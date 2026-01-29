@@ -1,0 +1,10 @@
+{
+  "entry": ["src/test/**/*.ts"],
+  "project": ["src/**/*.ts"],
+  "ignore": ["dist/**", "src/types/github.ts"],
+  "ignoreExportsUsedInFile": true,
+  "ignoreDependencies": [],
+  "rules": {
+    "exports": "warn"
+  }
+}
