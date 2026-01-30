@@ -1,16 +1,15 @@
 # gh-vault
 
-GitHub CLI for Pull Request operations with secure token storage. Acts as an alias for `gh pr` commands with MCP server support for Claude Code integration.
+GitHub CLI for Pull Request operations with secure token storage. Acts as an alias for `gh pr` commands.
 
 ## Commands
 
 - `pnpm dev` - Start CLI in watch mode
-- `pnpm dev:mcp` - Start MCP server in watch mode
 - `pnpm build` - Compile TypeScript to dist/
 - `pnpm check` - Run all checks (typecheck, lint, format, knip)
 - `pnpm lint:fix` - Fix linting issues
 - `pnpm format` - Format code with Prettier
-- `pnpm test` - Run integration tests with Vitest
+- `pnpm test` - Run tests with Vitest
 
 ## CLI Usage
 
@@ -33,9 +32,6 @@ gh-vault pr diff --name-only
 gh-vault auth login
 gh-vault auth status
 gh-vault auth logout
-
-# MCP Server mode
-gh-vault mcp
 ```
 
 ## Architecture
@@ -44,7 +40,7 @@ gh-vault mcp
 src/
 ├── cli/
 │   ├── index.ts              # Main CLI entry point
-│   └── mcp.ts                # MCP server mode
+│   └── commands/             # CLI command implementations
 ├── domains/                   # Domain-driven feature modules
 │   └── pr/                   # Pull Request domain
 │       ├── api.ts            # Business logic (GitHub API calls)
@@ -54,21 +50,15 @@ src/
 │       │   ├── list.ts       # gh-vault pr list
 │       │   ├── view.ts       # gh-vault pr view
 │       │   └── ...           # Other PR commands
-│       ├── mcp/
-│       │   └── tools.ts      # MCP tool registrations
 │       └── formatters/
 │           ├── text.ts       # CLI human-readable output
-│           ├── json.ts       # --json flag output
-│           └── markdown.ts   # MCP markdown output
-├── mcp/
-│   └── server.ts             # MCP server factory
+│           └── json.ts       # --json flag output
 ├── shared/                   # Cross-domain utilities
 │   ├── github.ts             # Octokit client wrapper
 │   ├── secrets.ts            # macOS Keychain integration
 │   ├── repo.ts               # Git remote detection
 │   └── jq.ts                 # jq filtering support
 └── test/
-    ├── integration.test.ts
     ├── setup.ts
     └── mocks/
 ```
@@ -108,27 +98,54 @@ When adding a new command or flag:
 - No `any` types
 - No `eslint-disable` comments (except `no-console` for CLI output)
 - Use `import type` for type-only imports
-- All logging to stderr in MCP mode (CRITICAL: never stdout - corrupts JSON-RPC)
 - Use `regex.exec(str)` instead of `str.match(regex)` (ESLint rule)
-
-## MCP SDK Patterns
-
-- Use Zod raw shapes for `registerTool` inputSchema (not `z.object()`)
-- Tool names use snake_case with action prefix: `get_`, `list_`, `create_`
-- Return Markdown-formatted text (LLMs understand Markdown natively)
-- Use `isError: true` for tool-level failures in response
 
 ## Testing
 
-- Integration tests use MSW to mock GitHub API with 100% fidelity
+- Tests use MSW to mock GitHub API with 100% fidelity
 - Mock keychain in `src/test/setup.ts` - tests don't need real tokens
-- MCP protocol tests spawn server via StdioClientTransport
 
 ## Gotchas
 
 - GitHub repo names can contain dots - regex must use `[^/]+?` not `[^/.]+`
 - `mergeable` field can be `null` while GitHub computes - handle gracefully
 - macOS only: uses `security` CLI for Keychain (no cross-platform fallback)
+
+## Token Requirements
+
+gh-vault requires **fine-grained personal access tokens** only.
+Classic tokens (`ghp_*`) are rejected for security reasons.
+
+### Why Fine-Grained Tokens?
+
+- **Scoped to specific repositories** - Limit access to only what's needed
+- **Granular permissions** - Enable only required capabilities
+- **Required expiration** - Built-in token rotation
+
+### Creating a Token
+
+1. Go to https://github.com/settings/personal-access-tokens
+2. Click "Generate new token"
+3. Select repository access (specific repos recommended)
+4. Enable required permissions (see table below)
+5. Generate and copy the token
+
+### Required Permissions
+
+| Permission      | Access | Commands That Need It                                    |
+|-----------------|--------|----------------------------------------------------------|
+| `pull_requests` | read   | `pr list`, `pr view`, `pr diff`, `pr checks`             |
+| `pull_requests` | write  | `pr create`, `pr edit`, `pr merge`, `pr close`, `pr reopen`, `pr comment`, `pr review` |
+| `actions`       | read   | `run list`, `run view`                                   |
+| `actions`       | write  | `run cancel`, `run rerun`, `run delete`                  |
+| `contents`      | write  | `pr merge --delete-branch`                               |
+| `checks`        | read   | `pr checks`                                              |
+| `statuses`      | read   | `pr checks`                                              |
+
+### Troubleshooting Permission Errors
+
+If a command fails with "Permission denied", the error message
+will tell you which permission is needed and how to fix it.
 
 ## Token Setup
 
@@ -141,20 +158,6 @@ gh-vault auth status
 
 # Remove token
 gh-vault auth logout
-```
-
-## MCP Server Integration
-
-Add to `~/.claude/settings.json`:
-```json
-{
-  "mcpServers": {
-    "gh-vault": {
-      "command": "node",
-      "args": ["/path/to/gh-vault/dist/cli/index.js", "mcp"]
-    }
-  }
-}
 ```
 
 ## Shell Alias Setup

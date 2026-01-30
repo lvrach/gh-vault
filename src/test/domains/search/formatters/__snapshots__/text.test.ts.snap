@@ -1,0 +1,140 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`formatCodeText > formats code result with multiple text matches 1`] = `
+"src/auth.ts
+  octocat/Hello-World
+  > first match fragment...
+  > second match fragment..."
+`;
+
+exports[`formatCodeText > formats code result without text matches 1`] = `
+"src/auth.ts
+  octocat/Hello-World"
+`;
+
+exports[`formatCodeText > formats empty list 1`] = `"No code matches your search"`;
+
+exports[`formatCodeText > formats multiple code results 1`] = `
+"src/auth.ts
+  octocat/Hello-World
+  > function authenticate(user: User) { ... }
+src/login.ts
+  octocat/Hello-World
+  > function authenticate(user: User) { ... }"
+`;
+
+exports[`formatCodeText > formats single code result 1`] = `
+"src/auth.ts
+  octocat/Hello-World
+  > function authenticate(user: User) { ... }"
+`;
+
+exports[`formatCommitsText > formats commit with long message (truncates) 1`] = `
+"abc123d This is a very long commit message that should be truncated because...
+  octocat/Hello-World • The Octocat • 2d ago"
+`;
+
+exports[`formatCommitsText > formats empty list 1`] = `"No commits match your search"`;
+
+exports[`formatCommitsText > formats multiple commits 1`] = `
+"abc123 Fix authentication bug
+  octocat/Hello-World • The Octocat • 2d ago
+def456 Another commit
+  octocat/Hello-World • The Octocat • 2d ago"
+`;
+
+exports[`formatCommitsText > formats single commit 1`] = `
+"abc123d Fix authentication bug
+  octocat/Hello-World • The Octocat • 2d ago"
+`;
+
+exports[`formatIssuesText > formats closed issue 1`] = `
+"✗ octocat/Hello-World#42 Bug in authentication [bug]
+  @reporter • 1d ago"
+`;
+
+exports[`formatIssuesText > formats empty list 1`] = `"No issues match your search"`;
+
+exports[`formatIssuesText > formats issue with null user 1`] = `
+"● octocat/Hello-World#42 Bug in authentication [bug]
+  @unknown • 1d ago"
+`;
+
+exports[`formatIssuesText > formats issues with multiple labels 1`] = `
+"● octocat/Hello-World#42 Bug in authentication [bug, priority-high, needs-triage]
+  @reporter • 1d ago"
+`;
+
+exports[`formatIssuesText > formats single open issue 1`] = `
+"● octocat/Hello-World#42 Bug in authentication [bug]
+  @reporter • 1d ago"
+`;
+
+exports[`formatPrsText > formats PRs with labels 1`] = `
+"● octocat/Hello-World#42 Bug in authentication [enhancement, documentation]
+  @reporter • 1d ago"
+`;
+
+exports[`formatPrsText > formats closed PR 1`] = `
+"✗ octocat/Hello-World#42 Bug in authentication [bug]
+  @reporter • 1d ago"
+`;
+
+exports[`formatPrsText > formats draft PR 1`] = `
+"○ octocat/Hello-World#42 Bug in authentication (draft) [bug]
+  @reporter • 1d ago"
+`;
+
+exports[`formatPrsText > formats empty list 1`] = `"No pull requests match your search"`;
+
+exports[`formatPrsText > formats open PR 1`] = `
+"● octocat/Hello-World#42 Bug in authentication [bug]
+  @reporter • 1d ago"
+`;
+
+exports[`formatReposText > formats archived repository 1`] = `
+"octocat/Hello-World (archived)
+  My first repository on GitHub
+  ★ 1.2k • 567 forks • TypeScript • Updated 2d ago"
+`;
+
+exports[`formatReposText > formats empty list 1`] = `"No repositories match your search"`;
+
+exports[`formatReposText > formats multiple repositories 1`] = `
+"owner/repo1
+  My first repository on GitHub
+  ★ 5.0k • 567 forks • TypeScript • Updated 2d ago
+
+owner/repo2
+  My first repository on GitHub
+  ★ 100 • 567 forks • TypeScript • Updated 2d ago"
+`;
+
+exports[`formatReposText > formats private repository 1`] = `
+"octocat/Hello-World (private)
+  My first repository on GitHub
+  ★ 1.2k • 567 forks • TypeScript • Updated 2d ago"
+`;
+
+exports[`formatReposText > formats repository with large numbers 1`] = `
+"octocat/Hello-World
+  My first repository on GitHub
+  ★ 1.5M • 75.0k forks • TypeScript • Updated 2d ago"
+`;
+
+exports[`formatReposText > formats repository without description 1`] = `
+"octocat/Hello-World
+  ★ 1.2k • 567 forks • TypeScript • Updated 2d ago"
+`;
+
+exports[`formatReposText > formats repository without language 1`] = `
+"octocat/Hello-World
+  My first repository on GitHub
+  ★ 1.2k • 567 forks • Updated 2d ago"
+`;
+
+exports[`formatReposText > formats single repository 1`] = `
+"octocat/Hello-World
+  My first repository on GitHub
+  ★ 1.2k • 567 forks • TypeScript • Updated 2d ago"
+`;

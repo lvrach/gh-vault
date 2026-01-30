@@ -1,0 +1,287 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`comment action formatters > formats comment created 1`] = `
+"Added comment to pull request #42
+https://github.com/owner/repo/pull/42#issuecomment-1"
+`;
+
+exports[`comment action formatters > formats comment deleted 1`] = `"Deleted comment from pull request #42"`;
+
+exports[`comment action formatters > formats comment updated 1`] = `
+"Updated comment on pull request #42
+https://github.com/owner/repo/pull/42#issuecomment-1"
+`;
+
+exports[`formatAutoMergeText > formats auto-merge disabled 1`] = `"Disabled auto-merge for #42"`;
+
+exports[`formatAutoMergeText > formats auto-merge enabled 1`] = `"Enabled auto-merge for #42 (squash)"`;
+
+exports[`formatCheckoutText > formats checkout message 1`] = `"Checked out pull request #42 to branch feature-branch"`;
+
+exports[`formatEditResultText > formats edit result with no updated fields 1`] = `
+"Updated pull request #42 (Same Title)
+"
+`;
+
+exports[`formatEditResultText > formats edit result with updated fields 1`] = `
+"Updated pull request #42 (Updated Title)
+
+Updated fields:
+  • title
+  • body
+  • labels"
+`;
+
+exports[`formatMergeResultText > formats merge result with branch deletion 1`] = `
+"Merged pull request #42 (Add feature)
+Deleted branch feature-branch"
+`;
+
+exports[`formatMergeResultText > formats merge result without branch deletion 1`] = `"Merged pull request #42 (Add feature)"`;
+
+exports[`formatPrChecksText > formats all passing checks 1`] = `
+"✓ 2 passing, 0 failing, 0 pending
+
+✓ CI (success)
+✓ Lint (success)"
+`;
+
+exports[`formatPrChecksText > formats mixed check results 1`] = `
+"✗ 2 passing, 1 failing, 1 pending
+
+✓ CI (success)
+✗ Tests (failure)
+● Deploy (in_progress)
+✓ coverage/codecov (success)"
+`;
+
+exports[`formatPrChecksText > formats pending checks 1`] = `
+"● 0 passing, 0 failing, 2 pending
+
+● CI (queued)
+● deploy/preview (pending)"
+`;
+
+exports[`formatPrCommentsText > formats comment with null user 1`] = `
+"unknown • 3d ago
+Looks good to me!"
+`;
+
+exports[`formatPrCommentsText > formats empty comments 1`] = `"No comments"`;
+
+exports[`formatPrCommentsText > formats multiple comments 1`] = `
+"reviewer • 3d ago
+First comment
+
+another • 3d ago
+Second comment"
+`;
+
+exports[`formatPrCommentsText > formats single comment 1`] = `
+"reviewer • 3d ago
+Looks good to me!"
+`;
+
+exports[`formatPrFilesText > formats empty file list 1`] = `"No files changed"`;
+
+exports[`formatPrFilesText > formats files name-only mode 1`] = `
+"src/a.ts
+src/b.ts
+test/c.test.ts"
+`;
+
+exports[`formatPrFilesText > formats files with various statuses 1`] = `
+"modified modified.ts +50 -10
+added    added.ts +50 -10
+removed  removed.ts +50 -10
+renamed  renamed.ts +50 -10
+copied   copied.ts +50 -10
+
+5 files changed, 250 insertions(+), 50 deletions(-)"
+`;
+
+exports[`formatPrFilesText > formats multiple files 1`] = `
+"modified src/index.ts +50 -10
+added    src/new.ts +100 -0
+removed  src/old.ts +0 -75
+
+3 files changed, 150 insertions(+), 85 deletions(-)"
+`;
+
+exports[`formatPrListText > formats PR with conflicts 1`] = `
+"● #42 Add new feature enhancement
+  octocat feature-branch • 1d ago"
+`;
+
+exports[`formatPrListText > formats PR with mergeable status 1`] = `
+"● #42 Add new feature enhancement
+  octocat feature-branch • 1d ago"
+`;
+
+exports[`formatPrListText > formats PR with multiple labels 1`] = `
+"● #42 Add new feature bug, priority-high, needs-review
+  octocat feature-branch • 1d ago"
+`;
+
+exports[`formatPrListText > formats PR with no labels 1`] = `
+"● #42 Add new feature
+  octocat feature-branch • 1d ago"
+`;
+
+exports[`formatPrListText > formats PR with null user 1`] = `
+"● #42 Add new feature enhancement
+  unknown feature-branch • 1d ago"
+`;
+
+exports[`formatPrListText > formats empty list 1`] = `"No pull requests match your search"`;
+
+exports[`formatPrListText > formats multiple PRs with various states 1`] = `
+"● #1 Open PR enhancement
+  octocat feature-branch • 1d ago
+○ #2 Draft PR enhancement
+  octocat feature-branch • 1d ago
+✗ #3 Closed PR enhancement
+  octocat feature-branch • 1d ago"
+`;
+
+exports[`formatPrListText > formats single open PR 1`] = `
+"● #42 Add new feature enhancement
+  octocat feature-branch • 1d ago"
+`;
+
+exports[`formatPrStateChangeText > formats closed PR 1`] = `"Closed pull request #42 (Add new feature)"`;
+
+exports[`formatPrStateChangeText > formats converted to draft 1`] = `"Converted to draft pull request #42 (Add new feature)"`;
+
+exports[`formatPrStateChangeText > formats ready for review 1`] = `"Marked as ready for review pull request #42 (Add new feature)"`;
+
+exports[`formatPrStateChangeText > formats reopened PR 1`] = `"Reopened pull request #42 (Add new feature)"`;
+
+exports[`formatPrStatusText > formats empty status 1`] = `"No open pull requests"`;
+
+exports[`formatPrStatusText > formats full status 1`] = `
+"Current branch
+  ● #1 Current branch PR https://github.com/owner/repo/pull/42
+
+Created by you
+  ● #2 My PR 1
+  ○ #3 My PR 2
+
+Review requested
+  ● #4 Review requested by author
+
+Assigned to you
+  ● #5 Assigned to me by assigner"
+`;
+
+exports[`formatPrStatusText > formats status with current branch PR 1`] = `
+"Current branch
+  ● #42 Add new feature https://github.com/owner/repo/pull/42"
+`;
+
+exports[`formatPrViewText > formats PR with no labels 1`] = `
+"Add new feature ● Open
+https://github.com/owner/repo/pull/42
+
+author:    octocat
+branch:    feature-branch -> main
+labels:    none
+changes:   +150 -25 in 8 files
+updated:   1d ago
+
+──
+
+This PR adds a great new feature.
+
+- Feature 1
+- Feature 2"
+`;
+
+exports[`formatPrViewText > formats PR without body 1`] = `
+"Add new feature ● Open
+https://github.com/owner/repo/pull/42
+
+author:    octocat
+branch:    feature-branch -> main
+labels:    enhancement, documentation
+changes:   +150 -25 in 8 files
+updated:   1d ago"
+`;
+
+exports[`formatPrViewText > formats closed (not merged) PR 1`] = `
+"Add new feature ✗ Closed
+https://github.com/owner/repo/pull/42
+
+author:    octocat
+branch:    feature-branch -> main
+labels:    enhancement, documentation
+changes:   +150 -25 in 8 files
+updated:   1d ago
+
+──
+
+This PR adds a great new feature.
+
+- Feature 1
+- Feature 2"
+`;
+
+exports[`formatPrViewText > formats draft PR 1`] = `
+"Add new feature ○ Draft
+https://github.com/owner/repo/pull/42
+
+author:    octocat
+branch:    feature-branch -> main
+labels:    enhancement, documentation
+changes:   +150 -25 in 8 files
+updated:   1d ago
+
+──
+
+This PR adds a great new feature.
+
+- Feature 1
+- Feature 2"
+`;
+
+exports[`formatPrViewText > formats merged PR 1`] = `
+"Add new feature ✓ Merged
+https://github.com/owner/repo/pull/42
+
+author:    octocat
+branch:    feature-branch -> main
+labels:    enhancement, documentation
+changes:   +150 -25 in 8 files
+updated:   1d ago
+
+──
+
+This PR adds a great new feature.
+
+- Feature 1
+- Feature 2"
+`;
+
+exports[`formatPrViewText > formats open PR with body 1`] = `
+"Add new feature ● Open
+https://github.com/owner/repo/pull/42
+
+author:    octocat
+branch:    feature-branch -> main
+labels:    enhancement, documentation
+changes:   +150 -25 in 8 files
+updated:   1d ago
+
+──
+
+This PR adds a great new feature.
+
+- Feature 1
+- Feature 2"
+`;
+
+exports[`formatReviewSubmittedText > formats approval 1`] = `"Approved pull request #42"`;
+
+exports[`formatReviewSubmittedText > formats changes requested 1`] = `"Requested changes on pull request #42"`;
+
+exports[`formatReviewSubmittedText > formats comment 1`] = `"Reviewed pull request #42"`;

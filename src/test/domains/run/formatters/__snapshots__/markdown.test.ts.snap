@@ -1,0 +1,329 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`formatRunCancelledMarkdown > formats cancelled run 1`] = `
+"# 🚫 Workflow Run Cancelled
+
+**Run:** #42 - CI Pipeline - Add new feature
+**Workflow:** CI
+
+The workflow run has been cancelled.
+
+[View on GitHub](https://github.com/owner/repo/actions/runs/1)"
+`;
+
+exports[`formatRunCancelledMarkdown > formats cancelled run with null workflow name 1`] = `
+"# 🚫 Workflow Run Cancelled
+
+**Run:** #42 - CI Pipeline - Add new feature
+**Workflow:** Workflow #100
+
+The workflow run has been cancelled.
+
+[View on GitHub](https://github.com/owner/repo/actions/runs/1)"
+`;
+
+exports[`formatRunDeletedMarkdown > formats deleted run 1`] = `
+"# 🗑️ Workflow Run Deleted
+
+**Run ID:** 12345
+
+The workflow run has been permanently deleted."
+`;
+
+exports[`formatRunListMarkdown > formats empty list 1`] = `"No workflow runs found."`;
+
+exports[`formatRunListMarkdown > formats multiple runs with various statuses 1`] = `
+"# Workflow Runs (3)
+
+- ✅ **Successful run**
+  - Workflow: CI | Run #42
+  - Status: SUCCESS | Event: push
+  - Branch: \`main\` | Actor: @octocat
+  - Created: Jan 19, 2024, 11:00 AM
+  - [View](https://github.com/owner/repo/actions/runs/1)
+
+- ❌ **Failed run**
+  - Workflow: CI | Run #42
+  - Status: FAILURE | Event: push
+  - Branch: \`main\` | Actor: @octocat
+  - Created: Jan 19, 2024, 11:00 AM
+  - [View](https://github.com/owner/repo/actions/runs/1)
+
+- 🔄 **In progress**
+  - Workflow: CI | Run #42
+  - Status: IN PROGRESS | Event: push
+  - Branch: \`main\` | Actor: @octocat
+  - Created: Jan 19, 2024, 11:00 AM
+  - [View](https://github.com/owner/repo/actions/runs/1)"
+`;
+
+exports[`formatRunListMarkdown > formats run with null actor 1`] = `
+"# Workflow Runs (1)
+
+- ✅ **CI Pipeline - Add new feature**
+  - Workflow: CI | Run #42
+  - Status: SUCCESS | Event: push
+  - Branch: \`main\` | Actor: @unknown
+  - Created: Jan 19, 2024, 11:00 AM
+  - [View](https://github.com/owner/repo/actions/runs/1)"
+`;
+
+exports[`formatRunListMarkdown > formats run with various conclusions 1`] = `
+"# Workflow Runs (4)
+
+- 🚫 **CI Pipeline - Add new feature**
+  - Workflow: CI | Run #42
+  - Status: CANCELLED | Event: push
+  - Branch: \`main\` | Actor: @octocat
+  - Created: Jan 19, 2024, 11:00 AM
+  - [View](https://github.com/owner/repo/actions/runs/1)
+
+- ⏭️ **CI Pipeline - Add new feature**
+  - Workflow: CI | Run #42
+  - Status: SKIPPED | Event: push
+  - Branch: \`main\` | Actor: @octocat
+  - Created: Jan 19, 2024, 11:00 AM
+  - [View](https://github.com/owner/repo/actions/runs/1)
+
+- ⏱️ **CI Pipeline - Add new feature**
+  - Workflow: CI | Run #42
+  - Status: TIMED_OUT | Event: push
+  - Branch: \`main\` | Actor: @octocat
+  - Created: Jan 19, 2024, 11:00 AM
+  - [View](https://github.com/owner/repo/actions/runs/1)
+
+- ⚪ **CI Pipeline - Add new feature**
+  - Workflow: CI | Run #42
+  - Status: NEUTRAL | Event: push
+  - Branch: \`main\` | Actor: @octocat
+  - Created: Jan 19, 2024, 11:00 AM
+  - [View](https://github.com/owner/repo/actions/runs/1)"
+`;
+
+exports[`formatRunListMarkdown > formats single run 1`] = `
+"# Workflow Runs (1)
+
+- ✅ **CI Pipeline - Add new feature**
+  - Workflow: CI | Run #42
+  - Status: SUCCESS | Event: push
+  - Branch: \`main\` | Actor: @octocat
+  - Created: Jan 19, 2024, 11:00 AM
+  - [View](https://github.com/owner/repo/actions/runs/1)"
+`;
+
+exports[`formatRunLogsMarkdown > formats logs with job name 1`] = `
+"# 📋 Logs for Job: test
+
+\`\`\`
+2024-01-19T10:00:00Z Running tests...
+2024-01-19T10:02:00Z Tests passed
+\`\`\`"
+`;
+
+exports[`formatRunLogsMarkdown > formats logs without job name 1`] = `
+"# 📋 Workflow Run Logs
+
+\`\`\`
+2024-01-19T10:00:00Z Running build...
+2024-01-19T10:01:00Z Build complete
+\`\`\`"
+`;
+
+exports[`formatRunRerunMarkdown > formats failed jobs rerun 1`] = `
+"# 🔄 Workflow Run Rerun Triggered
+
+**Run:** #42 - CI Pipeline - Add new feature
+**Workflow:** CI
+
+A rerun of failed jobs has been triggered.
+
+[View on GitHub](https://github.com/owner/repo/actions/runs/1)"
+`;
+
+exports[`formatRunRerunMarkdown > formats full rerun 1`] = `
+"# 🔄 Workflow Run Rerun Triggered
+
+**Run:** #42 - CI Pipeline - Add new feature
+**Workflow:** CI
+
+A full rerun of the workflow has been triggered.
+
+[View on GitHub](https://github.com/owner/repo/actions/runs/1)"
+`;
+
+exports[`formatRunRerunMarkdown > formats job rerun with undefined job name 1`] = `
+"# 🔄 Workflow Run Rerun Triggered
+
+**Run:** #42 - CI Pipeline - Add new feature
+**Workflow:** CI
+
+A rerun of job "unknown" has been triggered.
+
+[View on GitHub](https://github.com/owner/repo/actions/runs/1)"
+`;
+
+exports[`formatRunRerunMarkdown > formats single job rerun 1`] = `
+"# 🔄 Workflow Run Rerun Triggered
+
+**Run:** #42 - CI Pipeline - Add new feature
+**Workflow:** CI
+
+A rerun of job "build" has been triggered.
+
+[View on GitHub](https://github.com/owner/repo/actions/runs/1)"
+`;
+
+exports[`formatRunViewMarkdown > formats completed run 1`] = `
+"# ✅ CI Pipeline - Add new feature
+
+**Status:** SUCCESS
+**Workflow:** CI
+**Event:** push
+**Branch:** \`main\`
+**Commit:** \`abc123d\`
+**Actor:** [@octocat](https://github.com/octocat)
+**Run:** #42 (Attempt 1)
+
+## Timeline
+- **Created:** Jan 19, 2024, 11:00 AM
+- **Updated:** Jan 19, 2024, 11:05 AM
+
+## Jobs
+
+### ✅ build
+
+- **Status:** SUCCESS
+- **Duration:** 5m 0s
+- [View Job](https://github.com/owner/repo/actions/runs/1/jobs/1001)
+
+**Steps:**
+- ✅ Set up job (1m 30s)
+- ✅ Checkout (1m 30s)
+- ✅ Build (1m 30s)
+
+---
+[View on GitHub](https://github.com/owner/repo/actions/runs/1)"
+`;
+
+exports[`formatRunViewMarkdown > formats failed run with multiple jobs 1`] = `
+"# ❌ CI Pipeline - Add new feature
+
+**Status:** FAILURE
+**Workflow:** CI
+**Event:** push
+**Branch:** \`main\`
+**Commit:** \`abc123d\`
+**Actor:** [@octocat](https://github.com/octocat)
+**Run:** #42 (Attempt 1)
+
+## Timeline
+- **Created:** Jan 19, 2024, 11:00 AM
+- **Updated:** Jan 19, 2024, 11:05 AM
+
+## Jobs
+
+### ✅ build
+
+- **Status:** SUCCESS
+- **Duration:** 5m 0s
+- [View Job](https://github.com/owner/repo/actions/runs/1/jobs/1001)
+
+**Steps:**
+- ✅ Set up job (1m 30s)
+- ✅ Checkout (1m 30s)
+- ✅ Build (1m 30s)
+
+### ❌ test
+
+- **Status:** FAILURE
+- **Duration:** 5m 0s
+- [View Job](https://github.com/owner/repo/actions/runs/1/jobs/1001)
+
+**Steps:**
+- ❌ Run tests (1m 30s)
+
+---
+[View on GitHub](https://github.com/owner/repo/actions/runs/1)"
+`;
+
+exports[`formatRunViewMarkdown > formats in-progress run 1`] = `
+"# 🔄 CI Pipeline - Add new feature
+
+**Status:** IN PROGRESS
+**Workflow:** CI
+**Event:** push
+**Branch:** \`main\`
+**Commit:** \`abc123d\`
+**Actor:** [@octocat](https://github.com/octocat)
+**Run:** #42 (Attempt 1)
+
+## Timeline
+- **Created:** Jan 19, 2024, 11:00 AM
+- **Updated:** Jan 19, 2024, 11:05 AM
+
+## Jobs
+
+### 🔄 build
+
+- **Status:** IN PROGRESS
+- **Duration:** 26h 0m 0s
+- [View Job](https://github.com/owner/repo/actions/runs/1/jobs/1001)
+
+**Steps:**
+- ✅ Set up job (1m 30s)
+- ✅ Checkout (1m 30s)
+- ✅ Build (1m 30s)
+
+---
+[View on GitHub](https://github.com/owner/repo/actions/runs/1)"
+`;
+
+exports[`formatRunViewMarkdown > formats run with no jobs 1`] = `
+"# ✅ CI Pipeline - Add new feature
+
+**Status:** SUCCESS
+**Workflow:** CI
+**Event:** push
+**Branch:** \`main\`
+**Commit:** \`abc123d\`
+**Actor:** [@octocat](https://github.com/octocat)
+**Run:** #42 (Attempt 1)
+
+## Timeline
+- **Created:** Jan 19, 2024, 11:00 AM
+- **Updated:** Jan 19, 2024, 11:05 AM
+---
+[View on GitHub](https://github.com/owner/repo/actions/runs/1)"
+`;
+
+exports[`formatRunViewMarkdown > formats run with null actor 1`] = `
+"# ✅ CI Pipeline - Add new feature
+
+**Status:** SUCCESS
+**Workflow:** CI
+**Event:** push
+**Branch:** \`main\`
+**Commit:** \`abc123d\`
+**Actor:** [@unknown](#)
+**Run:** #42 (Attempt 1)
+
+## Timeline
+- **Created:** Jan 19, 2024, 11:00 AM
+- **Updated:** Jan 19, 2024, 11:05 AM
+
+## Jobs
+
+### ✅ build
+
+- **Status:** SUCCESS
+- **Duration:** 5m 0s
+- [View Job](https://github.com/owner/repo/actions/runs/1/jobs/1001)
+
+**Steps:**
+- ✅ Set up job (1m 30s)
+- ✅ Checkout (1m 30s)
+- ✅ Build (1m 30s)
+
+---
+[View on GitHub](https://github.com/owner/repo/actions/runs/1)"
+`;

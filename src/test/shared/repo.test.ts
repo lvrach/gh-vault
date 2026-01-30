@@ -68,9 +68,34 @@ describe('parsePrRef', () => {
     ['1', { type: 'number', value: 1 }],
     ['123', { type: 'number', value: 123 }],
     ['9999', { type: 'number', value: 9999 }],
-    // GitHub URLs
-    ['https://github.com/owner/repo/pull/123', { type: 'number', value: 123 }],
-    ['https://github.com/octocat/Hello-World/pull/42', { type: 'number', value: 42 }],
+    // GitHub URLs (now extract owner/repo)
+    [
+      'https://github.com/owner/repo/pull/123',
+      { type: 'number', value: 123, owner: 'owner', repo: 'repo' },
+    ],
+    [
+      'https://github.com/octocat/Hello-World/pull/42',
+      { type: 'number', value: 42, owner: 'octocat', repo: 'Hello-World' },
+    ],
+    // URL edge cases - query strings and fragments are handled gracefully
+    [
+      'https://github.com/owner/repo/pull/456?comment=789',
+      { type: 'number', value: 456, owner: 'owner', repo: 'repo' },
+    ],
+    [
+      'https://github.com/owner/repo/pull/789#issuecomment-123',
+      { type: 'number', value: 789, owner: 'owner', repo: 'repo' },
+    ],
+    // URL without protocol (normalized by URL constructor)
+    [
+      'github.com/owner/repo/pull/321',
+      { type: 'number', value: 321, owner: 'owner', repo: 'repo' },
+    ],
+    // Repo names with dots
+    [
+      'https://github.com/owner/repo.name/pull/1',
+      { type: 'number', value: 1, owner: 'owner', repo: 'repo.name' },
+    ],
     // Branch names
     ['feature-branch', { type: 'branch', value: 'feature-branch' }],
     ['fix/bug-123', { type: 'branch', value: 'fix/bug-123' }],

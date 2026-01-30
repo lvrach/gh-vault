@@ -27,21 +27,38 @@ export function createViewCommand(output: Output, prApi: PrApi): Command {
     .option('-R, --repo <owner/repo>', 'Select another repository')
     .action(async (prArg: string | undefined, options: ViewOptions) => {
       try {
-        const repoResult = await resolveRepository(options.repo);
-        if (!repoResult.success) {
-          output.printError(`Error: ${repoResult.error}`);
-          process.exitCode = 1;
-          return;
-        }
-        const { owner, repo } = repoResult;
+        // First try to resolve PR number - this may extract owner/repo from URL
+        const prResult = await resolvePrNumber(prArg, '', '', prApi.listPrs.bind(prApi));
 
-        const prResult = await resolvePrNumber(prArg, owner, repo, prApi.listPrs.bind(prApi));
-        if (!prResult.success) {
-          output.printError(`Error: ${prResult.error}`);
-          process.exitCode = 1;
-          return;
+        let owner: string;
+        let repo: string;
+        let pullNumber: number;
+
+        if (prResult.success && prResult.owner && prResult.repo) {
+          // Owner/repo came from URL - use them directly
+          owner = prResult.owner;
+          repo = prResult.repo;
+          pullNumber = prResult.pullNumber;
+        } else {
+          // No URL with owner/repo - resolve from --repo flag or local git
+          const repoResult = await resolveRepository(options.repo);
+          if (!repoResult.success) {
+            output.printError(`Error: ${repoResult.error}`);
+            process.exitCode = 1;
+            return;
+          }
+          owner = repoResult.owner;
+          repo = repoResult.repo;
+
+          // Re-resolve PR number with proper owner/repo for branch lookup
+          const prResult2 = await resolvePrNumber(prArg, owner, repo, prApi.listPrs.bind(prApi));
+          if (!prResult2.success) {
+            output.printError(`Error: ${prResult2.error}`);
+            process.exitCode = 1;
+            return;
+          }
+          pullNumber = prResult2.pullNumber;
         }
-        const pullNumber = prResult.pullNumber;
 
         if (options.web) {
           const url = `https://github.com/${owner}/${repo}/pull/${String(pullNumber)}`;

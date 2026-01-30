@@ -24,45 +24,21 @@ function pick(obj: Record<string, JsonValue>, fields: string[]): Record<string, 
 }
 
 /**
- * Default fields for PR list JSON output.
- * Note: When no fields are specified, the full JSON object is returned (matching gh CLI behavior).
- * These constants document the commonly-used fields for reference.
+ * Available fields for PR list JSON output (--json flag).
+ * When no fields are specified, all fields are returned (matches gh CLI behavior).
+ *
+ * Common fields: number, title, state, draft, url, author, createdAt, updatedAt,
+ *                headRefName, baseRefName, labels
  */
-const DEFAULT_PR_LIST_FIELDS = [
-  'number',
-  'title',
-  'state',
-  'draft',
-  'url',
-  'author',
-  'createdAt',
-  'updatedAt',
-];
 
 /**
- * Default fields for PR view JSON output.
- * Note: When no fields are specified, the full JSON object is returned (matching gh CLI behavior).
- * These constants document the commonly-used fields for reference.
+ * Available fields for PR view JSON output (--json flag).
+ * When no fields are specified, all fields are returned (matches gh CLI behavior).
+ *
+ * Common fields: number, title, body, state, draft, merged, mergeable, url, author,
+ *                headRefName, baseRefName, additions, deletions, changedFiles,
+ *                labels, createdAt, updatedAt, closedAt, mergedAt
  */
-const DEFAULT_PR_VIEW_FIELDS = [
-  'number',
-  'title',
-  'body',
-  'state',
-  'draft',
-  'merged',
-  'mergeable',
-  'url',
-  'author',
-  'headRefName',
-  'baseRefName',
-  'additions',
-  'deletions',
-  'changedFiles',
-  'labels',
-  'createdAt',
-  'updatedAt',
-];
 
 export function prListItemToJson(pr: PullRequestListItem): Record<string, JsonValue> {
   return {
@@ -109,10 +85,11 @@ export function prToJson(pr: PullRequest): Record<string, JsonValue> {
 
 export function formatPrListJson(prs: PullRequestListItem[], fields?: string[]): string {
   const jsonPrs = prs.map((pr) => prListItemToJson(pr));
-  const selectedFields = fields ?? DEFAULT_PR_LIST_FIELDS;
 
-  if (fields) {
-    const filtered = jsonPrs.map((pr) => pick(pr, selectedFields));
+  // Only filter if fields are explicitly provided and non-empty
+  // Empty array or undefined returns full objects (matches gh CLI behavior)
+  if (fields && fields.length > 0) {
+    const filtered = jsonPrs.map((pr) => pick(pr, fields));
     return JSON.stringify(filtered, null, 2);
   }
 
@@ -121,10 +98,11 @@ export function formatPrListJson(prs: PullRequestListItem[], fields?: string[]):
 
 export function formatPrViewJson(pr: PullRequest, fields?: string[]): string {
   const jsonPr = prToJson(pr);
-  const selectedFields = fields ?? DEFAULT_PR_VIEW_FIELDS;
 
-  if (fields) {
-    return JSON.stringify(pick(jsonPr, selectedFields), null, 2);
+  // Only filter if fields are explicitly provided and non-empty
+  // Empty array or undefined returns full object (matches gh CLI behavior)
+  if (fields && fields.length > 0) {
+    return JSON.stringify(pick(jsonPr, fields), null, 2);
   }
 
   return JSON.stringify(jsonPr, null, 2);

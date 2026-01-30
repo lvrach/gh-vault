@@ -1,0 +1,215 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`formatJobViewText > formats completed job (non-verbose) 1`] = `
+"✓ build
+https://github.com/owner/repo/actions/runs/1/jobs/1001
+
+status:     success
+duration:   5m0s"
+`;
+
+exports[`formatJobViewText > formats completed job (verbose with steps) 1`] = `
+"✓ build
+https://github.com/owner/repo/actions/runs/1/jobs/1001
+
+status:     success
+duration:   5m0s
+
+STEPS
+✓ Set up job (1m30s)
+✓ Checkout (1m30s)
+✓ Build (1m30s)"
+`;
+
+exports[`formatJobViewText > formats failed job 1`] = `
+"✗ build
+https://github.com/owner/repo/actions/runs/1/jobs/1001
+
+status:     failure
+duration:   5m0s
+
+STEPS
+✗ Build (1m30s)"
+`;
+
+exports[`formatJobViewText > formats in-progress job 1`] = `
+"● build
+https://github.com/owner/repo/actions/runs/1/jobs/1001
+
+status:     in progress
+duration:   26h0m"
+`;
+
+exports[`formatJobViewText > formats job with no started time 1`] = `
+"✓ build
+https://github.com/owner/repo/actions/runs/1/jobs/1001
+
+status:     success
+duration:   N/A"
+`;
+
+exports[`formatRunCancelledText > formats cancelled run 1`] = `"Cancelled workflow run #42 (CI Pipeline - Add new feature)"`;
+
+exports[`formatRunDeletedText > formats deleted run 1`] = `"Deleted workflow run #12345"`;
+
+exports[`formatRunListText > formats empty list 1`] = `"No workflow runs found"`;
+
+exports[`formatRunListText > formats multiple runs with various statuses 1`] = `
+"✓ Successful run CI
+  success • #42 • main • octocat • 1d ago
+  https://github.com/owner/repo/actions/runs/1
+
+✗ Failed run CI
+  failure • #42 • main • octocat • 1d ago
+  https://github.com/owner/repo/actions/runs/1
+
+● In progress CI
+  in progress • #42 • main • octocat • 1d ago
+  https://github.com/owner/repo/actions/runs/1
+
+⊘ Cancelled CI
+  cancelled • #42 • main • octocat • 1d ago
+  https://github.com/owner/repo/actions/runs/1"
+`;
+
+exports[`formatRunListText > formats queued run 1`] = `
+"○ CI Pipeline - Add new feature CI
+  queued • #42 • main • octocat • 1d ago
+  https://github.com/owner/repo/actions/runs/1"
+`;
+
+exports[`formatRunListText > formats run with null actor 1`] = `
+"✓ CI Pipeline - Add new feature CI
+  success • #42 • main • unknown • 1d ago
+  https://github.com/owner/repo/actions/runs/1"
+`;
+
+exports[`formatRunListText > formats run with null workflow name 1`] = `
+"✓ CI Pipeline - Add new feature workflow #100
+  success • #42 • main • octocat • 1d ago
+  https://github.com/owner/repo/actions/runs/1"
+`;
+
+exports[`formatRunListText > formats single completed run 1`] = `
+"✓ CI Pipeline - Add new feature CI
+  success • #42 • main • octocat • 1d ago
+  https://github.com/owner/repo/actions/runs/1"
+`;
+
+exports[`formatRunListText > formats waiting run 1`] = `
+"◐ CI Pipeline - Add new feature CI
+  waiting • #42 • main • octocat • 1d ago
+  https://github.com/owner/repo/actions/runs/1"
+`;
+
+exports[`formatRunRerunText > formats failed jobs rerun 1`] = `"Triggered rerun of failed jobs in workflow run #42 (CI Pipeline - Add new feature)"`;
+
+exports[`formatRunRerunText > formats full rerun 1`] = `"Triggered rerun of workflow run #42 (CI Pipeline - Add new feature)"`;
+
+exports[`formatRunRerunText > formats single job rerun 1`] = `"Triggered rerun of job "build" in workflow run #42 (CI Pipeline - Add new feature)"`;
+
+exports[`formatRunViewText > formats completed run (non-verbose) 1`] = `
+"✓ CI Pipeline - Add new feature
+https://github.com/owner/repo/actions/runs/1
+
+workflow:   CI
+status:     success
+event:      push
+branch:     main
+commit:     abc123d
+actor:      octocat
+run:        #42 (attempt 1)
+created:    1d ago
+
+JOBS
+✓ build (5m0s)"
+`;
+
+exports[`formatRunViewText > formats completed run (verbose with steps) 1`] = `
+"✓ CI Pipeline - Add new feature
+https://github.com/owner/repo/actions/runs/1
+
+workflow:   CI
+status:     success
+event:      push
+branch:     main
+commit:     abc123d
+actor:      octocat
+run:        #42 (attempt 1)
+created:    1d ago
+
+JOBS
+✓ build (5m0s)
+  ✓ Set up job (1m30s)
+  ✓ Checkout (1m30s)
+  ✓ Build (1m30s)"
+`;
+
+exports[`formatRunViewText > formats failed run 1`] = `
+"✗ CI Pipeline - Add new feature
+https://github.com/owner/repo/actions/runs/1
+
+workflow:   CI
+status:     failure
+event:      push
+branch:     main
+commit:     abc123d
+actor:      octocat
+run:        #42 (attempt 1)
+created:    1d ago
+
+JOBS
+✗ build (5m0s)
+  ✓ Set up job (1m30s)
+  ✗ Build (1m30s)"
+`;
+
+exports[`formatRunViewText > formats in-progress run 1`] = `
+"● CI Pipeline - Add new feature
+https://github.com/owner/repo/actions/runs/1
+
+workflow:   CI
+status:     in progress
+event:      push
+branch:     main
+commit:     abc123d
+actor:      octocat
+run:        #42 (attempt 1)
+created:    1d ago
+
+JOBS
+● build (26h0m)"
+`;
+
+exports[`formatRunViewText > formats run with multiple jobs 1`] = `
+"✓ CI Pipeline - Add new feature
+https://github.com/owner/repo/actions/runs/1
+
+workflow:   CI
+status:     success
+event:      push
+branch:     main
+commit:     abc123d
+actor:      octocat
+run:        #42 (attempt 1)
+created:    1d ago
+
+JOBS
+✓ build (5m0s)
+✓ test (5m0s)
+◌ deploy (5m0s)"
+`;
+
+exports[`formatRunViewText > formats run with no jobs 1`] = `
+"✓ CI Pipeline - Add new feature
+https://github.com/owner/repo/actions/runs/1
+
+workflow:   CI
+status:     success
+event:      push
+branch:     main
+commit:     abc123d
+actor:      octocat
+run:        #42 (attempt 1)
+created:    1d ago"
+`;

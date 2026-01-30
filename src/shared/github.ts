@@ -1,21 +1,22 @@
 import { Octokit } from 'octokit';
 
+import { AuthenticationError } from './errors.js';
 import { getToken } from './secrets.js';
 
 // Re-export Octokit type for consumers that need it for dependency injection
 export type { Octokit } from 'octokit';
 
-const USER_AGENT = 'gh-vault-mcp/0.1.0';
+const USER_AGENT = 'gh-vault/0.1.0';
 const REQUEST_TIMEOUT_MS = 30_000;
 
 /**
  * Create an authenticated Octokit client using the token from Keychain.
- * Throws if no token is configured.
+ * Throws AuthenticationError if no token is configured.
  */
 export async function createGitHubClient(): Promise<Octokit> {
   const token = await getToken();
   if (!token) {
-    throw new Error('GitHub token not configured. Run: gh-vault-mcp-config set');
+    throw new AuthenticationError();
   }
 
   return new Octokit({

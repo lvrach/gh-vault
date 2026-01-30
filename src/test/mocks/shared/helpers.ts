@@ -5,6 +5,11 @@
 
 import { HttpResponse } from 'msw';
 
+import {
+  getMagicErrorMessage,
+  isMagicErrorId,
+} from './constants.js';
+
 /**
  * Generate standard GitHub API rate limit headers.
  */
@@ -47,22 +52,40 @@ export function createErrorResponse(
 
 /**
  * Magic number pattern for error testing.
- * PR/Run/Issue #404 returns 404, #403 returns 403, etc.
  *
- * Returns an error response if the ID matches a magic number, null otherwise.
+ * When a test uses one of these IDs, the mock handler returns the corresponding
+ * HTTP error instead of success data. This allows testing error handling without
+ * complex mock setup.
+ *
+ * Supported magic numbers:
+ * - ID 404 → 404 Not Found
+ * - ID 403 → 403 Forbidden
+ * - ID 409 → 409 Conflict (merge conflicts, state conflicts)
+ * - ID 422 → 422 Unprocessable Entity (validation errors)
+ * - ID 500 → 500 Internal Server Error
+ *
+ * @example
+ * ```typescript
+ * // In a test file
+ * import { MAGIC_ERROR_IDS } from '../mocks/shared/constants.js';
+ *
+ * it('handles 404 error', async () => {
+ *   await expect(api.getPr(MAGIC_ERROR_IDS.NOT_FOUND)).rejects.toThrow();
+ * });
+ * ```
+ *
+ * @param id - The ID to check (PR number, run ID, issue number, etc.)
+ * @returns An error Response if the ID matches a magic number, null otherwise
  */
 export function handleMagicNumber(id: number): Response | null {
-  if (id === 404) {
-    return createErrorResponse(404, 'Not Found');
+  if (!isMagicErrorId(id)) {
+    return null;
   }
-  if (id === 403) {
-    return createErrorResponse(403, 'Forbidden');
-  }
-  if (id === 500) {
-    return createErrorResponse(500, 'Internal Server Error');
-  }
-  if (id === 422) {
-    return createErrorResponse(422, 'Validation Failed');
-  }
-  return null;
+
+  return createErrorResponse(id, getMagicErrorMessage(id));
 }
+
+// Re-export constants for convenience
+
+
+export {MAGIC_ERROR_IDS, StatusCodes} from './constants.js';

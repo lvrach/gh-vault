@@ -18,13 +18,13 @@ export default defineConfig({
         'src/**/*.test.ts',
         'src/**/types.ts', // Type-only files
       ],
-      // Coverage thresholds - updated after Stage 7 completion
-      // Current baseline: ~11% statements, ~10% branches, ~20% functions, ~11% lines
+      // Coverage thresholds - Phase 5 complete: All CLI commands, API tests
+      // Current: ~70% statements, ~67% branches, ~77% functions, ~70% lines
       thresholds: {
-        statements: 10,
-        branches: 8,
-        functions: 18,
-        lines: 10,
+        statements: 68,
+        branches: 65,
+        functions: 75,
+        lines: 68,
       },
     },
   },

@@ -1,0 +1,561 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`formatCreatedCommentMarkdown > formats created comment 1`] = `
+"# Comment Created
+
+**Author:** @author
+**Created:** Jan 18, 2024, 11:00 AM
+
+My new comment
+
+[View on GitHub](https://github.com/owner/repo/pull/42#issuecomment-1)"
+`;
+
+exports[`formatCreatedReviewMarkdown > formats approval review 1`] = `
+"# Review Submitted
+
+**Author:** @reviewer
+**Action:** APPROVE
+**Submitted:** Jan 18, 2024, 11:00 AM
+
+Great work!
+
+[View on GitHub](https://github.com/owner/repo/pull/42#pullrequestreview-1)"
+`;
+
+exports[`formatCreatedReviewMarkdown > formats changes requested review 1`] = `
+"# Review Submitted
+
+**Author:** @reviewer
+**Action:** REQUEST_CHANGES
+**Submitted:** Jan 18, 2024, 11:00 AM
+
+Please fix the issues
+
+[View on GitHub](#)"
+`;
+
+exports[`formatEditResultMarkdown > formats edit result with fields 1`] = `
+"# PR Updated
+
+**PR:** #42 - Updated Title
+
+## Updated Fields
+- title
+- body
+- labels
+
+[View on GitHub](https://github.com/owner/repo/pull/42)"
+`;
+
+exports[`formatEditResultMarkdown > formats edit result with no fields 1`] = `
+"# PR Updated
+
+**PR:** #42 - Same Title
+
+## Updated Fields
+*No fields changed*
+
+[View on GitHub](https://github.com/owner/repo/pull/42)"
+`;
+
+exports[`formatMergeResultMarkdown > formats merge result with branch deletion 1`] = `
+"# PR Merged
+
+**PR:** #42 - Add feature
+**Merge Commit:** \`abc123def456789\`
+**Deleted Branch:** \`feature-branch\`
+
+Pull Request successfully merged
+
+[View on GitHub](https://github.com/owner/repo/pull/42)"
+`;
+
+exports[`formatMergeResultMarkdown > formats merge result without branch deletion 1`] = `
+"# PR Merged
+
+**PR:** #42 - Add feature
+**Merge Commit:** \`abc123def456789\`
+
+Pull Request successfully merged
+
+[View on GitHub](https://github.com/owner/repo/pull/42)"
+`;
+
+exports[`formatPrChecksMarkdown > formats all passing checks 1`] = `
+"# CI Status ✅
+
+**Commit:** \`abc123d\`
+**Overall:** SUCCESS
+**Summary:** 2 passing, 0 failing, 0 pending
+
+## Check Runs
+
+- ✅ **CI** (success) [Details](https://ci.example.com/1)
+- ✅ **Lint** (success)
+"
+`;
+
+exports[`formatPrChecksMarkdown > formats mixed checks 1`] = `
+"# CI Status ❌
+
+**Commit:** \`abc123d\`
+**Overall:** FAILURE
+**Summary:** 1 passing, 1 failing, 1 pending
+
+## Check Runs
+
+- ✅ **CI** (success)
+- ❌ **Tests** (failure) [Details](https://ci.example.com/2)
+
+## Commit Statuses
+
+- 🔄 **deploy/preview** (pending) [Details](https://deploy.example.com)"
+`;
+
+exports[`formatPrCommentsMarkdown > formats comment with empty body 1`] = `
+"# Comments (1)
+
+### [@reviewer](#) - Jan 17, 2024, 11:00 AM
+
+*Empty comment*
+
+[View](#)"
+`;
+
+exports[`formatPrCommentsMarkdown > formats empty comments 1`] = `"No comments found."`;
+
+exports[`formatPrCommentsMarkdown > formats multiple comments 1`] = `
+"# Comments (2)
+
+### [@reviewer1](https://github.com/reviewer1) - Jan 17, 2024, 11:00 AM
+
+Great work!
+
+[View](#comment-1)
+
+---
+
+### [@reviewer2](https://github.com/reviewer2) - Jan 17, 2024, 01:00 PM
+
+One small suggestion...
+
+[View](#comment-2)"
+`;
+
+exports[`formatPrFilesMarkdown > formats empty file list 1`] = `"No files changed in this PR."`;
+
+exports[`formatPrFilesMarkdown > formats multiple files 1`] = `
+"## Files Changed (3)
+
+- **src/index.ts** (modified) +50 -10
+- **src/new.ts** (added) +100 -0
+- **src/old.ts** (removed) +0 -75"
+`;
+
+exports[`formatPrListMarkdown > formats PR with labels 1`] = `
+"# Pull Requests (1)
+
+- **#42** Add new feature
+  - Status: Open | Author: @octocat [bug, priority-high]
+  - Updated: Jan 18, 2024, 03:20 PM
+  - [View](https://github.com/owner/repo/pull/42)"
+`;
+
+exports[`formatPrListMarkdown > formats empty list 1`] = `"No pull requests found."`;
+
+exports[`formatPrListMarkdown > formats multiple PRs 1`] = `
+"# Pull Requests (3)
+
+- **#1** First PR
+  - Status: Open | Author: @octocat [enhancement]
+  - Updated: Jan 18, 2024, 03:20 PM
+  - [View](https://github.com/owner/repo/pull/42)
+
+- **#2** Second PR
+  - Status: Draft | Author: @octocat [enhancement]
+  - Updated: Jan 18, 2024, 03:20 PM
+  - [View](https://github.com/owner/repo/pull/42)
+
+- **#3** Third PR
+  - Status: Closed | Author: @octocat [enhancement]
+  - Updated: Jan 18, 2024, 03:20 PM
+  - [View](https://github.com/owner/repo/pull/42)"
+`;
+
+exports[`formatPrListMarkdown > formats single PR 1`] = `
+"# Pull Requests (1)
+
+- **#42** Add new feature
+  - Status: Open | Author: @octocat [enhancement]
+  - Updated: Jan 18, 2024, 03:20 PM
+  - [View](https://github.com/owner/repo/pull/42)"
+`;
+
+exports[`formatPrReviewCommentsMarkdown > formats empty review comments 1`] = `"No review comments found."`;
+
+exports[`formatPrReviewCommentsMarkdown > formats review comment with null line 1`] = `
+"# Review Comments (1)
+
+### [@reviewer](#) on \`src/file.ts\`
+
+**Location:** File
+
+\`\`\`diff
+@@
+\`\`\`
+
+File-level comment
+
+[View](#) | Jan 17, 2024, 11:00 AM"
+`;
+
+exports[`formatPrReviewCommentsMarkdown > formats review comments 1`] = `
+"# Review Comments (2)
+
+### [@reviewer](https://github.com/reviewer) on \`src/utils.ts\`
+
+**Location:** Line 42
+
+\`\`\`diff
+@@ -40,3 +40,5 @@
+ function foo() {
++  const x = 1;
+ }
+\`\`\`
+
+Consider using a more descriptive name
+
+[View](#review-comment-1) | Jan 17, 2024, 11:00 AM
+
+---
+
+### [@reviewer](https://github.com/reviewer) on \`src/utils.ts\` (reply)
+
+**Location:** Line 42
+
+\`\`\`diff
+@@ -40,3 +40,5 @@
+ function foo() {
++  const x = 1;
+ }
+\`\`\`
+
+This is a reply
+
+[View](#review-comment-2) | Jan 17, 2024, 12:00 PM"
+`;
+
+exports[`formatPrReviewsMarkdown > formats empty reviews 1`] = `"No reviews found."`;
+
+exports[`formatPrReviewsMarkdown > formats multiple reviews 1`] = `
+"# Reviews (2)
+
+### [@reviewer1](https://github.com/reviewer1) - Approved
+
+LGTM!
+
+[View](#review-1) | Jan 17, 2024, 11:00 AM
+
+---
+
+### [@reviewer2](https://github.com/reviewer2) - Changes Requested
+
+Please address comments
+
+[View](#review-2) | Jan 17, 2024, 01:00 PM"
+`;
+
+exports[`formatPrReviewsMarkdown > formats review with null body 1`] = `
+"# Reviews (1)
+
+### [@reviewer](#) - Commented
+
+*No comment*
+
+[View](#) | Jan 17, 2024, 11:00 AM"
+`;
+
+exports[`formatPrStateChangeMarkdown > formats closed PR 1`] = `
+"# PR Closed
+
+**PR:** #42 - Add new feature
+**Status:** closed
+**Draft:** No
+
+[View on GitHub](https://github.com/owner/repo/pull/42)"
+`;
+
+exports[`formatPrStateChangeMarkdown > formats converted to draft 1`] = `
+"# PR Converted to Draft
+
+**PR:** #42 - Add new feature
+**Status:** open
+**Draft:** Yes
+
+[View on GitHub](https://github.com/owner/repo/pull/42)"
+`;
+
+exports[`formatPrStateChangeMarkdown > formats ready for review 1`] = `
+"# PR Marked Ready for Review
+
+**PR:** #42 - Add new feature
+**Status:** open
+**Draft:** No
+
+[View on GitHub](https://github.com/owner/repo/pull/42)"
+`;
+
+exports[`formatPrStateChangeMarkdown > formats reopened PR 1`] = `
+"# PR Reopened
+
+**PR:** #42 - Add new feature
+**Status:** open
+**Draft:** No
+
+[View on GitHub](https://github.com/owner/repo/pull/42)"
+`;
+
+exports[`formatPrStatusMarkdown > formats empty status 1`] = `
+"# PR Status
+
+*No relevant open pull requests found.*"
+`;
+
+exports[`formatPrStatusMarkdown > formats full status 1`] = `
+"# PR Status
+
+## Current Branch
+- **#1** Current branch PR [View](https://github.com/owner/repo/pull/42)
+
+## Created by You (2)
+- **#2** My PR 1 (open) [View](https://github.com/owner/repo/pull/42)
+- **#3** My PR 2 (Draft) [View](https://github.com/owner/repo/pull/42)
+
+## Review Requested (1)
+- **#4** Needs review by @author [View](https://github.com/owner/repo/pull/42)
+
+## Assigned to You (1)
+- **#5** Assigned to me by @assigner [View](https://github.com/owner/repo/pull/42)"
+`;
+
+exports[`formatPrViewMarkdown > formats PR with no labels 1`] = `
+"# PR #42: Add new feature
+
+**Status:** Open
+**Author:** [@octocat](https://github.com/octocat)
+**Branch:** \`feature-branch\` -> \`main\`
+**Labels:** None
+
+## Stats
+- **Changes:** +150 / -25 in 8 files
+- **Mergeable:** Yes (clean)
+
+## Dates
+- **Created:** Jan 15, 2024, 11:30 AM
+- **Updated:** Jan 18, 2024, 03:20 PM
+
+
+
+## Description
+This PR adds a great new feature.
+
+- Feature 1
+- Feature 2
+
+---
+[View on GitHub](https://github.com/owner/repo/pull/42)"
+`;
+
+exports[`formatPrViewMarkdown > formats PR with null mergeable 1`] = `
+"# PR #42: Add new feature
+
+**Status:** Open
+**Author:** [@octocat](https://github.com/octocat)
+**Branch:** \`feature-branch\` -> \`main\`
+**Labels:** \`enhancement\`, \`documentation\`
+
+## Stats
+- **Changes:** +150 / -25 in 8 files
+- **Mergeable:** Calculating... (clean)
+
+## Dates
+- **Created:** Jan 15, 2024, 11:30 AM
+- **Updated:** Jan 18, 2024, 03:20 PM
+
+
+
+## Description
+This PR adds a great new feature.
+
+- Feature 1
+- Feature 2
+
+---
+[View on GitHub](https://github.com/owner/repo/pull/42)"
+`;
+
+exports[`formatPrViewMarkdown > formats PR with null user 1`] = `
+"# PR #42: Add new feature
+
+**Status:** Open
+**Author:** [@unknown](#)
+**Branch:** \`feature-branch\` -> \`main\`
+**Labels:** \`enhancement\`, \`documentation\`
+
+## Stats
+- **Changes:** +150 / -25 in 8 files
+- **Mergeable:** Yes (clean)
+
+## Dates
+- **Created:** Jan 15, 2024, 11:30 AM
+- **Updated:** Jan 18, 2024, 03:20 PM
+
+
+
+## Description
+This PR adds a great new feature.
+
+- Feature 1
+- Feature 2
+
+---
+[View on GitHub](https://github.com/owner/repo/pull/42)"
+`;
+
+exports[`formatPrViewMarkdown > formats PR without body 1`] = `
+"# PR #42: Add new feature
+
+**Status:** Open
+**Author:** [@octocat](https://github.com/octocat)
+**Branch:** \`feature-branch\` -> \`main\`
+**Labels:** \`enhancement\`, \`documentation\`
+
+## Stats
+- **Changes:** +150 / -25 in 8 files
+- **Mergeable:** Yes (clean)
+
+## Dates
+- **Created:** Jan 15, 2024, 11:30 AM
+- **Updated:** Jan 18, 2024, 03:20 PM
+
+
+
+## Description
+*No description provided*
+
+---
+[View on GitHub](https://github.com/owner/repo/pull/42)"
+`;
+
+exports[`formatPrViewMarkdown > formats closed PR 1`] = `
+"# PR #42: Add new feature
+
+**Status:** Closed
+**Author:** [@octocat](https://github.com/octocat)
+**Branch:** \`feature-branch\` -> \`main\`
+**Labels:** \`enhancement\`, \`documentation\`
+
+## Stats
+- **Changes:** +150 / -25 in 8 files
+- **Mergeable:** Yes (clean)
+
+## Dates
+- **Created:** Jan 15, 2024, 11:30 AM
+- **Updated:** Jan 18, 2024, 03:20 PM
+
+- **Closed:** Jan 19, 2024, 05:00 PM
+
+## Description
+This PR adds a great new feature.
+
+- Feature 1
+- Feature 2
+
+---
+[View on GitHub](https://github.com/owner/repo/pull/42)"
+`;
+
+exports[`formatPrViewMarkdown > formats draft PR 1`] = `
+"# PR #42: Add new feature
+
+**Status:** Draft
+**Author:** [@octocat](https://github.com/octocat)
+**Branch:** \`feature-branch\` -> \`main\`
+**Labels:** \`enhancement\`, \`documentation\`
+
+## Stats
+- **Changes:** +150 / -25 in 8 files
+- **Mergeable:** Yes (clean)
+
+## Dates
+- **Created:** Jan 15, 2024, 11:30 AM
+- **Updated:** Jan 18, 2024, 03:20 PM
+
+
+
+## Description
+This PR adds a great new feature.
+
+- Feature 1
+- Feature 2
+
+---
+[View on GitHub](https://github.com/owner/repo/pull/42)"
+`;
+
+exports[`formatPrViewMarkdown > formats merged PR 1`] = `
+"# PR #42: Add new feature
+
+**Status:** Merged
+**Author:** [@octocat](https://github.com/octocat)
+**Branch:** \`feature-branch\` -> \`main\`
+**Labels:** \`enhancement\`, \`documentation\`
+
+## Stats
+- **Changes:** +150 / -25 in 8 files
+- **Mergeable:** Yes (clean)
+
+## Dates
+- **Created:** Jan 15, 2024, 11:30 AM
+- **Updated:** Jan 18, 2024, 03:20 PM
+- **Merged:** Jan 19, 2024, 05:00 PM
+
+
+## Description
+This PR adds a great new feature.
+
+- Feature 1
+- Feature 2
+
+---
+[View on GitHub](https://github.com/owner/repo/pull/42)"
+`;
+
+exports[`formatPrViewMarkdown > formats open PR 1`] = `
+"# PR #42: Add new feature
+
+**Status:** Open
+**Author:** [@octocat](https://github.com/octocat)
+**Branch:** \`feature-branch\` -> \`main\`
+**Labels:** \`enhancement\`, \`documentation\`
+
+## Stats
+- **Changes:** +150 / -25 in 8 files
+- **Mergeable:** Yes (clean)
+
+## Dates
+- **Created:** Jan 15, 2024, 11:30 AM
+- **Updated:** Jan 18, 2024, 03:20 PM
+
+
+
+## Description
+This PR adds a great new feature.
+
+- Feature 1
+- Feature 2
+
+---
+[View on GitHub](https://github.com/owner/repo/pull/42)"
+`;

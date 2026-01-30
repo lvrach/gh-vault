@@ -95,21 +95,9 @@ pnpm build
 npm link
 ```
 
-## Shell Alias Setup
+## Shell Alias
 
-Add gh-vault as a `gh` alias for seamless integration:
-
-```bash
-# Create a gh alias (recommended)
-gh alias set vault '!/path/to/gh-vault/dist/cli/index.js'
-
-# Now use it like any gh command
-gh vault pr list
-gh vault pr view 123
-gh vault auth login
-```
-
-Or add a standalone alias to `~/.bashrc` or `~/.zshrc`:
+Add to `~/.bashrc` or `~/.zshrc`:
 
 ```bash
 alias gh-vault='node /path/to/gh-vault/dist/cli/index.js'

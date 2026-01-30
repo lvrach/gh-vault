@@ -1,0 +1,399 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`formatCodeMarkdown > formats code result with multiple text matches 1`] = `
+"# Code Search Results (1 total)
+
+## [src/auth.ts](https://github.com/octocat/Hello-World/blob/main/src/auth.ts)
+
+Repository: [octocat/Hello-World](https://github.com/octocat/Hello-World)
+
+**Matches:**
+
+\`\`\`
+function authenticate() { ... }
+\`\`\`
+
+\`\`\`
+const auth = new Auth();
+\`\`\`
+
+---"
+`;
+
+exports[`formatCodeMarkdown > formats code result without text matches 1`] = `
+"# Code Search Results (1 total)
+
+## [src/auth.ts](https://github.com/octocat/Hello-World/blob/main/src/auth.ts)
+
+Repository: [octocat/Hello-World](https://github.com/octocat/Hello-World)
+
+---"
+`;
+
+exports[`formatCodeMarkdown > formats empty result 1`] = `"No code matches your search."`;
+
+exports[`formatCodeMarkdown > formats multiple code results 1`] = `
+"# Code Search Results (1.0k total)
+
+## [src/auth.ts](https://github.com/octocat/Hello-World/blob/main/src/auth.ts)
+
+Repository: [octocat/Hello-World](https://github.com/octocat/Hello-World)
+
+**Matches:**
+
+\`\`\`
+function authenticate(user: User) { ... }
+\`\`\`
+
+---
+
+## [src/login.ts](https://github.com/octocat/Hello-World/blob/main/src/auth.ts)
+
+Repository: [octocat/Hello-World](https://github.com/octocat/Hello-World)
+
+**Matches:**
+
+\`\`\`
+function authenticate(user: User) { ... }
+\`\`\`
+
+---"
+`;
+
+exports[`formatCodeMarkdown > formats single code result 1`] = `
+"# Code Search Results (1 total)
+
+## [src/auth.ts](https://github.com/octocat/Hello-World/blob/main/src/auth.ts)
+
+Repository: [octocat/Hello-World](https://github.com/octocat/Hello-World)
+
+**Matches:**
+
+\`\`\`
+function authenticate(user: User) { ... }
+\`\`\`
+
+---"
+`;
+
+exports[`formatCommitsMarkdown > formats commit with multi-line message 1`] = `
+"# Commit Search Results (1 total)
+
+## [\`abc123d\`](https://github.com/octocat/Hello-World/commit/abc123def456789) - octocat/Hello-World
+
+**Fix authentication bug**
+
+Author: The Octocat | Date: Jan 18, 2024
+
+\`\`\`
+Fix authentication bug
+
+This resolves issue #42.
+
+- Fixed login flow
+- Updated tests
+\`\`\`
+
+---"
+`;
+
+exports[`formatCommitsMarkdown > formats commit with single-line message 1`] = `
+"# Commit Search Results (1 total)
+
+## [\`abc123d\`](https://github.com/octocat/Hello-World/commit/abc123def456789) - octocat/Hello-World
+
+**Simple fix**
+
+Author: The Octocat | Date: Jan 18, 2024
+
+---"
+`;
+
+exports[`formatCommitsMarkdown > formats empty result 1`] = `"No commits match your search."`;
+
+exports[`formatCommitsMarkdown > formats multiple commits 1`] = `
+"# Commit Search Results (500 total)
+
+## [\`abc123\`](https://github.com/octocat/Hello-World/commit/abc123def456789) - octocat/Hello-World
+
+**First commit**
+
+Author: The Octocat | Date: Jan 18, 2024
+
+---
+
+## [\`def456\`](https://github.com/octocat/Hello-World/commit/abc123def456789) - octocat/Hello-World
+
+**Second commit**
+
+Author: The Octocat | Date: Jan 18, 2024
+
+---"
+`;
+
+exports[`formatCommitsMarkdown > formats single commit 1`] = `
+"# Commit Search Results (1 total)
+
+## [\`abc123d\`](https://github.com/octocat/Hello-World/commit/abc123def456789) - octocat/Hello-World
+
+**Fix authentication bug**
+
+Author: The Octocat | Date: Jan 18, 2024
+
+\`\`\`
+Fix authentication bug
+
+This resolves issue #42
+\`\`\`
+
+---"
+`;
+
+exports[`formatIssuesMarkdown > formats closed issue 1`] = `
+"# Issue Search Results (1 total)
+
+## 🔴 [octocat/Hello-World#42](https://github.com/octocat/Hello-World/issues/42)
+
+**Bug in authentication** [bug]
+
+Author: @reporter | Comments: 5 | Updated: Jan 18, 2024
+
+---"
+`;
+
+exports[`formatIssuesMarkdown > formats empty result 1`] = `"No issues match your search."`;
+
+exports[`formatIssuesMarkdown > formats issue with assignees 1`] = `
+"# Issue Search Results (1 total)
+
+## 🟢 [octocat/Hello-World#42](https://github.com/octocat/Hello-World/issues/42)
+
+**Bug in authentication** [bug]
+
+Author: @reporter | Comments: 5 | Updated: Jan 18, 2024
+Assignees: @assignee1, @assignee2
+
+---"
+`;
+
+exports[`formatIssuesMarkdown > formats issue with multiple labels 1`] = `
+"# Issue Search Results (1 total)
+
+## 🟢 [octocat/Hello-World#42](https://github.com/octocat/Hello-World/issues/42)
+
+**Bug in authentication** [bug, priority-high, needs-triage]
+
+Author: @reporter | Comments: 5 | Updated: Jan 18, 2024
+
+---"
+`;
+
+exports[`formatIssuesMarkdown > formats issue with null user 1`] = `
+"# Issue Search Results (1 total)
+
+## 🟢 [octocat/Hello-World#42](https://github.com/octocat/Hello-World/issues/42)
+
+**Bug in authentication** [bug]
+
+Author: @unknown | Comments: 5 | Updated: Jan 18, 2024
+
+---"
+`;
+
+exports[`formatIssuesMarkdown > formats single open issue 1`] = `
+"# Issue Search Results (1 total)
+
+## 🟢 [octocat/Hello-World#42](https://github.com/octocat/Hello-World/issues/42)
+
+**Bug in authentication** [bug]
+
+Author: @reporter | Comments: 5 | Updated: Jan 18, 2024
+
+---"
+`;
+
+exports[`formatPrsMarkdown > formats PR with assignees 1`] = `
+"# Pull Request Search Results (1 total)
+
+## 🟢 [octocat/Hello-World#42](https://github.com/octocat/Hello-World/issues/42)
+
+**Bug in authentication** [bug]
+
+Author: @reporter | Comments: 5 | Updated: Jan 18, 2024
+Assignees: @reviewer
+
+---"
+`;
+
+exports[`formatPrsMarkdown > formats closed PR 1`] = `
+"# Pull Request Search Results (1 total)
+
+## 🔴 [octocat/Hello-World#42](https://github.com/octocat/Hello-World/issues/42)
+
+**Bug in authentication** [bug]
+
+Author: @reporter | Comments: 5 | Updated: Jan 18, 2024
+
+---"
+`;
+
+exports[`formatPrsMarkdown > formats draft PR 1`] = `
+"# Pull Request Search Results (1 total)
+
+## ⚪ [octocat/Hello-World#42](https://github.com/octocat/Hello-World/issues/42)
+
+**Bug in authentication** (draft) [bug]
+
+Author: @reporter | Comments: 5 | Updated: Jan 18, 2024
+
+---"
+`;
+
+exports[`formatPrsMarkdown > formats empty result 1`] = `"No pull requests match your search."`;
+
+exports[`formatPrsMarkdown > formats multiple PRs 1`] = `
+"# Pull Request Search Results (100 total)
+
+## 🟢 [octocat/Hello-World#1](https://github.com/octocat/Hello-World/issues/42)
+
+**First PR** [bug]
+
+Author: @reporter | Comments: 5 | Updated: Jan 18, 2024
+
+---
+
+## ⚪ [octocat/Hello-World#2](https://github.com/octocat/Hello-World/issues/42)
+
+**Second PR** (draft) [bug]
+
+Author: @reporter | Comments: 5 | Updated: Jan 18, 2024
+
+---"
+`;
+
+exports[`formatPrsMarkdown > formats open PR 1`] = `
+"# Pull Request Search Results (1 total)
+
+## 🟢 [octocat/Hello-World#42](https://github.com/octocat/Hello-World/issues/42)
+
+**Bug in authentication** [bug]
+
+Author: @reporter | Comments: 5 | Updated: Jan 18, 2024
+
+---"
+`;
+
+exports[`formatReposMarkdown > formats empty result 1`] = `"No repositories match your search."`;
+
+exports[`formatReposMarkdown > formats large total count 1`] = `
+"# Repository Search Results (1.5M total)
+
+## [octocat/Hello-World](https://github.com/octocat/Hello-World)
+
+My first repository on GitHub
+
+⭐ 1.2k | 🍴 567 | 📝 TypeScript | 📜 MIT License
+
+Updated: Jan 18, 2024
+Topics: \`typescript\`, \`testing\`
+
+---"
+`;
+
+exports[`formatReposMarkdown > formats multiple repositories 1`] = `
+"# Repository Search Results (250 total)
+
+## [owner/repo1](https://github.com/octocat/Hello-World)
+
+My first repository on GitHub
+
+⭐ 1.2k | 🍴 567 | 📝 TypeScript | 📜 MIT License
+
+Updated: Jan 18, 2024
+Topics: \`typescript\`, \`testing\`
+
+---
+
+## [owner/repo2](https://github.com/octocat/Hello-World)
+
+My first repository on GitHub
+
+⭐ 1.2k | 🍴 567 | 📝 TypeScript | 📜 MIT License
+
+Updated: Jan 18, 2024
+Topics: \`typescript\`, \`testing\`
+
+---"
+`;
+
+exports[`formatReposMarkdown > formats repository with badges (archived, private, fork) 1`] = `
+"# Repository Search Results (1 total)
+
+## [octocat/Hello-World](https://github.com/octocat/Hello-World) (archived, private, fork)
+
+My first repository on GitHub
+
+⭐ 1.2k | 🍴 567 | 📝 TypeScript | 📜 MIT License
+
+Updated: Jan 18, 2024
+Topics: \`typescript\`, \`testing\`
+
+---"
+`;
+
+exports[`formatReposMarkdown > formats repository without description 1`] = `
+"# Repository Search Results (1 total)
+
+## [octocat/Hello-World](https://github.com/octocat/Hello-World)
+
+⭐ 1.2k | 🍴 567 | 📝 TypeScript | 📜 MIT License
+
+Updated: Jan 18, 2024
+Topics: \`typescript\`, \`testing\`
+
+---"
+`;
+
+exports[`formatReposMarkdown > formats repository without license 1`] = `
+"# Repository Search Results (1 total)
+
+## [octocat/Hello-World](https://github.com/octocat/Hello-World)
+
+My first repository on GitHub
+
+⭐ 1.2k | 🍴 567 | 📝 TypeScript
+
+Updated: Jan 18, 2024
+Topics: \`typescript\`, \`testing\`
+
+---"
+`;
+
+exports[`formatReposMarkdown > formats repository without topics 1`] = `
+"# Repository Search Results (1 total)
+
+## [octocat/Hello-World](https://github.com/octocat/Hello-World)
+
+My first repository on GitHub
+
+⭐ 1.2k | 🍴 567 | 📝 TypeScript | 📜 MIT License
+
+Updated: Jan 18, 2024
+
+---"
+`;
+
+exports[`formatReposMarkdown > formats single repository 1`] = `
+"# Repository Search Results (1 total)
+
+## [octocat/Hello-World](https://github.com/octocat/Hello-World)
+
+My first repository on GitHub
+
+⭐ 1.2k | 🍴 567 | 📝 TypeScript | 📜 MIT License
+
+Updated: Jan 18, 2024
+Topics: \`typescript\`, \`testing\`
+
+---"
+`;

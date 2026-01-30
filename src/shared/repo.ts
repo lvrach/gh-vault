@@ -38,9 +38,10 @@ export async function resolveRepository(repoOption?: string): Promise<ResolveRep
 
 /**
  * Result of resolving a PR number from CLI arguments.
+ * When a URL is provided, owner and repo are also extracted.
  */
 export type ResolvePrResult =
-  | { success: true; pullNumber: number }
+  | { success: true; pullNumber: number; owner?: string; repo?: string }
   | { success: false; error: string };
 
 /**
@@ -79,7 +80,11 @@ export async function resolvePrNumber(
   }
 
   if (parsed.type === 'number') {
-    return { success: true, pullNumber: parsed.value };
+    // If owner/repo were extracted from URL, include them in the result
+    const result: ResolvePrResult = { success: true, pullNumber: parsed.value };
+    if (parsed.owner) result.owner = parsed.owner;
+    if (parsed.repo) result.repo = parsed.repo;
+    return result;
   }
 
   // Branch name - find PR
@@ -241,26 +246,98 @@ export async function getDefaultBranch(owner: string, repo: string): Promise<str
   return data.default_branch;
 }
 
+export interface PrRefNumber {
+  type: 'number';
+  value: number;
+  /** Owner extracted from URL, if provided */
+  owner?: string;
+  /** Repo extracted from URL, if provided */
+  repo?: string;
+}
+
+export interface PrRefBranch {
+  type: 'branch';
+  value: string;
+}
+
+export type PrRef = PrRefNumber | PrRefBranch;
+
+/**
+ * Parse a GitHub PR URL using the built-in URL API.
+ * More maintainable than regex - uses structured URL parsing.
+ *
+ * Supports:
+ * - https://github.com/owner/repo/pull/123
+ * - github.com/owner/repo/pull/123 (without protocol)
+ * - URLs with query strings or fragments
+ *
+ * @returns Extracted owner, repo, and PR number, or null if not a valid PR URL
+ */
+function parseGitHubPrUrl(
+  ref: string
+): { owner: string; repo: string; prNumber: number } | null {
+  try {
+    // Normalize URL - add protocol if missing
+    const urlString = ref.startsWith('http') ? ref : `https://${ref}`;
+    const url = new URL(urlString);
+
+    // Validate hostname
+    if (!url.hostname.includes('github.com')) {
+      return null;
+    }
+
+    // Parse pathname: /owner/repo/pull/123
+    // Filter removes empty strings from leading/trailing slashes
+    const parts = url.pathname.split('/').filter(Boolean);
+
+    // Validate structure: expect ['owner', 'repo', 'pull', 'number']
+    const owner = parts[0];
+    const repo = parts[1];
+    const pullSegment = parts[2];
+    const prNumberStr = parts[3];
+
+    if (!owner || !repo || pullSegment !== 'pull' || !prNumberStr) {
+      return null;
+    }
+
+    const prNumber = Number.parseInt(prNumberStr, 10);
+
+    // Validate PR number
+    if (Number.isNaN(prNumber) || prNumber <= 0) {
+      return null;
+    }
+
+    return { owner, repo, prNumber };
+  } catch {
+    // Invalid URL format
+    return null;
+  }
+}
+
 /**
  * Parse a PR reference which can be:
  * - A number: 123
  * - A branch name: feature-branch
  * - A URL: https://github.com/owner/repo/pull/123
+ *
+ * When a URL is provided, owner and repo are extracted and included in the result.
  */
-export function parsePrRef(
-  ref: string
-): { type: 'number'; value: number } | { type: 'branch'; value: string } | null {
+export function parsePrRef(ref: string): PrRef | null {
   // Try as number first
   const num = Number.parseInt(ref, 10);
   if (!Number.isNaN(num) && num > 0 && String(num) === ref) {
     return { type: 'number', value: num };
   }
 
-  // Try as GitHub URL
-  const urlRegex = /github\.com\/[^/]+\/[^/]+\/pull\/(\d+)/;
-  const urlMatch = urlRegex.exec(ref);
-  if (urlMatch?.[1]) {
-    return { type: 'number', value: Number.parseInt(urlMatch[1], 10) };
+  // Try as GitHub URL using structured URL parsing
+  const urlParsed = parseGitHubPrUrl(ref);
+  if (urlParsed) {
+    return {
+      type: 'number',
+      value: urlParsed.prNumber,
+      owner: urlParsed.owner,
+      repo: urlParsed.repo,
+    };
   }
 
   // Treat as branch name
