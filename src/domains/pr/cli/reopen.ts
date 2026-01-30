@@ -2,7 +2,7 @@ import { Command } from 'commander';
 
 import type { Output } from '../../../shared/output.js';
 import { resolvePrNumber, resolveRepository } from '../../../shared/repo.js';
-import { createPrComment, listPrs, updatePrState } from '../api.js';
+import type { PrApi } from '../api.js';
 import { formatPrStateChangeText } from '../formatters/text.js';
 
 interface ReopenOptions {
@@ -10,7 +10,7 @@ interface ReopenOptions {
   repo?: string | undefined;
 }
 
-export function createReopenCommand(output: Output): Command {
+export function createReopenCommand(output: Output, prApi: PrApi): Command {
   return new Command('reopen')
     .description('Reopen a pull request')
     .argument('<pr>', 'PR number or URL')
@@ -26,7 +26,7 @@ export function createReopenCommand(output: Output): Command {
         }
         const { owner, repo } = repoResult;
 
-        const prResult = await resolvePrNumber(prArg, owner, repo, listPrs);
+        const prResult = await resolvePrNumber(prArg, owner, repo, prApi.listPrs.bind(prApi));
         if (!prResult.success) {
           output.printError(`Error: ${prResult.error}`);
           process.exitCode = 1;
@@ -35,7 +35,7 @@ export function createReopenCommand(output: Output): Command {
         const pullNumber = prResult.pullNumber;
 
         if (options.comment) {
-          await createPrComment({
+          await prApi.createPrComment({
             owner,
             repo,
             issueNumber: pullNumber,
@@ -43,7 +43,7 @@ export function createReopenCommand(output: Output): Command {
           });
         }
 
-        const pr = await updatePrState({
+        const pr = await prApi.updatePrState({
           owner,
           repo,
           pullNumber,

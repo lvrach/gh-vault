@@ -2,14 +2,14 @@ import { Command } from 'commander';
 
 import type { Output } from '../../../shared/output.js';
 import { resolveRepository } from '../../../shared/repo.js';
-import { cancelRun, getRun } from '../api.js';
+import type { RunApi } from '../api.js';
 import { formatRunCancelledText } from '../formatters/text.js';
 
 interface CancelOptions {
   repo?: string | undefined;
 }
 
-export function createCancelCommand(output: Output): Command {
+export function createCancelCommand(output: Output, runApi: RunApi): Command {
   return new Command('cancel')
     .description('Cancel a workflow run')
     .argument('<run-id>', 'ID of the workflow run to cancel')
@@ -32,7 +32,7 @@ export function createCancelCommand(output: Output): Command {
         }
 
         // Get run info first for display
-        const run = await getRun({ owner, repo, runId });
+        const run = await runApi.getRun({ owner, repo, runId });
 
         // Check if run is already completed
         if (run.status === 'completed') {
@@ -41,7 +41,7 @@ export function createCancelCommand(output: Output): Command {
           return;
         }
 
-        await cancelRun({ owner, repo, runId });
+        await runApi.cancelRun({ owner, repo, runId });
 
         const useColor = process.stdout.isTTY;
         output.print(formatRunCancelledText(run, useColor));

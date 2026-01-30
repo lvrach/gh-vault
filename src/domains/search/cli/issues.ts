@@ -3,7 +3,7 @@ import open from 'open';
 
 import { filterWithJq, JqError } from '../../../shared/jq.js';
 import type { Output } from '../../../shared/output.js';
-import { searchIssues } from '../api.js';
+import type { SearchApi } from '../api.js';
 import { formatIssuesJson, issueToJson } from '../formatters/json.js';
 import { formatIssuesText } from '../formatters/text.js';
 import type { SearchIssuesInput } from '../types.js';
@@ -46,7 +46,7 @@ interface IssuesOptions {
   web?: boolean;
 }
 
-export function createIssuesCommand(output: Output): Command {
+export function createIssuesCommand(output: Output, searchApi: SearchApi): Command {
   return new Command('issues')
     .description('Search for issues on GitHub')
     .argument('[query...]', 'Search keywords')
@@ -140,7 +140,7 @@ export function createIssuesCommand(output: Output): Command {
           perPage: Number.parseInt(options.limit ?? '30', 10),
         };
 
-        const result = await searchIssues(input);
+        const result = await searchApi.searchIssues(input);
 
         // Handle --jq filtering
         if (options.jq) {

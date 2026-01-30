@@ -1,9 +1,9 @@
 /**
- * Run domain API functions - fetch data from GitHub Actions and return structured types.
- * These functions are presentation-agnostic and can be used by both CLI and MCP.
+ * Run domain API class - fetch data from GitHub Actions and return structured types.
+ * These methods are presentation-agnostic and can be used by both CLI and MCP.
  */
 
-import { createGitHubClient } from '../../shared/github.js';
+import type { Octokit } from '../../shared/github.js';
 import type {
   CancelRunInput,
   DeleteRunInput,
@@ -174,7 +174,7 @@ function mapRun(run: GitHubWorkflowRun, workflowName: string | null = null): Run
 }
 
 // ============================================================================
-// API Functions
+// RunApi Class
 // ============================================================================
 
 // GitHub API status type (superset of our RunStatus)
@@ -195,277 +195,260 @@ type GitHubRunStatus =
   | 'pending';
 
 /**
- * List workflow runs for a repository with optional filters.
+ * Run domain API with constructor-injected Octokit client.
+ * All methods use the injected client for GitHub API calls.
  */
-export async function listRuns(input: ListRunsInput): Promise<RunListItem[]> {
-  const client = await createGitHubClient();
+export class RunApi {
+  constructor(private readonly client: Octokit) {}
 
-  const params: {
-    owner: string;
-    repo: string;
-    per_page: number;
-    branch?: string;
-    status?: GitHubRunStatus;
-    event?: string;
-    actor?: string;
-    head_sha?: string;
-    created?: string;
-    exclude_pull_requests?: boolean;
-    check_suite_id?: number;
-  } = {
-    owner: input.owner,
-    repo: input.repo,
-    per_page: input.perPage ?? DEFAULT_PAGE_SIZE,
-  };
+  /**
+   * List workflow runs for a repository with optional filters.
+   */
+  async listRuns(input: ListRunsInput): Promise<RunListItem[]> {
+    const params: {
+      owner: string;
+      repo: string;
+      per_page: number;
+      branch?: string;
+      status?: GitHubRunStatus;
+      event?: string;
+      actor?: string;
+      head_sha?: string;
+      created?: string;
+      exclude_pull_requests?: boolean;
+      check_suite_id?: number;
+    } = {
+      owner: input.owner,
+      repo: input.repo,
+      per_page: input.perPage ?? DEFAULT_PAGE_SIZE,
+    };
 
-  if (input.branch) params.branch = input.branch;
-  if (input.status) params.status = input.status as GitHubRunStatus;
-  if (input.event) params.event = input.event;
-  if (input.actor) params.actor = input.actor;
-  if (input.headSha) params.head_sha = input.headSha;
-  if (input.created) params.created = input.created;
-  if (input.excludePullRequests) params.exclude_pull_requests = input.excludePullRequests;
-  if (input.checkSuiteId) params.check_suite_id = input.checkSuiteId;
+    if (input.branch) params.branch = input.branch;
+    if (input.status) params.status = input.status as GitHubRunStatus;
+    if (input.event) params.event = input.event;
+    if (input.actor) params.actor = input.actor;
+    if (input.headSha) params.head_sha = input.headSha;
+    if (input.created) params.created = input.created;
+    if (input.excludePullRequests) params.exclude_pull_requests = input.excludePullRequests;
+    if (input.checkSuiteId !== undefined) {
+      params.check_suite_id = input.checkSuiteId;
+    }
 
-  // If filtering by workflow, use the workflow-specific endpoint
-  if (input.workflowId) {
-    const { data } = await client.rest.actions.listWorkflowRuns({
-      ...params,
-      workflow_id: input.workflowId,
-    });
+    // If filtering by workflow, use the workflow-specific endpoint
+    if (input.workflowId !== undefined) {
+      const { data } = await this.client.rest.actions.listWorkflowRuns({
+        ...params,
+        workflow_id: input.workflowId,
+      });
+
+      return data.workflow_runs.map((run) => mapRun(run as GitHubWorkflowRun));
+    }
+
+    const { data } = await this.client.rest.actions.listWorkflowRunsForRepo(params);
 
     return data.workflow_runs.map((run) => mapRun(run as GitHubWorkflowRun));
   }
 
-  const { data } = await client.rest.actions.listWorkflowRunsForRepo(params);
+  /**
+   * Get a specific workflow run.
+   */
+  async getRun(input: GetRunInput): Promise<RunListItem> {
+    if (input.attempt !== undefined) {
+      const { data } = await this.client.rest.actions.getWorkflowRunAttempt({
+        owner: input.owner,
+        repo: input.repo,
+        run_id: input.runId,
+        attempt_number: input.attempt,
+      });
 
-  return data.workflow_runs.map((run) => mapRun(run as GitHubWorkflowRun));
-}
+      return mapRun(data as GitHubWorkflowRun);
+    }
 
-/**
- * Get a specific workflow run.
- */
-export async function getRun(input: GetRunInput): Promise<RunListItem> {
-  const client = await createGitHubClient();
-
-  if (input.attempt) {
-    const { data } = await client.rest.actions.getWorkflowRunAttempt({
+    const { data } = await this.client.rest.actions.getWorkflowRun({
       owner: input.owner,
       repo: input.repo,
       run_id: input.runId,
-      attempt_number: input.attempt,
     });
 
     return mapRun(data as GitHubWorkflowRun);
   }
 
-  const { data } = await client.rest.actions.getWorkflowRun({
-    owner: input.owner,
-    repo: input.repo,
-    run_id: input.runId,
-  });
+  /**
+   * Get a workflow run with its jobs for detailed view.
+   * If an attempt is specified, fetches jobs for that specific attempt.
+   */
+  async getRunWithJobs(input: GetRunInput): Promise<RunDetail> {
+    const run = await this.getRun(input);
 
-  return mapRun(data as GitHubWorkflowRun);
-}
+    // If a specific attempt is requested, use the attempt-specific jobs endpoint
+    const jobs =
+      input.attempt !== undefined
+        ? await this.getRunJobsForAttempt({
+            owner: input.owner,
+            repo: input.repo,
+            runId: input.runId,
+            attemptNumber: input.attempt,
+          })
+        : await this.getRunJobs({
+            owner: input.owner,
+            repo: input.repo,
+            runId: input.runId,
+            filter: 'latest',
+          });
 
-/**
- * Get a workflow run with its jobs for detailed view.
- * If an attempt is specified, fetches jobs for that specific attempt.
- */
-export async function getRunWithJobs(input: GetRunInput): Promise<RunDetail> {
-  const run = await getRun(input);
+    return {
+      ...run,
+      jobs,
+    };
+  }
 
-  // If a specific attempt is requested, use the attempt-specific jobs endpoint
-  const jobs = input.attempt
-    ? await getRunJobsForAttempt({
-        owner: input.owner,
-        repo: input.repo,
-        runId: input.runId,
-        attemptNumber: input.attempt,
-      })
-    : await getRunJobs({
-        owner: input.owner,
-        repo: input.repo,
-        runId: input.runId,
-        filter: 'latest',
-      });
+  /**
+   * Get jobs for a workflow run.
+   */
+  async getRunJobs(input: GetRunJobsInput): Promise<RunJob[]> {
+    const { data } = await this.client.rest.actions.listJobsForWorkflowRun({
+      owner: input.owner,
+      repo: input.repo,
+      run_id: input.runId,
+      filter: input.filter ?? 'latest',
+      per_page: input.perPage ?? DEFAULT_PAGE_SIZE,
+    });
 
-  return {
-    ...run,
-    jobs,
-  };
-}
+    return data.jobs.map((job) => mapJob(job));
+  }
 
-/**
- * Get jobs for a workflow run.
- */
-export async function getRunJobs(input: GetRunJobsInput): Promise<RunJob[]> {
-  const client = await createGitHubClient();
+  /**
+   * Get jobs for a specific workflow run attempt.
+   * This uses the attempt-specific endpoint to ensure jobs match the requested attempt.
+   */
+  async getRunJobsForAttempt(input: {
+    owner: string;
+    repo: string;
+    runId: number;
+    attemptNumber: number;
+    perPage?: number | undefined;
+  }): Promise<RunJob[]> {
+    const { data } = await this.client.rest.actions.listJobsForWorkflowRunAttempt({
+      owner: input.owner,
+      repo: input.repo,
+      run_id: input.runId,
+      attempt_number: input.attemptNumber,
+      per_page: input.perPage ?? DEFAULT_PAGE_SIZE,
+    });
 
-  const { data } = await client.rest.actions.listJobsForWorkflowRun({
-    owner: input.owner,
-    repo: input.repo,
-    run_id: input.runId,
-    filter: input.filter ?? 'latest',
-    per_page: input.perPage ?? DEFAULT_PAGE_SIZE,
-  });
+    return data.jobs.map((job) => mapJob(job));
+  }
 
-  return data.jobs.map((job) => mapJob(job));
-}
+  /**
+   * Get a specific job by ID.
+   */
+  async getJob(input: { owner: string; repo: string; jobId: number }): Promise<RunJob> {
+    const { data } = await this.client.rest.actions.getJobForWorkflowRun({
+      owner: input.owner,
+      repo: input.repo,
+      job_id: input.jobId,
+    });
 
-/**
- * Get jobs for a specific workflow run attempt.
- * This uses the attempt-specific endpoint to ensure jobs match the requested attempt.
- */
-export async function getRunJobsForAttempt(input: {
-  owner: string;
-  repo: string;
-  runId: number;
-  attemptNumber: number;
-  perPage?: number | undefined;
-}): Promise<RunJob[]> {
-  const client = await createGitHubClient();
+    return mapJob(data);
+  }
 
-  const { data } = await client.rest.actions.listJobsForWorkflowRunAttempt({
-    owner: input.owner,
-    repo: input.repo,
-    run_id: input.runId,
-    attempt_number: input.attemptNumber,
-    per_page: input.perPage ?? DEFAULT_PAGE_SIZE,
-  });
+  /**
+   * Download logs for a specific job.
+   * Returns the plain text logs.
+   */
+  async getJobLogs(input: GetJobLogsInput): Promise<string> {
+    const { data } = await this.client.rest.actions.downloadJobLogsForWorkflowRun({
+      owner: input.owner,
+      repo: input.repo,
+      job_id: input.jobId,
+    });
 
-  return data.jobs.map((job) => mapJob(job));
-}
+    // The API returns the log content directly as a string
+    return data as string;
+  }
 
-/**
- * Get a specific job by ID.
- */
-export async function getJob(input: {
-  owner: string;
-  repo: string;
-  jobId: number;
-}): Promise<RunJob> {
-  const client = await createGitHubClient();
+  /**
+   * Cancel a workflow run.
+   */
+  async cancelRun(input: CancelRunInput): Promise<void> {
+    await this.client.rest.actions.cancelWorkflowRun({
+      owner: input.owner,
+      repo: input.repo,
+      run_id: input.runId,
+    });
+  }
 
-  const { data } = await client.rest.actions.getJobForWorkflowRun({
-    owner: input.owner,
-    repo: input.repo,
-    job_id: input.jobId,
-  });
+  /**
+   * Rerun an entire workflow run.
+   */
+  async rerunRun(input: RerunInput): Promise<void> {
+    await this.client.rest.actions.reRunWorkflow({
+      owner: input.owner,
+      repo: input.repo,
+      run_id: input.runId,
+      ...(input.enableDebugLogging !== undefined && {
+        enable_debug_logging: input.enableDebugLogging,
+      }),
+    });
+  }
 
-  return mapJob(data);
-}
+  /**
+   * Rerun only the failed jobs in a workflow run.
+   */
+  async rerunFailedJobs(input: RerunFailedJobsInput): Promise<void> {
+    await this.client.rest.actions.reRunWorkflowFailedJobs({
+      owner: input.owner,
+      repo: input.repo,
+      run_id: input.runId,
+      ...(input.enableDebugLogging !== undefined && {
+        enable_debug_logging: input.enableDebugLogging,
+      }),
+    });
+  }
 
-/**
- * Download logs for a specific job.
- * Returns the plain text logs.
- */
-export async function getJobLogs(input: GetJobLogsInput): Promise<string> {
-  const client = await createGitHubClient();
+  /**
+   * Rerun a specific job.
+   */
+  async rerunJob(input: RerunJobInput): Promise<void> {
+    await this.client.rest.actions.reRunJobForWorkflowRun({
+      owner: input.owner,
+      repo: input.repo,
+      job_id: input.jobId,
+      ...(input.enableDebugLogging !== undefined && {
+        enable_debug_logging: input.enableDebugLogging,
+      }),
+    });
+  }
 
-  const { data } = await client.rest.actions.downloadJobLogsForWorkflowRun({
-    owner: input.owner,
-    repo: input.repo,
-    job_id: input.jobId,
-  });
+  /**
+   * Delete a workflow run.
+   */
+  async deleteRun(input: DeleteRunInput): Promise<void> {
+    await this.client.rest.actions.deleteWorkflowRun({
+      owner: input.owner,
+      repo: input.repo,
+      run_id: input.runId,
+    });
+  }
 
-  // The API returns the log content directly as a string
-  return data as string;
-}
+  /**
+   * Lookup a workflow by name to get its ID.
+   */
+  async getWorkflowIdByName(input: {
+    owner: string;
+    repo: string;
+    name: string;
+  }): Promise<number | null> {
+    const { data } = await this.client.rest.actions.listRepoWorkflows({
+      owner: input.owner,
+      repo: input.repo,
+      per_page: 100,
+    });
 
-/**
- * Cancel a workflow run.
- */
-export async function cancelRun(input: CancelRunInput): Promise<void> {
-  const client = await createGitHubClient();
+    const workflow = data.workflows.find(
+      (w) => w.name.toLowerCase() === input.name.toLowerCase() || w.path.endsWith(`/${input.name}`)
+    );
 
-  await client.rest.actions.cancelWorkflowRun({
-    owner: input.owner,
-    repo: input.repo,
-    run_id: input.runId,
-  });
-}
-
-/**
- * Rerun an entire workflow run.
- */
-export async function rerunRun(input: RerunInput): Promise<void> {
-  const client = await createGitHubClient();
-
-  await client.rest.actions.reRunWorkflow({
-    owner: input.owner,
-    repo: input.repo,
-    run_id: input.runId,
-    ...(input.enableDebugLogging !== undefined && {
-      enable_debug_logging: input.enableDebugLogging,
-    }),
-  });
-}
-
-/**
- * Rerun only the failed jobs in a workflow run.
- */
-export async function rerunFailedJobs(input: RerunFailedJobsInput): Promise<void> {
-  const client = await createGitHubClient();
-
-  await client.rest.actions.reRunWorkflowFailedJobs({
-    owner: input.owner,
-    repo: input.repo,
-    run_id: input.runId,
-    ...(input.enableDebugLogging !== undefined && {
-      enable_debug_logging: input.enableDebugLogging,
-    }),
-  });
-}
-
-/**
- * Rerun a specific job.
- */
-export async function rerunJob(input: RerunJobInput): Promise<void> {
-  const client = await createGitHubClient();
-
-  await client.rest.actions.reRunJobForWorkflowRun({
-    owner: input.owner,
-    repo: input.repo,
-    job_id: input.jobId,
-    ...(input.enableDebugLogging !== undefined && {
-      enable_debug_logging: input.enableDebugLogging,
-    }),
-  });
-}
-
-/**
- * Delete a workflow run.
- */
-export async function deleteRun(input: DeleteRunInput): Promise<void> {
-  const client = await createGitHubClient();
-
-  await client.rest.actions.deleteWorkflowRun({
-    owner: input.owner,
-    repo: input.repo,
-    run_id: input.runId,
-  });
-}
-
-/**
- * Lookup a workflow by name to get its ID.
- */
-export async function getWorkflowIdByName(input: {
-  owner: string;
-  repo: string;
-  name: string;
-}): Promise<number | null> {
-  const client = await createGitHubClient();
-
-  const { data } = await client.rest.actions.listRepoWorkflows({
-    owner: input.owner,
-    repo: input.repo,
-    per_page: 100,
-  });
-
-  const workflow = data.workflows.find(
-    (w) => w.name.toLowerCase() === input.name.toLowerCase() || w.path.endsWith(`/${input.name}`)
-  );
-
-  return workflow?.id ?? null;
+    return workflow?.id ?? null;
+  }
 }

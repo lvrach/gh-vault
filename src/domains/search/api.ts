@@ -1,9 +1,9 @@
 /**
- * Search domain API functions - fetch data from GitHub Search API.
- * These functions are presentation-agnostic and can be used by both CLI and MCP.
+ * Search domain API class - fetch data from GitHub Search API.
+ * These methods are presentation-agnostic and can be used by both CLI and MCP.
  */
 
-import { createGitHubClient } from '../../shared/github.js';
+import type { Octokit } from '../../shared/github.js';
 import type {
   SearchCodeInput,
   SearchCodeResult,
@@ -317,90 +317,147 @@ function transformLabel(l: string | { name?: string; color?: string | null }): {
 }
 
 /**
- * Search for repositories on GitHub
+ * Search domain API with constructor-injected Octokit client.
+ * All methods use the injected client for GitHub API calls.
  */
-export async function searchRepos(
-  input: SearchReposInput
-): Promise<SearchResult<SearchRepository>> {
-  const client = await createGitHubClient();
-  const query = buildRepoQuery(input);
+export class SearchApi {
+  constructor(private readonly client: Octokit) {}
 
-  // Build params without undefined values to satisfy exactOptionalPropertyTypes
-  const params: {
-    q: string;
-    sort?: 'forks' | 'help-wanted-issues' | 'stars' | 'updated';
-    order?: 'asc' | 'desc';
-    per_page: number;
-  } = {
-    q: query,
-    per_page: input.perPage ?? 30,
-  };
-  if (input.sort) params.sort = input.sort;
-  if (input.order) params.order = input.order;
+  /**
+   * Search for repositories on GitHub
+   */
+  async searchRepos(input: SearchReposInput): Promise<SearchResult<SearchRepository>> {
+    const query = buildRepoQuery(input);
 
-  const { data } = await client.rest.search.repos(params);
+    // Build params without undefined values to satisfy exactOptionalPropertyTypes
+    const params: {
+      q: string;
+      sort?: 'forks' | 'help-wanted-issues' | 'stars' | 'updated';
+      order?: 'asc' | 'desc';
+      per_page: number;
+    } = {
+      q: query,
+      per_page: input.perPage ?? 30,
+    };
+    if (input.sort) params.sort = input.sort;
+    if (input.order) params.order = input.order;
 
-  return {
-    totalCount: data.total_count,
-    incompleteResults: data.incomplete_results,
-    items: data.items.map((repo) => ({
-      id: repo.id,
-      name: repo.name,
-      fullName: repo.full_name,
-      description: repo.description,
-      owner: toSearchUser(repo.owner) ?? { login: '', htmlUrl: '' },
-      htmlUrl: repo.html_url,
-      language: repo.language,
-      stargazersCount: repo.stargazers_count,
-      forksCount: repo.forks_count,
-      openIssuesCount: repo.open_issues_count,
-      watchersCount: repo.watchers_count,
-      isPrivate: repo.private,
-      isFork: repo.fork,
-      isArchived: repo.archived,
-      createdAt: repo.created_at,
-      updatedAt: repo.updated_at,
-      pushedAt: repo.pushed_at,
-      license: repo.license ? { name: repo.license.name, spdxId: repo.license.spdx_id } : null,
-      topics: repo.topics ?? [],
-      visibility: repo.visibility ?? (repo.private ? 'private' : 'public'),
-      defaultBranch: repo.default_branch,
-    })),
-  };
-}
+    const { data } = await this.client.rest.search.repos(params);
 
-/**
- * Search for issues on GitHub
- */
-export async function searchIssues(input: SearchIssuesInput): Promise<SearchResult<SearchIssue>> {
-  const client = await createGitHubClient();
-  const query = buildIssueQuery(input);
-
-  // Build params without undefined values to satisfy exactOptionalPropertyTypes
-  const params: {
-    q: string;
-    sort?: 'comments' | 'created' | 'updated' | 'reactions';
-    order?: 'asc' | 'desc';
-    per_page: number;
-  } = {
-    q: query,
-    per_page: input.perPage ?? 30,
-  };
-  // Only set sort if it's a valid value for this API
-  const validSorts = ['comments', 'created', 'updated', 'reactions'] as const;
-  if (input.sort && validSorts.includes(input.sort as (typeof validSorts)[number])) {
-    params.sort = input.sort as (typeof validSorts)[number];
+    return {
+      totalCount: data.total_count,
+      incompleteResults: data.incomplete_results,
+      items: data.items.map((repo) => ({
+        id: repo.id,
+        name: repo.name,
+        fullName: repo.full_name,
+        description: repo.description,
+        owner: toSearchUser(repo.owner) ?? { login: '', htmlUrl: '' },
+        htmlUrl: repo.html_url,
+        language: repo.language,
+        stargazersCount: repo.stargazers_count,
+        forksCount: repo.forks_count,
+        openIssuesCount: repo.open_issues_count,
+        watchersCount: repo.watchers_count,
+        isPrivate: repo.private,
+        isFork: repo.fork,
+        isArchived: repo.archived,
+        createdAt: repo.created_at,
+        updatedAt: repo.updated_at,
+        pushedAt: repo.pushed_at,
+        license: repo.license ? { name: repo.license.name, spdxId: repo.license.spdx_id } : null,
+        topics: repo.topics ?? [],
+        visibility: repo.visibility ?? (repo.private ? 'private' : 'public'),
+        defaultBranch: repo.default_branch,
+      })),
+    };
   }
-  if (input.order) params.order = input.order;
 
-  const { data } = await client.rest.search.issuesAndPullRequests(params);
+  /**
+   * Search for issues on GitHub
+   */
+  async searchIssues(input: SearchIssuesInput): Promise<SearchResult<SearchIssue>> {
+    const query = buildIssueQuery(input);
 
-  return {
-    totalCount: data.total_count,
-    incompleteResults: data.incomplete_results,
-    items: data.items
-      .filter((item) => !item.pull_request || input.includePrs)
-      .map((item) => ({
+    // Build params without undefined values to satisfy exactOptionalPropertyTypes
+    const params: {
+      q: string;
+      sort?: 'comments' | 'created' | 'updated' | 'reactions';
+      order?: 'asc' | 'desc';
+      per_page: number;
+    } = {
+      q: query,
+      per_page: input.perPage ?? 30,
+    };
+    // Only set sort if it's a valid value for this API
+    const validSorts = ['comments', 'created', 'updated', 'reactions'] as const;
+    if (input.sort && validSorts.includes(input.sort as (typeof validSorts)[number])) {
+      params.sort = input.sort as (typeof validSorts)[number];
+    }
+    if (input.order) params.order = input.order;
+
+    const { data } = await this.client.rest.search.issuesAndPullRequests(params);
+
+    return {
+      totalCount: data.total_count,
+      incompleteResults: data.incomplete_results,
+      items: data.items
+        .filter((item) => !item.pull_request || input.includePrs)
+        .map((item) => ({
+          id: item.id,
+          number: item.number,
+          title: item.title,
+          body: item.body ?? null,
+          state: item.state as 'open' | 'closed',
+          user: toSearchUser(item.user),
+          assignees: (item.assignees ?? [])
+            .map((a) => toSearchUser(a))
+            .filter((a): a is SearchUser => a !== null),
+          labels: item.labels.map((l) => transformLabel(l)),
+          commentsCount: item.comments,
+          createdAt: item.created_at,
+          updatedAt: item.updated_at,
+          closedAt: item.closed_at,
+          htmlUrl: item.html_url,
+          repository: {
+            fullName: item.repository_url.replace('https://api.github.com/repos/', ''),
+            htmlUrl: item.repository_url.replace('api.github.com/repos', 'github.com'),
+          },
+          isPullRequest: !!item.pull_request,
+          isLocked: item.locked,
+        })),
+    };
+  }
+
+  /**
+   * Search for pull requests on GitHub
+   */
+  async searchPrs(input: SearchPrsInput): Promise<SearchResult<SearchPullRequest>> {
+    const query = buildPrQuery(input);
+
+    // Build params without undefined values to satisfy exactOptionalPropertyTypes
+    const params: {
+      q: string;
+      sort?: 'comments' | 'created' | 'updated' | 'reactions';
+      order?: 'asc' | 'desc';
+      per_page: number;
+    } = {
+      q: query,
+      per_page: input.perPage ?? 30,
+    };
+    // Only set sort if it's a valid value for this API
+    const validSorts = ['comments', 'created', 'updated', 'reactions'] as const;
+    if (input.sort && validSorts.includes(input.sort as (typeof validSorts)[number])) {
+      params.sort = input.sort as (typeof validSorts)[number];
+    }
+    if (input.order) params.order = input.order;
+
+    const { data } = await this.client.rest.search.issuesAndPullRequests(params);
+
+    return {
+      totalCount: data.total_count,
+      incompleteResults: data.incomplete_results,
+      items: data.items.map((item) => ({
         id: item.id,
         number: item.number,
         title: item.title,
@@ -420,158 +477,100 @@ export async function searchIssues(input: SearchIssuesInput): Promise<SearchResu
           fullName: item.repository_url.replace('https://api.github.com/repos/', ''),
           htmlUrl: item.repository_url.replace('api.github.com/repos', 'github.com'),
         },
-        isPullRequest: !!item.pull_request,
+        isPullRequest: true,
         isLocked: item.locked,
+        isDraft: item.draft ?? false,
       })),
-  };
-}
-
-/**
- * Search for pull requests on GitHub
- */
-export async function searchPrs(input: SearchPrsInput): Promise<SearchResult<SearchPullRequest>> {
-  const client = await createGitHubClient();
-  const query = buildPrQuery(input);
-
-  // Build params without undefined values to satisfy exactOptionalPropertyTypes
-  const params: {
-    q: string;
-    sort?: 'comments' | 'created' | 'updated' | 'reactions';
-    order?: 'asc' | 'desc';
-    per_page: number;
-  } = {
-    q: query,
-    per_page: input.perPage ?? 30,
-  };
-  // Only set sort if it's a valid value for this API
-  const validSorts = ['comments', 'created', 'updated', 'reactions'] as const;
-  if (input.sort && validSorts.includes(input.sort as (typeof validSorts)[number])) {
-    params.sort = input.sort as (typeof validSorts)[number];
+    };
   }
-  if (input.order) params.order = input.order;
 
-  const { data } = await client.rest.search.issuesAndPullRequests(params);
+  /**
+   * Search for commits on GitHub
+   */
+  async searchCommits(input: SearchCommitsInput): Promise<SearchResult<SearchCommit>> {
+    const query = buildCommitQuery(input);
 
-  return {
-    totalCount: data.total_count,
-    incompleteResults: data.incomplete_results,
-    items: data.items.map((item) => ({
-      id: item.id,
-      number: item.number,
-      title: item.title,
-      body: item.body ?? null,
-      state: item.state as 'open' | 'closed',
-      user: toSearchUser(item.user),
-      assignees: (item.assignees ?? [])
-        .map((a) => toSearchUser(a))
-        .filter((a): a is SearchUser => a !== null),
-      labels: item.labels.map((l) => transformLabel(l)),
-      commentsCount: item.comments,
-      createdAt: item.created_at,
-      updatedAt: item.updated_at,
-      closedAt: item.closed_at,
-      htmlUrl: item.html_url,
-      repository: {
-        fullName: item.repository_url.replace('https://api.github.com/repos/', ''),
-        htmlUrl: item.repository_url.replace('api.github.com/repos', 'github.com'),
-      },
-      isPullRequest: true,
-      isLocked: item.locked,
-      isDraft: item.draft ?? false,
-    })),
-  };
-}
+    // Build params without undefined values to satisfy exactOptionalPropertyTypes
+    const params: {
+      q: string;
+      sort?: 'author-date' | 'committer-date';
+      order?: 'asc' | 'desc';
+      per_page: number;
+    } = {
+      q: query,
+      per_page: input.perPage ?? 30,
+    };
+    if (input.sort) params.sort = input.sort;
+    if (input.order) params.order = input.order;
 
-/**
- * Search for commits on GitHub
- */
-export async function searchCommits(
-  input: SearchCommitsInput
-): Promise<SearchResult<SearchCommit>> {
-  const client = await createGitHubClient();
-  const query = buildCommitQuery(input);
+    const { data } = await this.client.rest.search.commits(params);
 
-  // Build params without undefined values to satisfy exactOptionalPropertyTypes
-  const params: {
-    q: string;
-    sort?: 'author-date' | 'committer-date';
-    order?: 'asc' | 'desc';
-    per_page: number;
-  } = {
-    q: query,
-    per_page: input.perPage ?? 30,
-  };
-  if (input.sort) params.sort = input.sort;
-  if (input.order) params.order = input.order;
-
-  const { data } = await client.rest.search.commits(params);
-
-  return {
-    totalCount: data.total_count,
-    incompleteResults: data.incomplete_results,
-    items: data.items.map((item) => ({
-      sha: item.sha,
-      htmlUrl: item.html_url,
-      message: item.commit.message,
-      author: {
-        name: item.commit.author.name,
-        email: item.commit.author.email,
-        date: item.commit.author.date,
-      },
-      committer: item.commit.committer
-        ? {
-            name: item.commit.committer.name ?? '',
-            email: item.commit.committer.email ?? '',
-            date: item.commit.committer.date ?? '',
-          }
-        : null,
-      repository: {
-        fullName: item.repository.full_name,
-        htmlUrl: item.repository.html_url,
-      },
-      parents: item.parents.map((p) => ({ sha: p.sha ?? '' })),
-    })),
-  };
-}
-
-/**
- * Search for code on GitHub
- */
-export async function searchCode(input: SearchCodeInput): Promise<SearchResult<SearchCodeResult>> {
-  const client = await createGitHubClient();
-  const query = buildCodeQuery(input);
-
-  const { data } = await client.rest.search.code({
-    q: query,
-    per_page: input.perPage ?? 30,
-  });
-
-  return {
-    totalCount: data.total_count,
-    incompleteResults: data.incomplete_results,
-    items: data.items.map((item) => {
-      // text_matches is optional in the API response
-      const textMatches = item.text_matches
-        ? item.text_matches.map((tm) => ({
-            fragment: tm.fragment ?? '',
-            matches: (tm.matches ?? []).map((m) => ({
-              text: m.text ?? '',
-              indices: m.indices ?? [],
-            })),
-          }))
-        : undefined;
-
-      return {
-        name: item.name,
-        path: item.path,
+    return {
+      totalCount: data.total_count,
+      incompleteResults: data.incomplete_results,
+      items: data.items.map((item) => ({
         sha: item.sha,
         htmlUrl: item.html_url,
+        message: item.commit.message,
+        author: {
+          name: item.commit.author.name,
+          email: item.commit.author.email,
+          date: item.commit.author.date,
+        },
+        committer: item.commit.committer
+          ? {
+              name: item.commit.committer.name ?? '',
+              email: item.commit.committer.email ?? '',
+              date: item.commit.committer.date ?? '',
+            }
+          : null,
         repository: {
           fullName: item.repository.full_name,
           htmlUrl: item.repository.html_url,
         },
-        textMatches,
-      };
-    }),
-  };
+        parents: item.parents.map((p) => ({ sha: p.sha ?? '' })),
+      })),
+    };
+  }
+
+  /**
+   * Search for code on GitHub
+   */
+  async searchCode(input: SearchCodeInput): Promise<SearchResult<SearchCodeResult>> {
+    const query = buildCodeQuery(input);
+
+    const { data } = await this.client.rest.search.code({
+      q: query,
+      per_page: input.perPage ?? 30,
+    });
+
+    return {
+      totalCount: data.total_count,
+      incompleteResults: data.incomplete_results,
+      items: data.items.map((item) => {
+        // text_matches is optional in the API response
+        const textMatches = item.text_matches
+          ? item.text_matches.map((tm) => ({
+              fragment: tm.fragment ?? '',
+              matches: (tm.matches ?? []).map((m) => ({
+                text: m.text ?? '',
+                indices: m.indices ?? [],
+              })),
+            }))
+          : undefined;
+
+        return {
+          name: item.name,
+          path: item.path,
+          sha: item.sha,
+          htmlUrl: item.html_url,
+          repository: {
+            fullName: item.repository.full_name,
+            htmlUrl: item.repository.html_url,
+          },
+          textMatches,
+        };
+      }),
+    };
+  }
 }

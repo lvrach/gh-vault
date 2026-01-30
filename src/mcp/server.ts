@@ -8,6 +8,13 @@ import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { registerPrTools } from '../domains/pr/mcp/tools.js';
 import { registerRunTools } from '../domains/run/mcp/tools.js';
 import { registerSearchTools } from '../domains/search/mcp/tools.js';
+import { createGitHubClient } from '../shared/github.js';
+
+/**
+ * Shared client factory for all domains - creates authenticated Octokit on demand.
+ * Defined at module level to satisfy unicorn/consistent-function-scoping.
+ */
+const getClient = (): ReturnType<typeof createGitHubClient> => createGitHubClient();
 
 /**
  * Create a new MCP server with all tools registered.
@@ -19,9 +26,9 @@ export function createMcpServer(): McpServer {
     version: '0.1.0',
   });
 
-  registerPrTools(server);
-  registerRunTools(server);
-  registerSearchTools(server);
+  registerPrTools(server, getClient);
+  registerRunTools(server, getClient);
+  registerSearchTools(server, getClient);
 
   return server;
 }

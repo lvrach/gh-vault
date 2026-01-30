@@ -10,7 +10,7 @@ import {
   getDefaultBranch,
   resolveRepository,
 } from '../../../shared/repo.js';
-import { createPr, getCurrentUser } from '../api.js';
+import type { PrApi } from '../api.js';
 
 interface CreateOptions {
   title?: string | undefined;
@@ -42,7 +42,7 @@ function collect(value: string, previous: string[]): string[] {
   return [...previous, value];
 }
 
-export function createCreateCommand(output: Output): Command {
+export function createCreateCommand(output: Output, prApi: PrApi): Command {
   return new Command('create')
     .description('Create a pull request')
     .option('-t, --title <title>', 'Title for the pull request')
@@ -118,11 +118,11 @@ export function createCreateCommand(output: Output): Command {
 
         let assignees = options.assignee;
         if (assignees?.includes('@me')) {
-          const currentUser = await getCurrentUser();
+          const currentUser = await prApi.getCurrentUser();
           assignees = assignees.map((a) => (a === '@me' ? currentUser : a));
         }
 
-        const pr = await createPr({
+        const pr = await prApi.createPr({
           owner,
           repo,
           title,

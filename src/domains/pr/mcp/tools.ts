@@ -6,7 +6,9 @@
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
 
+import type { Octokit } from '../../../shared/github.js';
 import { detectRepo, getCurrentBranch } from '../../../shared/repo.js';
+import { PrApi } from '../api.js';
 
 /** Return type for MCP tool handler callbacks */
 interface ToolResult {
@@ -14,24 +16,6 @@ interface ToolResult {
   content: { type: 'text'; text: string }[];
   isError?: boolean;
 }
-import {
-  createPrComment,
-  createPrReview,
-  deleteBranch,
-  editPr,
-  getCurrentUser,
-  getPr,
-  getPrStatus,
-  listPrChecks,
-  listPrComments,
-  listPrFiles,
-  listPrReviewComments,
-  listPrReviews,
-  listPrs,
-  mergePr,
-  updatePrDraft,
-  updatePrState,
-} from '../api.js';
 import {
   formatCreatedCommentMarkdown,
   formatCreatedReviewMarkdown,
@@ -237,8 +221,10 @@ Action Required:
 
 /**
  * Register all pull request tools with the MCP server.
+ * @param server The MCP server instance
+ * @param getClient Function that returns a Promise resolving to an authenticated Octokit client
  */
-export function registerPrTools(server: McpServer): void {
+export function registerPrTools(server: McpServer, getClient: () => Promise<Octokit>): void {
   server.registerTool(
     'get_pull_request',
     {
@@ -248,7 +234,9 @@ export function registerPrTools(server: McpServer): void {
     },
     async (input): Promise<ToolResult> => {
       try {
-        const pr = await getPr({
+        const client = await getClient();
+        const prApi = new PrApi(client);
+        const pr = await prApi.getPr({
           owner: input.owner,
           repo: input.repo,
           pullNumber: input.pull_number,
@@ -272,7 +260,9 @@ export function registerPrTools(server: McpServer): void {
     },
     async (input): Promise<ToolResult> => {
       try {
-        const prs = await listPrs({
+        const client = await getClient();
+        const prApi = new PrApi(client);
+        const prs = await prApi.listPrs({
           owner: input.owner,
           repo: input.repo,
           state: input.state,
@@ -297,7 +287,9 @@ export function registerPrTools(server: McpServer): void {
     },
     async (input): Promise<ToolResult> => {
       try {
-        const comments = await listPrComments({
+        const client = await getClient();
+        const prApi = new PrApi(client);
+        const comments = await prApi.listPrComments({
           owner: input.owner,
           repo: input.repo,
           issueNumber: input.issue_number,
@@ -321,7 +313,9 @@ export function registerPrTools(server: McpServer): void {
     },
     async (input): Promise<ToolResult> => {
       try {
-        const comments = await listPrReviewComments({
+        const client = await getClient();
+        const prApi = new PrApi(client);
+        const comments = await prApi.listPrReviewComments({
           owner: input.owner,
           repo: input.repo,
           pullNumber: input.pull_number,
@@ -346,7 +340,9 @@ export function registerPrTools(server: McpServer): void {
     },
     async (input): Promise<ToolResult> => {
       try {
-        const reviews = await listPrReviews({
+        const client = await getClient();
+        const prApi = new PrApi(client);
+        const reviews = await prApi.listPrReviews({
           owner: input.owner,
           repo: input.repo,
           pullNumber: input.pull_number,
@@ -370,7 +366,9 @@ export function registerPrTools(server: McpServer): void {
     },
     async (input): Promise<ToolResult> => {
       try {
-        const comment = await createPrComment({
+        const client = await getClient();
+        const prApi = new PrApi(client);
+        const comment = await prApi.createPrComment({
           owner: input.owner,
           repo: input.repo,
           issueNumber: input.issue_number,
@@ -394,7 +392,9 @@ export function registerPrTools(server: McpServer): void {
     },
     async (input): Promise<ToolResult> => {
       try {
-        const review = await createPrReview({
+        const client = await getClient();
+        const prApi = new PrApi(client);
+        const review = await prApi.createPrReview({
           owner: input.owner,
           repo: input.repo,
           pullNumber: input.pull_number,
@@ -421,7 +421,9 @@ export function registerPrTools(server: McpServer): void {
     },
     async (input): Promise<ToolResult> => {
       try {
-        const files = await listPrFiles({
+        const client = await getClient();
+        const prApi = new PrApi(client);
+        const files = await prApi.listPrFiles({
           owner: input.owner,
           repo: input.repo,
           pullNumber: input.pull_number,
@@ -525,7 +527,9 @@ You can now use these values with other PR tools:
     },
     async (input): Promise<ToolResult> => {
       try {
-        const result = await editPr({
+        const client = await getClient();
+        const prApi = new PrApi(client);
+        const result = await prApi.editPr({
           owner: input.owner,
           repo: input.repo,
           pullNumber: input.pull_number,
@@ -560,14 +564,17 @@ You can now use these values with other PR tools:
     },
     async (input): Promise<ToolResult> => {
       try {
+        const client = await getClient();
+        const prApi = new PrApi(client);
+
         // Get PR info first for the response
-        const pr = await getPr({
+        const pr = await prApi.getPr({
           owner: input.owner,
           repo: input.repo,
           pullNumber: input.pull_number,
         });
 
-        const result = await mergePr({
+        const result = await prApi.mergePr({
           owner: input.owner,
           repo: input.repo,
           pullNumber: input.pull_number,
@@ -581,7 +588,7 @@ You can now use these values with other PR tools:
         let deletedBranch: string | undefined;
         if (input.delete_branch) {
           try {
-            await deleteBranch({ owner: input.owner, repo: input.repo, branch: pr.head.ref });
+            await prApi.deleteBranch({ owner: input.owner, repo: input.repo, branch: pr.head.ref });
             deletedBranch = pr.head.ref;
           } catch {
             // Expected: branch may already be deleted, be protected, or user lacks permission
@@ -618,9 +625,12 @@ You can now use these values with other PR tools:
     },
     async (input): Promise<ToolResult> => {
       try {
+        const client = await getClient();
+        const prApi = new PrApi(client);
+
         // Add comment if provided
         if (input.comment) {
-          await createPrComment({
+          await prApi.createPrComment({
             owner: input.owner,
             repo: input.repo,
             issueNumber: input.pull_number,
@@ -628,7 +638,7 @@ You can now use these values with other PR tools:
           });
         }
 
-        const pr = await updatePrState({
+        const pr = await prApi.updatePrState({
           owner: input.owner,
           repo: input.repo,
           pullNumber: input.pull_number,
@@ -638,7 +648,7 @@ You can now use these values with other PR tools:
         // Delete branch if requested
         if (input.delete_branch) {
           try {
-            await deleteBranch({ owner: input.owner, repo: input.repo, branch: pr.head.ref });
+            await prApi.deleteBranch({ owner: input.owner, repo: input.repo, branch: pr.head.ref });
           } catch {
             // Expected: branch may already be deleted, be protected, or user lacks permission
           }
@@ -662,9 +672,12 @@ You can now use these values with other PR tools:
     },
     async (input): Promise<ToolResult> => {
       try {
+        const client = await getClient();
+        const prApi = new PrApi(client);
+
         // Add comment if provided
         if (input.comment) {
-          await createPrComment({
+          await prApi.createPrComment({
             owner: input.owner,
             repo: input.repo,
             issueNumber: input.pull_number,
@@ -672,7 +685,7 @@ You can now use these values with other PR tools:
           });
         }
 
-        const pr = await updatePrState({
+        const pr = await prApi.updatePrState({
           owner: input.owner,
           repo: input.repo,
           pullNumber: input.pull_number,
@@ -697,7 +710,9 @@ You can now use these values with other PR tools:
     },
     async (input): Promise<ToolResult> => {
       try {
-        const pr = await updatePrDraft({
+        const client = await getClient();
+        const prApi = new PrApi(client);
+        const pr = await prApi.updatePrDraft({
           owner: input.owner,
           repo: input.repo,
           pullNumber: input.pull_number,
@@ -724,7 +739,9 @@ You can now use these values with other PR tools:
     },
     async (input): Promise<ToolResult> => {
       try {
-        const checks = await listPrChecks({
+        const client = await getClient();
+        const prApi = new PrApi(client);
+        const checks = await prApi.listPrChecks({
           owner: input.owner,
           repo: input.repo,
           pullNumber: input.pull_number,
@@ -749,10 +766,12 @@ You can now use these values with other PR tools:
     },
     async (input): Promise<ToolResult> => {
       try {
-        const username = await getCurrentUser();
+        const client = await getClient();
+        const prApi = new PrApi(client);
+        const username = await prApi.getCurrentUser();
         const currentBranch = (await getCurrentBranch()) ?? undefined;
 
-        const status = await getPrStatus({
+        const status = await prApi.getPrStatus({
           owner: input.owner,
           repo: input.repo,
           username,

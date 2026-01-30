@@ -4,7 +4,7 @@ import { Command } from 'commander';
 
 import type { Output } from '../../../shared/output.js';
 import { resolvePrNumber, resolveRepository } from '../../../shared/repo.js';
-import { editPr, getCurrentUser, listPrs } from '../api.js';
+import type { PrApi } from '../api.js';
 import { formatEditResultText } from '../formatters/text.js';
 
 interface EditOptions {
@@ -23,7 +23,7 @@ interface EditOptions {
   repo?: string | undefined;
 }
 
-export function createEditCommand(output: Output): Command {
+export function createEditCommand(output: Output, prApi: PrApi): Command {
   return new Command('edit')
     .description('Edit a pull request')
     .argument('[pr]', 'PR number, URL, or branch name')
@@ -57,7 +57,7 @@ export function createEditCommand(output: Output): Command {
         const { owner, repo } = repoResult;
 
         // Resolve PR number
-        const prResult = await resolvePrNumber(prArg, owner, repo, listPrs);
+        const prResult = await resolvePrNumber(prArg, owner, repo, prApi.listPrs.bind(prApi));
         if (!prResult.success) {
           output.printError(`Error: ${prResult.error}`);
           process.exitCode = 1;
@@ -78,7 +78,7 @@ export function createEditCommand(output: Output): Command {
         // Resolve @me to actual username for assignees
         let addAssignees = options.addAssignee;
         if (addAssignees?.includes('@me')) {
-          const currentUser = await getCurrentUser();
+          const currentUser = await prApi.getCurrentUser();
           addAssignees = addAssignees.map((a) => (a === '@me' ? currentUser : a));
         }
 
@@ -103,7 +103,7 @@ export function createEditCommand(output: Output): Command {
         }
 
         // Edit the PR
-        const result = await editPr({
+        const result = await prApi.editPr({
           owner,
           repo,
           pullNumber,

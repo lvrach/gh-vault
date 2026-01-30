@@ -4,7 +4,7 @@ import open from 'open';
 import { filterWithJq, JqError } from '../../../shared/jq.js';
 import type { Output } from '../../../shared/output.js';
 import { resolveRepository } from '../../../shared/repo.js';
-import { getJob, getJobLogs, getRunWithJobs } from '../api.js';
+import type { RunApi } from '../api.js';
 import {
   formatJobViewJson,
   formatRunViewJson,
@@ -26,7 +26,7 @@ interface ViewOptions {
   repo?: string | undefined;
 }
 
-export function createViewCommand(output: Output): Command {
+export function createViewCommand(output: Output, runApi: RunApi): Command {
   return new Command('view')
     .description('View a workflow run')
     .argument('[run-id]', 'ID of the workflow run')
@@ -73,7 +73,7 @@ export function createViewCommand(output: Output): Command {
             return;
           }
 
-          const job = await getJob({ owner, repo, jobId });
+          const job = await runApi.getJob({ owner, repo, jobId });
 
           if (options.web) {
             await open(job.htmlUrl);
@@ -82,7 +82,7 @@ export function createViewCommand(output: Output): Command {
 
           // View job logs
           if (options.log || options.logFailed) {
-            const logs = await getJobLogs({ owner, repo, jobId });
+            const logs = await runApi.getJobLogs({ owner, repo, jobId });
 
             if (options.logFailed) {
               // Filter to show only failed step logs
@@ -146,7 +146,7 @@ export function createViewCommand(output: Output): Command {
 
         // View run
         const attempt = options.attempt ? Number.parseInt(options.attempt, 10) : undefined;
-        const run = await getRunWithJobs({
+        const run = await runApi.getRunWithJobs({
           owner,
           repo,
           runId,
@@ -174,7 +174,7 @@ export function createViewCommand(output: Output): Command {
 
             output.print(`\n=== Job: ${job.name} ===\n`);
             try {
-              const logs = await getJobLogs({ owner, repo, jobId: job.id });
+              const logs = await runApi.getJobLogs({ owner, repo, jobId: job.id });
               output.print(logs);
             } catch {
               output.print('(Unable to retrieve logs for this job)');

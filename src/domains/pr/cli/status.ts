@@ -3,7 +3,7 @@ import { Command } from 'commander';
 import { filterWithJq, JqError } from '../../../shared/jq.js';
 import type { Output } from '../../../shared/output.js';
 import { getCurrentBranch, resolveRepository } from '../../../shared/repo.js';
-import { getCurrentUser, getPrStatus } from '../api.js';
+import type { PrApi } from '../api.js';
 import { formatPrStatusText } from '../formatters/text.js';
 
 interface StatusOptions {
@@ -13,7 +13,7 @@ interface StatusOptions {
   repo?: string | undefined;
 }
 
-export function createStatusCommand(output: Output): Command {
+export function createStatusCommand(output: Output, prApi: PrApi): Command {
   return new Command('status')
     .description('Show status of relevant pull requests')
     .option('-c, --conflict-status', 'Display merge conflict status (slower)')
@@ -29,10 +29,10 @@ export function createStatusCommand(output: Output): Command {
           return;
         }
         const { owner, repo } = repoResult;
-        const username = await getCurrentUser();
+        const username = await prApi.getCurrentUser();
         const currentBranch = (await getCurrentBranch()) ?? undefined;
 
-        const status = await getPrStatus({
+        const status = await prApi.getPrStatus({
           owner,
           repo,
           username,

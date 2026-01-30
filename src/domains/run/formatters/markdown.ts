@@ -62,7 +62,16 @@ function getStatusEmoji(status: RunStatus, conclusion: RunConclusion): string {
     case 'timed_out': {
       return '⏱️';
     }
-    default: {
+    case 'neutral': {
+      return '⚪';
+    }
+    case 'stale': {
+      return '🕒';
+    }
+    case 'startup_failure': {
+      return '💥';
+    }
+    case null: {
       return '❓';
     }
   }

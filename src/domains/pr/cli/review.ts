@@ -4,7 +4,7 @@ import { Command } from 'commander';
 
 import type { Output } from '../../../shared/output.js';
 import { resolvePrNumber, resolveRepository } from '../../../shared/repo.js';
-import { createPrReview, listPrs } from '../api.js';
+import type { PrApi } from '../api.js';
 import { formatReviewSubmittedText } from '../formatters/text.js';
 import type { ReviewEvent } from '../types.js';
 
@@ -17,7 +17,7 @@ interface ReviewOptions {
   repo?: string | undefined;
 }
 
-export function createReviewCommand(output: Output): Command {
+export function createReviewCommand(output: Output, prApi: PrApi): Command {
   return new Command('review')
     .description('Add a review to a pull request')
     .argument('[pr]', 'PR number, URL, or branch name')
@@ -65,7 +65,7 @@ export function createReviewCommand(output: Output): Command {
           body = '';
         }
 
-        const prResult = await resolvePrNumber(prArg, owner, repo, listPrs);
+        const prResult = await resolvePrNumber(prArg, owner, repo, prApi.listPrs.bind(prApi));
         if (!prResult.success) {
           output.printError(`Error: ${prResult.error}`);
           process.exitCode = 1;
@@ -73,7 +73,7 @@ export function createReviewCommand(output: Output): Command {
         }
         const pullNumber = prResult.pullNumber;
 
-        const review = await createPrReview({
+        const review = await prApi.createPrReview({
           owner,
           repo,
           pullNumber,

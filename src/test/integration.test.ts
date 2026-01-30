@@ -1,17 +1,8 @@
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { StdioClientTransport } from '@modelcontextprotocol/sdk/client/stdio.js';
-import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 
-import {
-  createPrComment,
-  createPrReview,
-  getPr,
-  listPrComments,
-  listPrFiles,
-  listPrReviewComments,
-  listPrReviews,
-  listPrs,
-} from '../domains/pr/api.js';
+import { PrApi } from '../domains/pr/api.js';
 import {
   formatCreatedCommentMarkdown,
   formatCreatedReviewMarkdown,
@@ -22,7 +13,9 @@ import {
   formatPrReviewsMarkdown,
   formatPrViewMarkdown,
 } from '../domains/pr/formatters/markdown.js';
-import { mockServer } from './mocks/server.js';
+import { createGitHubClient } from '../shared/github.js';
+
+// MSW server is started in src/test/setup.ts (shared across all tests)
 
 // Test the MCP server protocol (tool listing, connection)
 describe('gh-vault MCP Protocol Tests', () => {
@@ -131,23 +124,19 @@ describe('gh-vault MCP Protocol Tests', () => {
 });
 
 // Test the core API functions with MSW mocks
+// MSW server is started in src/test/setup.ts (shared across all tests)
 describe('gh-vault GitHub API Integration Tests', () => {
-  beforeAll(() => {
-    // Start MSW mock server - will intercept all HTTP requests in this process
-    mockServer.listen({ onUnhandledRequest: 'error' });
-  });
+  let prApi: PrApi;
 
-  afterAll(() => {
-    mockServer.close();
-  });
-
-  afterEach(() => {
-    mockServer.resetHandlers();
+  beforeAll(async () => {
+    // Create GitHub client and API instance for tests
+    const client = await createGitHubClient();
+    prApi = new PrApi(client);
   });
 
   describe('getPr', () => {
     it('should return PR details in markdown format', async () => {
-      const pr = await getPr({
+      const pr = await prApi.getPr({
         owner: 'octocat',
         repo: 'Hello-World',
         pullNumber: 1347,
@@ -167,7 +156,7 @@ describe('gh-vault GitHub API Integration Tests', () => {
 
     it('should throw error for non-existent PR', async () => {
       await expect(
-        getPr({
+        prApi.getPr({
           owner: 'octocat',
           repo: 'Hello-World',
           pullNumber: 404,
@@ -176,7 +165,7 @@ describe('gh-vault GitHub API Integration Tests', () => {
     });
 
     it('should show merge status correctly', async () => {
-      const pr = await getPr({
+      const pr = await prApi.getPr({
         owner: 'octocat',
         repo: 'Hello-World',
         pullNumber: 123,
@@ -188,7 +177,7 @@ describe('gh-vault GitHub API Integration Tests', () => {
     });
 
     it('should show labels when present', async () => {
-      const pr = await getPr({
+      const pr = await prApi.getPr({
         owner: 'octocat',
         repo: 'Hello-World',
         pullNumber: 1,
@@ -202,7 +191,7 @@ describe('gh-vault GitHub API Integration Tests', () => {
 
   describe('listPrs', () => {
     it('should return list of open PRs by default', async () => {
-      const prs = await listPrs({
+      const prs = await prApi.listPrs({
         owner: 'octocat',
         repo: 'Hello-World',
         state: 'open',
@@ -218,7 +207,7 @@ describe('gh-vault GitHub API Integration Tests', () => {
     });
 
     it('should filter by state when specified', async () => {
-      const prs = await listPrs({
+      const prs = await prApi.listPrs({
         owner: 'octocat',
         repo: 'Hello-World',
         state: 'all',
@@ -230,7 +219,7 @@ describe('gh-vault GitHub API Integration Tests', () => {
     });
 
     it('should respect perPage parameter', async () => {
-      const prs = await listPrs({
+      const prs = await prApi.listPrs({
         owner: 'octocat',
         repo: 'Hello-World',
         state: 'open',
@@ -242,7 +231,7 @@ describe('gh-vault GitHub API Integration Tests', () => {
     });
 
     it('should include view links for each PR', async () => {
-      const prs = await listPrs({
+      const prs = await prApi.listPrs({
         owner: 'octocat',
         repo: 'Hello-World',
         state: 'open',
@@ -256,7 +245,7 @@ describe('gh-vault GitHub API Integration Tests', () => {
 
   describe('listPrFiles', () => {
     it('should return files changed with status', async () => {
-      const files = await listPrFiles({
+      const files = await prApi.listPrFiles({
         owner: 'octocat',
         repo: 'Hello-World',
         pullNumber: 1347,
@@ -273,7 +262,7 @@ describe('gh-vault GitHub API Integration Tests', () => {
     });
 
     it('should show additions and deletions', async () => {
-      const files = await listPrFiles({
+      const files = await prApi.listPrFiles({
         owner: 'octocat',
         repo: 'Hello-World',
         pullNumber: 1347,
@@ -287,7 +276,7 @@ describe('gh-vault GitHub API Integration Tests', () => {
 
     it('should throw error for non-existent PR', async () => {
       await expect(
-        listPrFiles({
+        prApi.listPrFiles({
           owner: 'octocat',
           repo: 'Hello-World',
           pullNumber: 404,
@@ -299,7 +288,7 @@ describe('gh-vault GitHub API Integration Tests', () => {
 
   describe('listPrComments', () => {
     it('should return issue comments on PR', async () => {
-      const comments = await listPrComments({
+      const comments = await prApi.listPrComments({
         owner: 'octocat',
         repo: 'Hello-World',
         issueNumber: 1347,
@@ -314,7 +303,7 @@ describe('gh-vault GitHub API Integration Tests', () => {
 
     it('should throw error for non-existent PR', async () => {
       await expect(
-        listPrComments({
+        prApi.listPrComments({
           owner: 'octocat',
           repo: 'Hello-World',
           issueNumber: 404,
@@ -326,7 +315,7 @@ describe('gh-vault GitHub API Integration Tests', () => {
 
   describe('listPrReviewComments', () => {
     it('should return inline review comments', async () => {
-      const comments = await listPrReviewComments({
+      const comments = await prApi.listPrReviewComments({
         owner: 'octocat',
         repo: 'Hello-World',
         pullNumber: 1347,
@@ -341,7 +330,7 @@ describe('gh-vault GitHub API Integration Tests', () => {
     });
 
     it('should show diff hunks', async () => {
-      const comments = await listPrReviewComments({
+      const comments = await prApi.listPrReviewComments({
         owner: 'octocat',
         repo: 'Hello-World',
         pullNumber: 1347,
@@ -354,7 +343,7 @@ describe('gh-vault GitHub API Integration Tests', () => {
 
     it('should throw error for non-existent PR', async () => {
       await expect(
-        listPrReviewComments({
+        prApi.listPrReviewComments({
           owner: 'octocat',
           repo: 'Hello-World',
           pullNumber: 404,
@@ -366,7 +355,7 @@ describe('gh-vault GitHub API Integration Tests', () => {
 
   describe('listPrReviews', () => {
     it('should return reviews with different states', async () => {
-      const reviews = await listPrReviews({
+      const reviews = await prApi.listPrReviews({
         owner: 'octocat',
         repo: 'Hello-World',
         pullNumber: 1347,
@@ -382,7 +371,7 @@ describe('gh-vault GitHub API Integration Tests', () => {
     });
 
     it('should show review bodies', async () => {
-      const reviews = await listPrReviews({
+      const reviews = await prApi.listPrReviews({
         owner: 'octocat',
         repo: 'Hello-World',
         pullNumber: 1347,
@@ -395,7 +384,7 @@ describe('gh-vault GitHub API Integration Tests', () => {
 
     it('should throw error for non-existent PR', async () => {
       await expect(
-        listPrReviews({
+        prApi.listPrReviews({
           owner: 'octocat',
           repo: 'Hello-World',
           pullNumber: 404,
@@ -407,7 +396,7 @@ describe('gh-vault GitHub API Integration Tests', () => {
 
   describe('createPrComment', () => {
     it('should create a comment and return confirmation', async () => {
-      const comment = await createPrComment({
+      const comment = await prApi.createPrComment({
         owner: 'octocat',
         repo: 'Hello-World',
         issueNumber: 1347,
@@ -423,7 +412,7 @@ describe('gh-vault GitHub API Integration Tests', () => {
 
     it('should throw error for non-existent PR', async () => {
       await expect(
-        createPrComment({
+        prApi.createPrComment({
           owner: 'octocat',
           repo: 'Hello-World',
           issueNumber: 404,
@@ -435,7 +424,7 @@ describe('gh-vault GitHub API Integration Tests', () => {
 
   describe('createPrReview', () => {
     it('should create an APPROVE review', async () => {
-      const review = await createPrReview({
+      const review = await prApi.createPrReview({
         owner: 'octocat',
         repo: 'Hello-World',
         pullNumber: 1347,
@@ -451,7 +440,7 @@ describe('gh-vault GitHub API Integration Tests', () => {
     });
 
     it('should create a REQUEST_CHANGES review', async () => {
-      const review = await createPrReview({
+      const review = await prApi.createPrReview({
         owner: 'octocat',
         repo: 'Hello-World',
         pullNumber: 1347,
@@ -466,7 +455,7 @@ describe('gh-vault GitHub API Integration Tests', () => {
     });
 
     it('should create a COMMENT review', async () => {
-      const review = await createPrReview({
+      const review = await prApi.createPrReview({
         owner: 'octocat',
         repo: 'Hello-World',
         pullNumber: 1347,
@@ -481,7 +470,7 @@ describe('gh-vault GitHub API Integration Tests', () => {
 
     it('should throw error for non-existent PR', async () => {
       await expect(
-        createPrReview({
+        prApi.createPrReview({
           owner: 'octocat',
           repo: 'Hello-World',
           pullNumber: 404,
@@ -494,7 +483,7 @@ describe('gh-vault GitHub API Integration Tests', () => {
 
   describe('Edge Cases', () => {
     it('should handle PRs with labels', async () => {
-      const pr = await getPr({
+      const pr = await prApi.getPr({
         owner: 'octocat',
         repo: 'Hello-World',
         pullNumber: 1,
@@ -506,7 +495,7 @@ describe('gh-vault GitHub API Integration Tests', () => {
 
     it('should handle various PR numbers', async () => {
       for (const prNumber of [1, 2, 3]) {
-        const pr = await getPr({
+        const pr = await prApi.getPr({
           owner: 'octocat',
           repo: 'Hello-World',
           pullNumber: prNumber,

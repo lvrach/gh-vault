@@ -3,7 +3,7 @@ import open from 'open';
 
 import { filterWithJq, JqError } from '../../../shared/jq.js';
 import type { Output } from '../../../shared/output.js';
-import { searchCode } from '../api.js';
+import type { SearchApi } from '../api.js';
 import { codeToJson, formatCodeJson } from '../formatters/json.js';
 import { formatCodeText } from '../formatters/text.js';
 import type { SearchCodeInput } from '../types.js';
@@ -22,7 +22,7 @@ interface CodeOptions {
   web?: boolean;
 }
 
-export function createCodeCommand(output: Output): Command {
+export function createCodeCommand(output: Output, searchApi: SearchApi): Command {
   return new Command('code')
     .description('Search within code in GitHub repositories')
     .argument('<query...>', 'Search keywords (required)')
@@ -68,7 +68,7 @@ export function createCodeCommand(output: Output): Command {
           perPage: Number.parseInt(options.limit ?? '30', 10),
         };
 
-        const result = await searchCode(input);
+        const result = await searchApi.searchCode(input);
 
         // Handle --jq filtering
         if (options.jq) {

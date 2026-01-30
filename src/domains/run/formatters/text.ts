@@ -87,7 +87,16 @@ function getStatusIcon(status: RunStatus, conclusion: RunConclusion): string {
     case 'timed_out': {
       return '⏱';
     }
-    default: {
+    case 'neutral': {
+      return '○';
+    }
+    case 'stale': {
+      return '◐';
+    }
+    case 'startup_failure': {
+      return '✗';
+    }
+    case null: {
       return '●';
     }
   }
@@ -112,7 +121,10 @@ function getStatusColor(status: RunStatus, conclusion: RunConclusion, color: boo
     case 'cancelled': {
       return MAGENTA;
     }
-    default: {
+    case 'neutral':
+    case 'skipped':
+    case 'stale':
+    case null: {
       return DIM;
     }
   }

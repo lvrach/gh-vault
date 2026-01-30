@@ -2,7 +2,7 @@ import { Command } from 'commander';
 
 import type { Output } from '../../../shared/output.js';
 import { resolvePrNumber, resolveRepository } from '../../../shared/repo.js';
-import { createPrComment, deleteBranch, getPr, listPrs, updatePrState } from '../api.js';
+import type { PrApi } from '../api.js';
 import { formatPrStateChangeText } from '../formatters/text.js';
 
 interface CloseOptions {
@@ -11,7 +11,7 @@ interface CloseOptions {
   repo?: string | undefined;
 }
 
-export function createCloseCommand(output: Output): Command {
+export function createCloseCommand(output: Output, prApi: PrApi): Command {
   return new Command('close')
     .description('Close a pull request')
     .argument('[pr]', 'PR number, URL, or branch name')
@@ -28,18 +28,18 @@ export function createCloseCommand(output: Output): Command {
         }
         const { owner, repo } = repoResult;
 
-        const prResult = await resolvePrNumber(prArg, owner, repo, listPrs);
+        const prResult = await resolvePrNumber(prArg, owner, repo, prApi.listPrs.bind(prApi));
         if (!prResult.success) {
           output.printError(`Error: ${prResult.error}`);
           process.exitCode = 1;
           return;
         }
         const pullNumber = prResult.pullNumber;
-        const prData = await getPr({ owner, repo, pullNumber });
+        const prData = await prApi.getPr({ owner, repo, pullNumber });
         const prBranch = prData.head.ref;
 
         if (options.comment) {
-          await createPrComment({
+          await prApi.createPrComment({
             owner,
             repo,
             issueNumber: pullNumber,
@@ -47,7 +47,7 @@ export function createCloseCommand(output: Output): Command {
           });
         }
 
-        const pr = await updatePrState({
+        const pr = await prApi.updatePrState({
           owner,
           repo,
           pullNumber,
@@ -56,7 +56,7 @@ export function createCloseCommand(output: Output): Command {
 
         if (options.deleteBranch && prBranch) {
           try {
-            await deleteBranch({ owner, repo, branch: prBranch });
+            await prApi.deleteBranch({ owner, repo, branch: prBranch });
           } catch {
             // Expected: branch may already be deleted, be protected, or user lacks permission
           }

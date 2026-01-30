@@ -3,7 +3,7 @@ import open from 'open';
 
 import { filterWithJq, JqError } from '../../../shared/jq.js';
 import type { Output } from '../../../shared/output.js';
-import { searchPrs } from '../api.js';
+import type { SearchApi } from '../api.js';
 import { formatPrsJson, prToJson } from '../formatters/json.js';
 import { formatPrsText } from '../formatters/text.js';
 import type { SearchPrsInput } from '../types.js';
@@ -54,7 +54,7 @@ interface PrsOptions {
   web?: boolean;
 }
 
-export function createPrsCommand(output: Output): Command {
+export function createPrsCommand(output: Output, searchApi: SearchApi): Command {
   return new Command('prs')
     .description('Search for pull requests on GitHub')
     .argument('[query...]', 'Search keywords')
@@ -172,7 +172,7 @@ export function createPrsCommand(output: Output): Command {
           perPage: Number.parseInt(options.limit ?? '30', 10),
         };
 
-        const result = await searchPrs(input);
+        const result = await searchApi.searchPrs(input);
 
         // Handle --jq filtering
         if (options.jq) {

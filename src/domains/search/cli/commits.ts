@@ -3,7 +3,7 @@ import open from 'open';
 
 import { filterWithJq, JqError } from '../../../shared/jq.js';
 import type { Output } from '../../../shared/output.js';
-import { searchCommits } from '../api.js';
+import type { SearchApi } from '../api.js';
 import { commitToJson, formatCommitsJson } from '../formatters/json.js';
 import { formatCommitsText } from '../formatters/text.js';
 import type { SearchCommitsInput } from '../types.js';
@@ -32,7 +32,7 @@ interface CommitsOptions {
   web?: boolean;
 }
 
-export function createCommitsCommand(output: Output): Command {
+export function createCommitsCommand(output: Output, searchApi: SearchApi): Command {
   return new Command('commits')
     .description('Search for commits on GitHub')
     .argument('[query...]', 'Search keywords')
@@ -95,7 +95,7 @@ export function createCommitsCommand(output: Output): Command {
           perPage: Number.parseInt(options.limit ?? '30', 10),
         };
 
-        const result = await searchCommits(input);
+        const result = await searchApi.searchCommits(input);
 
         // Handle --jq filtering
         if (options.jq) {

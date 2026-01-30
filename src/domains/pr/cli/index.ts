@@ -1,6 +1,7 @@
 import { Command } from 'commander';
 
 import type { Output } from '../../../shared/output.js';
+import type { PrApi } from '../api.js';
 import { createCheckoutCommand } from './checkout.js';
 import { createChecksCommand } from './checks.js';
 import { createCloseCommand } from './close.js';
@@ -20,21 +21,21 @@ import { createViewCommand } from './view.js';
  * Creates and returns the PR command with all subcommands registered.
  * Follows the domain registration pattern for CLI commands.
  */
-export function createPrCommand(output: Output): Command {
+export function createPrCommand(output: Output, prApi: PrApi): Command {
   return new Command('pr')
     .description('Work with GitHub pull requests')
-    .addCommand(createCheckoutCommand(output))
-    .addCommand(createChecksCommand(output))
-    .addCommand(createCloseCommand(output))
-    .addCommand(createCommentCommand(output))
-    .addCommand(createCreateCommand(output))
-    .addCommand(createDiffCommand(output))
-    .addCommand(createEditCommand(output))
-    .addCommand(createListCommand(output))
-    .addCommand(createMergeCommand(output))
-    .addCommand(createReadyCommand(output))
-    .addCommand(createReopenCommand(output))
-    .addCommand(createReviewCommand(output))
-    .addCommand(createStatusCommand(output))
-    .addCommand(createViewCommand(output));
+    .addCommand(createCheckoutCommand(output, prApi))
+    .addCommand(createChecksCommand(output, prApi))
+    .addCommand(createCloseCommand(output, prApi))
+    .addCommand(createCommentCommand(output, prApi))
+    .addCommand(createCreateCommand(output, prApi))
+    .addCommand(createDiffCommand(output, prApi))
+    .addCommand(createEditCommand(output, prApi))
+    .addCommand(createListCommand(output, prApi))
+    .addCommand(createMergeCommand(output, prApi))
+    .addCommand(createReadyCommand(output, prApi))
+    .addCommand(createReopenCommand(output, prApi))
+    .addCommand(createReviewCommand(output, prApi))
+    .addCommand(createStatusCommand(output, prApi))
+    .addCommand(createViewCommand(output, prApi));
 }

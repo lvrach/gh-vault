@@ -3,7 +3,7 @@ import open from 'open';
 
 import type { Output } from '../../../shared/output.js';
 import { resolvePrNumber, resolveRepository } from '../../../shared/repo.js';
-import { listPrFiles, listPrs } from '../api.js';
+import type { PrApi } from '../api.js';
 import { formatPrFilesText } from '../formatters/text.js';
 
 interface DiffOptions {
@@ -14,7 +14,7 @@ interface DiffOptions {
   repo?: string | undefined;
 }
 
-export function createDiffCommand(output: Output): Command {
+export function createDiffCommand(output: Output, prApi: PrApi): Command {
   return new Command('diff')
     .description('View changes in a pull request')
     .argument('[pr]', 'PR number, URL, or branch name')
@@ -33,7 +33,7 @@ export function createDiffCommand(output: Output): Command {
         }
         const { owner, repo } = repoResult;
 
-        const prResult = await resolvePrNumber(prArg, owner, repo, listPrs);
+        const prResult = await resolvePrNumber(prArg, owner, repo, prApi.listPrs.bind(prApi));
         if (!prResult.success) {
           output.printError(`Error: ${prResult.error}`);
           process.exitCode = 1;
@@ -47,7 +47,7 @@ export function createDiffCommand(output: Output): Command {
           return;
         }
 
-        const files = await listPrFiles({ owner, repo, pullNumber });
+        const files = await prApi.listPrFiles({ owner, repo, pullNumber });
 
         let useColor: boolean;
         if (options.color === 'always') {

@@ -4,7 +4,7 @@ import open from 'open';
 import { filterWithJq, JqError } from '../../../shared/jq.js';
 import type { Output } from '../../../shared/output.js';
 import { resolveRepository } from '../../../shared/repo.js';
-import { listPrs } from '../api.js';
+import type { PrApi } from '../api.js';
 import { formatPrListJson, prListItemToJson } from '../formatters/json.js';
 import { formatPrListText } from '../formatters/text.js';
 
@@ -24,7 +24,7 @@ interface ListOptions {
   repo?: string | undefined;
 }
 
-export function createListCommand(output: Output): Command {
+export function createListCommand(output: Output, prApi: PrApi): Command {
   return new Command('list')
     .description('List pull requests in a repository')
     .option('-s, --state <state>', 'Filter by state: open, closed, all', 'open')
@@ -56,7 +56,7 @@ export function createListCommand(output: Output): Command {
           return;
         }
 
-        const prs = await listPrs({
+        const prs = await prApi.listPrs({
           owner,
           repo,
           state: options.state ?? 'open',

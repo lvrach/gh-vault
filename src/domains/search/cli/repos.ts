@@ -3,7 +3,7 @@ import open from 'open';
 
 import { filterWithJq, JqError } from '../../../shared/jq.js';
 import type { Output } from '../../../shared/output.js';
-import { searchRepos } from '../api.js';
+import type { SearchApi } from '../api.js';
 import { formatReposJson, repoToJson } from '../formatters/json.js';
 import { formatReposText } from '../formatters/text.js';
 import type { SearchReposInput } from '../types.js';
@@ -34,7 +34,7 @@ interface ReposOptions {
   web?: boolean;
 }
 
-export function createReposCommand(output: Output): Command {
+export function createReposCommand(output: Output, searchApi: SearchApi): Command {
   return new Command('repos')
     .description('Search for repositories on GitHub')
     .argument('[query...]', 'Search keywords')
@@ -104,7 +104,7 @@ export function createReposCommand(output: Output): Command {
           perPage: Number.parseInt(options.limit ?? '30', 10),
         };
 
-        const result = await searchRepos(input);
+        const result = await searchApi.searchRepos(input);
 
         // Handle --jq filtering
         if (options.jq) {

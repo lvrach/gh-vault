@@ -4,14 +4,7 @@ import { Command } from 'commander';
 
 import type { Output } from '../../../shared/output.js';
 import { resolvePrNumber, resolveRepository } from '../../../shared/repo.js';
-import {
-  deleteBranch,
-  disableAutoMerge,
-  enableAutoMerge,
-  getPr,
-  listPrs,
-  mergePr,
-} from '../api.js';
+import type { PrApi } from '../api.js';
 import { formatAutoMergeText, formatMergeResultText } from '../formatters/text.js';
 import type { MergeMethod } from '../types.js';
 
@@ -31,7 +24,7 @@ interface MergeOptions {
   repo?: string | undefined;
 }
 
-export function createMergeCommand(output: Output): Command {
+export function createMergeCommand(output: Output, prApi: PrApi): Command {
   return new Command('merge')
     .description('Merge a pull request')
     .argument('[pr]', 'PR number, URL, or branch name')
@@ -73,17 +66,17 @@ export function createMergeCommand(output: Output): Command {
           mergeMethod = 'rebase';
         }
 
-        const prResult = await resolvePrNumber(prArg, owner, repo, listPrs);
+        const prResult = await resolvePrNumber(prArg, owner, repo, prApi.listPrs.bind(prApi));
         if (!prResult.success) {
           output.printError(`Error: ${prResult.error}`);
           process.exitCode = 1;
           return;
         }
         const pullNumber = prResult.pullNumber;
-        const pr = await getPr({ owner, repo, pullNumber });
+        const pr = await prApi.getPr({ owner, repo, pullNumber });
 
         if (options.disableAuto) {
-          await disableAutoMerge({ owner, repo, pullNumber });
+          await prApi.disableAutoMerge({ owner, repo, pullNumber });
           const useColor = process.stdout.isTTY;
           output.print(formatAutoMergeText(false, pullNumber, mergeMethod, useColor));
           return;
@@ -99,7 +92,7 @@ export function createMergeCommand(output: Output): Command {
             commitMessage = options.body;
           }
 
-          await enableAutoMerge({
+          await prApi.enableAutoMerge({
             owner,
             repo,
             pullNumber,
@@ -130,7 +123,7 @@ export function createMergeCommand(output: Output): Command {
           );
         }
 
-        const result = await mergePr({
+        const result = await prApi.mergePr({
           owner,
           repo,
           pullNumber,
@@ -144,7 +137,7 @@ export function createMergeCommand(output: Output): Command {
         let deletedBranch: string | undefined;
         if (options.deleteBranch) {
           try {
-            await deleteBranch({ owner, repo, branch: pr.head.ref });
+            await prApi.deleteBranch({ owner, repo, branch: pr.head.ref });
             deletedBranch = pr.head.ref;
           } catch {
             // Expected: branch may already be deleted, be protected, or user lacks permission

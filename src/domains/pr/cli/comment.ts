@@ -6,14 +6,7 @@ import open from 'open';
 
 import type { Output } from '../../../shared/output.js';
 import { resolvePrNumber, resolveRepository } from '../../../shared/repo.js';
-import {
-  createPrComment,
-  deletePrComment,
-  getCurrentUser,
-  listPrComments,
-  listPrs,
-  updatePrComment,
-} from '../api.js';
+import type { PrApi } from '../api.js';
 import {
   formatCommentCreatedText,
   formatCommentDeletedText,
@@ -44,7 +37,7 @@ interface CommentOptions {
   repo?: string | undefined;
 }
 
-export function createCommentCommand(output: Output): Command {
+export function createCommentCommand(output: Output, prApi: PrApi): Command {
   return new Command('comment')
     .description('Add a comment to a pull request')
     .argument('[pr]', 'PR number, URL, or branch name')
@@ -65,7 +58,7 @@ export function createCommentCommand(output: Output): Command {
         }
         const { owner, repo } = repoResult;
 
-        const prResult = await resolvePrNumber(prArg, owner, repo, listPrs);
+        const prResult = await resolvePrNumber(prArg, owner, repo, prApi.listPrs.bind(prApi));
         if (!prResult.success) {
           output.printError(`Error: ${prResult.error}`);
           process.exitCode = 1;
@@ -82,8 +75,8 @@ export function createCommentCommand(output: Output): Command {
         const useColor = process.stdout.isTTY;
 
         if (options.editLast || options.deleteLast) {
-          const currentUser = await getCurrentUser();
-          const comments = await listPrComments({
+          const currentUser = await prApi.getCurrentUser();
+          const comments = await prApi.listPrComments({
             owner,
             repo,
             issueNumber: pullNumber,
@@ -114,7 +107,7 @@ export function createCommentCommand(output: Output): Command {
               }
             }
 
-            await deletePrComment({
+            await prApi.deletePrComment({
               owner,
               repo,
               commentId: lastComment.id,
@@ -140,7 +133,7 @@ export function createCommentCommand(output: Output): Command {
               return;
             }
 
-            const updatedComment = await updatePrComment({
+            const updatedComment = await prApi.updatePrComment({
               owner,
               repo,
               commentId: lastComment.id,
@@ -165,7 +158,7 @@ export function createCommentCommand(output: Output): Command {
           return;
         }
 
-        const comment = await createPrComment({
+        const comment = await prApi.createPrComment({
           owner,
           repo,
           issueNumber: pullNumber,

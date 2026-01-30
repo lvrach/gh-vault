@@ -48,14 +48,70 @@ export default defineConfig([
       '@typescript-eslint/explicit-function-return-type': 'error',
       '@typescript-eslint/no-explicit-any': 'error',
       '@typescript-eslint/explicit-module-boundary-types': 'error',
+      // Enforce `import type` for type-only imports
+      '@typescript-eslint/consistent-type-imports': [
+        'error',
+        { prefer: 'type-imports', fixStyle: 'inline-type-imports' },
+      ],
+      // Prevent truthy/falsy confusion - pragmatic settings that catch real bugs
+      // while allowing common idiomatic patterns like `if (str)` and `if (obj)`
+      '@typescript-eslint/strict-boolean-expressions': [
+        'error',
+        {
+          allowString: true, // Allow `if (str)` - only falsy is ""
+          allowNumber: false, // Disallow `if (num)` - both 0 and NaN are falsy
+          allowNullableObject: true, // Allow `if (obj)` - clear null/undefined check
+          allowNullableBoolean: true, // Allow `if (maybeBool)` - common pattern
+          allowNullableString: true, // Allow `if (maybeStr)` - common pattern
+          allowNullableNumber: false, // Disallow - 0 vs null confusion
+          allowNullableEnum: false, // Disallow - enum values can be 0
+          allowAny: false, // Never allow any
+        },
+      ],
+      // Ensure all switch cases are handled for discriminated unions
+      '@typescript-eslint/switch-exhaustiveness-check': 'error',
+      // Encourage immutability for class properties
+      '@typescript-eslint/prefer-readonly': 'error',
+      // Prefer nullish coalescing (??) over logical OR (||) for null/undefined
+      '@typescript-eslint/prefer-nullish-coalescing': 'error',
+      // Consistent type assertions (prefer 'as' over angle brackets)
+      '@typescript-eslint/consistent-type-assertions': [
+        'error',
+        { assertionStyle: 'as', objectLiteralTypeAssertions: 'never' },
+      ],
+      // Require explicit return and argument types on exported functions
+      // Allow public on parameter properties (constructor(public readonly x: T))
+      '@typescript-eslint/explicit-member-accessibility': [
+        'error',
+        {
+          accessibility: 'no-public',
+          overrides: {
+            parameterProperties: 'off',
+          },
+        },
+      ],
 
       // Import sorting and organization
       'simple-import-sort/imports': 'error',
       'simple-import-sort/exports': 'error',
       'unused-imports/no-unused-imports': 'error',
+      // Disable base rule, use unused-imports version with _ prefix ignore pattern
+      '@typescript-eslint/no-unused-vars': 'off',
+      'unused-imports/no-unused-vars': [
+        'error',
+        {
+          vars: 'all',
+          varsIgnorePattern: '^_',
+          args: 'after-used',
+          argsIgnorePattern: '^_',
+        },
+      ],
       'import-x/no-cycle': 'error',
       'import-x/no-self-import': 'error',
       'import-x/no-useless-path-segments': 'error',
+
+      // General JavaScript rules
+      eqeqeq: ['error', 'always'], // Require === instead of ==
 
       // Node.js rules
       'n/no-missing-import': 'off',
@@ -96,7 +152,7 @@ export default defineConfig([
     },
   },
   {
-    ignores: ['dist/**', 'node_modules/**', '*.js', '!eslint.config.js'],
+    ignores: ['dist/**', 'node_modules/**', 'coverage/**', '*.js', '!eslint.config.js'],
   },
   {
     files: ['src/test/**/*.ts'],

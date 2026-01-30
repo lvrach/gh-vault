@@ -6,18 +6,8 @@
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
 
-import {
-  cancelRun,
-  deleteRun,
-  getJob,
-  getJobLogs,
-  getRunWithJobs,
-  getWorkflowIdByName,
-  listRuns,
-  rerunFailedJobs,
-  rerunJob,
-  rerunRun,
-} from '../api.js';
+import type { Octokit } from '../../../shared/github.js';
+import { RunApi } from '../api.js';
 import {
   formatRunCancelledMarkdown,
   formatRunDeletedMarkdown,
@@ -166,8 +156,10 @@ Action Required:
 
 /**
  * Register all workflow run tools with the MCP server.
+ * @param server The MCP server instance
+ * @param getClient Function that returns a Promise resolving to an authenticated Octokit client
  */
-export function registerRunTools(server: McpServer): void {
+export function registerRunTools(server: McpServer, getClient: () => Promise<Octokit>): void {
   server.registerTool(
     'list_workflow_runs',
     {
@@ -177,12 +169,15 @@ export function registerRunTools(server: McpServer): void {
     },
     async (input): Promise<ToolResult> => {
       try {
+        const client = await getClient();
+        const runApi = new RunApi(client);
+
         // Resolve workflow name to ID if provided
         let workflowId: number | string | undefined;
         if (input.workflow) {
           const numericId = Number.parseInt(input.workflow, 10);
           if (Number.isNaN(numericId)) {
-            const foundId = await getWorkflowIdByName({
+            const foundId = await runApi.getWorkflowIdByName({
               owner: input.owner,
               repo: input.repo,
               name: input.workflow,
@@ -199,7 +194,7 @@ export function registerRunTools(server: McpServer): void {
           }
         }
 
-        const runs = await listRuns({
+        const runs = await runApi.listRuns({
           owner: input.owner,
           repo: input.repo,
           branch: input.branch,
@@ -229,7 +224,10 @@ export function registerRunTools(server: McpServer): void {
     },
     async (input): Promise<ToolResult> => {
       try {
-        const run = await getRunWithJobs({
+        const client = await getClient();
+        const runApi = new RunApi(client);
+
+        const run = await runApi.getRunWithJobs({
           owner: input.owner,
           repo: input.repo,
           runId: input.run_id,
@@ -255,7 +253,10 @@ export function registerRunTools(server: McpServer): void {
     },
     async (input): Promise<ToolResult> => {
       try {
-        if (!input.run_id && !input.job_id) {
+        const client = await getClient();
+        const runApi = new RunApi(client);
+
+        if (input.run_id === undefined && input.job_id === undefined) {
           return {
             content: [{ type: 'text', text: 'Error: Either run_id or job_id is required' }],
             isError: true,
@@ -263,14 +264,14 @@ export function registerRunTools(server: McpServer): void {
         }
 
         // Get logs for specific job
-        if (input.job_id) {
-          const job = await getJob({
+        if (input.job_id !== undefined) {
+          const job = await runApi.getJob({
             owner: input.owner,
             repo: input.repo,
             jobId: input.job_id,
           });
 
-          const logs = await getJobLogs({
+          const logs = await runApi.getJobLogs({
             owner: input.owner,
             repo: input.repo,
             jobId: input.job_id,
@@ -281,7 +282,7 @@ export function registerRunTools(server: McpServer): void {
 
         // Get logs for all jobs in run - we know run_id exists because we checked above
         const runId = input.run_id;
-        if (!runId) {
+        if (runId === undefined) {
           return {
             content: [
               { type: 'text', text: 'Error: run_id is required when job_id is not provided' },
@@ -290,7 +291,7 @@ export function registerRunTools(server: McpServer): void {
           };
         }
 
-        const run = await getRunWithJobs({
+        const run = await runApi.getRunWithJobs({
           owner: input.owner,
           repo: input.repo,
           runId,
@@ -308,7 +309,7 @@ export function registerRunTools(server: McpServer): void {
           }
 
           try {
-            const logs = await getJobLogs({
+            const logs = await runApi.getJobLogs({
               owner: input.owner,
               repo: input.repo,
               jobId: job.id,
@@ -343,7 +344,10 @@ export function registerRunTools(server: McpServer): void {
     },
     async (input): Promise<ToolResult> => {
       try {
-        const run = await getRunWithJobs({
+        const client = await getClient();
+        const runApi = new RunApi(client);
+
+        const run = await runApi.getRunWithJobs({
           owner: input.owner,
           repo: input.repo,
           runId: input.run_id,
@@ -361,7 +365,7 @@ export function registerRunTools(server: McpServer): void {
           };
         }
 
-        await cancelRun({
+        await runApi.cancelRun({
           owner: input.owner,
           repo: input.repo,
           runId: input.run_id,
@@ -386,21 +390,24 @@ export function registerRunTools(server: McpServer): void {
     },
     async (input): Promise<ToolResult> => {
       try {
-        const run = await getRunWithJobs({
+        const client = await getClient();
+        const runApi = new RunApi(client);
+
+        const run = await runApi.getRunWithJobs({
           owner: input.owner,
           repo: input.repo,
           runId: input.run_id,
         });
 
         // Rerun specific job
-        if (input.job_id) {
-          const job = await getJob({
+        if (input.job_id !== undefined) {
+          const job = await runApi.getJob({
             owner: input.owner,
             repo: input.repo,
             jobId: input.job_id,
           });
 
-          await rerunJob({
+          await runApi.rerunJob({
             owner: input.owner,
             repo: input.repo,
             jobId: input.job_id,
@@ -414,7 +421,7 @@ export function registerRunTools(server: McpServer): void {
 
         // Rerun failed jobs
         if (input.failed_only) {
-          await rerunFailedJobs({
+          await runApi.rerunFailedJobs({
             owner: input.owner,
             repo: input.repo,
             runId: input.run_id,
@@ -425,7 +432,7 @@ export function registerRunTools(server: McpServer): void {
         }
 
         // Full rerun
-        await rerunRun({
+        await runApi.rerunRun({
           owner: input.owner,
           repo: input.repo,
           runId: input.run_id,
@@ -450,7 +457,10 @@ export function registerRunTools(server: McpServer): void {
     },
     async (input): Promise<ToolResult> => {
       try {
-        await deleteRun({
+        const client = await getClient();
+        const runApi = new RunApi(client);
+
+        await runApi.deleteRun({
           owner: input.owner,
           repo: input.repo,
           runId: input.run_id,

@@ -2,14 +2,14 @@ import { Command } from 'commander';
 
 import type { Output } from '../../../shared/output.js';
 import { resolveRepository } from '../../../shared/repo.js';
-import { deleteRun } from '../api.js';
+import type { RunApi } from '../api.js';
 import { formatRunDeletedText } from '../formatters/text.js';
 
 interface DeleteOptions {
   repo?: string | undefined;
 }
 
-export function createDeleteCommand(output: Output): Command {
+export function createDeleteCommand(output: Output, runApi: RunApi): Command {
   return new Command('delete')
     .description('Delete a workflow run')
     .argument('<run-id>', 'ID of the workflow run to delete')
@@ -31,7 +31,7 @@ export function createDeleteCommand(output: Output): Command {
           return;
         }
 
-        await deleteRun({ owner, repo, runId });
+        await runApi.deleteRun({ owner, repo, runId });
 
         const useColor = process.stdout.isTTY;
         output.print(formatRunDeletedText(runId, useColor));

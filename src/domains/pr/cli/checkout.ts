@@ -11,7 +11,7 @@ import {
   resolveRepository,
   updateSubmodules,
 } from '../../../shared/repo.js';
-import { getPr, listPrs } from '../api.js';
+import type { PrApi } from '../api.js';
 import { formatCheckoutText } from '../formatters/text.js';
 
 interface CheckoutOptions {
@@ -22,7 +22,7 @@ interface CheckoutOptions {
   repo?: string | undefined;
 }
 
-export function createCheckoutCommand(output: Output): Command {
+export function createCheckoutCommand(output: Output, prApi: PrApi): Command {
   return new Command('checkout')
     .description('Check out a pull request in git')
     .argument('[pr]', 'PR number, URL, or branch name')
@@ -49,7 +49,7 @@ export function createCheckoutCommand(output: Output): Command {
           }
         }
 
-        const prResult = await resolvePrNumber(prArg, owner, repo, listPrs);
+        const prResult = await resolvePrNumber(prArg, owner, repo, prApi.listPrs.bind(prApi));
         if (!prResult.success) {
           output.printError(`Error: ${prResult.error}`);
           process.exitCode = 1;
@@ -57,7 +57,7 @@ export function createCheckoutCommand(output: Output): Command {
         }
         const pullNumber = prResult.pullNumber;
 
-        const pr = await getPr({ owner, repo, pullNumber });
+        const pr = await prApi.getPr({ owner, repo, pullNumber });
         const prRef = `pull/${String(pullNumber)}/head`;
         const localBranch = options.branch ?? pr.head.ref;
 

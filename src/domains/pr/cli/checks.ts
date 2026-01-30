@@ -6,7 +6,7 @@ import open from 'open';
 import { filterWithJq, JqError } from '../../../shared/jq.js';
 import type { Output } from '../../../shared/output.js';
 import { resolvePrNumber, resolveRepository } from '../../../shared/repo.js';
-import { listPrChecks, listPrs } from '../api.js';
+import type { PrApi } from '../api.js';
 import { formatPrChecksText } from '../formatters/text.js';
 import type { PrChecksResult } from '../types.js';
 
@@ -21,7 +21,7 @@ interface ChecksOptions {
   repo?: string | undefined;
 }
 
-export function createChecksCommand(output: Output): Command {
+export function createChecksCommand(output: Output, prApi: PrApi): Command {
   return new Command('checks')
     .description('Show CI status for a pull request')
     .argument('[pr]', 'PR number, URL, or branch name')
@@ -43,7 +43,7 @@ export function createChecksCommand(output: Output): Command {
         }
         const { owner, repo } = repoResult;
 
-        const prResult = await resolvePrNumber(prArg, owner, repo, listPrs);
+        const prResult = await resolvePrNumber(prArg, owner, repo, prApi.listPrs.bind(prApi));
         if (!prResult.success) {
           output.printError(`Error: ${prResult.error}`);
           process.exitCode = 1;
@@ -60,7 +60,7 @@ export function createChecksCommand(output: Output): Command {
         const intervalMs = Number.parseInt(options.interval ?? '10', 10) * 1000;
 
         const displayChecks = async (): Promise<PrChecksResult> => {
-          const checks = await listPrChecks({
+          const checks = await prApi.listPrChecks({
             owner,
             repo,
             pullNumber,

@@ -4,7 +4,7 @@ import open from 'open';
 import { filterWithJq, JqError } from '../../../shared/jq.js';
 import type { Output } from '../../../shared/output.js';
 import { resolvePrNumber, resolveRepository } from '../../../shared/repo.js';
-import { getPr, listPrComments, listPrs } from '../api.js';
+import type { PrApi } from '../api.js';
 import { formatPrCommentsJson, formatPrViewJson, prToJson } from '../formatters/json.js';
 import { formatPrCommentsText, formatPrViewText } from '../formatters/text.js';
 
@@ -16,7 +16,7 @@ interface ViewOptions {
   repo?: string | undefined;
 }
 
-export function createViewCommand(output: Output): Command {
+export function createViewCommand(output: Output, prApi: PrApi): Command {
   return new Command('view')
     .description('View a pull request')
     .argument('[pr]', 'PR number, URL, or branch name')
@@ -35,7 +35,7 @@ export function createViewCommand(output: Output): Command {
         }
         const { owner, repo } = repoResult;
 
-        const prResult = await resolvePrNumber(prArg, owner, repo, listPrs);
+        const prResult = await resolvePrNumber(prArg, owner, repo, prApi.listPrs.bind(prApi));
         if (!prResult.success) {
           output.printError(`Error: ${prResult.error}`);
           process.exitCode = 1;
@@ -49,7 +49,7 @@ export function createViewCommand(output: Output): Command {
           return;
         }
 
-        const pr = await getPr({ owner, repo, pullNumber });
+        const pr = await prApi.getPr({ owner, repo, pullNumber });
         const useColor = process.stdout.isTTY;
 
         if (options.jq) {
@@ -86,7 +86,7 @@ export function createViewCommand(output: Output): Command {
         }
 
         if (options.comments) {
-          const comments = await listPrComments({ owner, repo, issueNumber: pullNumber });
+          const comments = await prApi.listPrComments({ owner, repo, issueNumber: pullNumber });
           output.print('');
 
           if (options.json === undefined) {

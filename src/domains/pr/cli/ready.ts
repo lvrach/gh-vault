@@ -2,7 +2,7 @@ import { Command } from 'commander';
 
 import type { Output } from '../../../shared/output.js';
 import { resolvePrNumber, resolveRepository } from '../../../shared/repo.js';
-import { listPrs, updatePrDraft } from '../api.js';
+import type { PrApi } from '../api.js';
 import { formatPrStateChangeText } from '../formatters/text.js';
 
 interface ReadyOptions {
@@ -10,7 +10,7 @@ interface ReadyOptions {
   repo?: string | undefined;
 }
 
-export function createReadyCommand(output: Output): Command {
+export function createReadyCommand(output: Output, prApi: PrApi): Command {
   return new Command('ready')
     .description('Mark a pull request as ready for review')
     .argument('[pr]', 'PR number, URL, or branch name')
@@ -26,7 +26,7 @@ export function createReadyCommand(output: Output): Command {
         }
         const { owner, repo } = repoResult;
 
-        const prResult = await resolvePrNumber(prArg, owner, repo, listPrs);
+        const prResult = await resolvePrNumber(prArg, owner, repo, prApi.listPrs.bind(prApi));
         if (!prResult.success) {
           output.printError(`Error: ${prResult.error}`);
           process.exitCode = 1;
@@ -34,7 +34,7 @@ export function createReadyCommand(output: Output): Command {
         }
         const pullNumber = prResult.pullNumber;
 
-        const pr = await updatePrDraft({
+        const pr = await prApi.updatePrDraft({
           owner,
           repo,
           pullNumber,

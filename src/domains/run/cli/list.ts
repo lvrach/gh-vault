@@ -3,7 +3,7 @@ import { Command } from 'commander';
 import { filterWithJq, JqError } from '../../../shared/jq.js';
 import type { Output } from '../../../shared/output.js';
 import { resolveRepository } from '../../../shared/repo.js';
-import { getWorkflowIdByName, listRuns } from '../api.js';
+import type { RunApi } from '../api.js';
 import { formatRunListJson, runListItemToJson } from '../formatters/json.js';
 import { formatRunListText } from '../formatters/text.js';
 import type { RunStatus } from '../types.js';
@@ -32,7 +32,7 @@ const VALID_STATUSES: RunStatus[] = [
   'action_required',
 ];
 
-export function createListCommand(output: Output): Command {
+export function createListCommand(output: Output, runApi: RunApi): Command {
   return new Command('list')
     .alias('ls')
     .description('List recent workflow runs')
@@ -78,7 +78,7 @@ export function createListCommand(output: Output): Command {
           const numericId = Number.parseInt(options.workflow, 10);
           if (Number.isNaN(numericId)) {
             // Try to find workflow by name
-            const foundId = await getWorkflowIdByName({
+            const foundId = await runApi.getWorkflowIdByName({
               owner,
               repo,
               name: options.workflow,
@@ -94,7 +94,7 @@ export function createListCommand(output: Output): Command {
           }
         }
 
-        const runs = await listRuns({
+        const runs = await runApi.listRuns({
           owner,
           repo,
           branch: options.branch,

@@ -122,7 +122,7 @@ export function formatPrReviewCommentsMarkdown(comments: PrReviewComment[]): str
 
   const lines = comments.map((c) => {
     const location = c.line === null ? 'File' : `Line ${String(c.line)}`;
-    const replyNote = c.inReplyToId ? ' (reply)' : '';
+    const replyNote = c.inReplyToId !== undefined ? ' (reply)' : '';
     const author = c.user?.login ?? 'unknown';
     const authorUrl = c.user?.htmlUrl ?? '#';
 

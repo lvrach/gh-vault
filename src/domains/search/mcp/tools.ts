@@ -6,7 +6,8 @@
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
 
-import { searchCode, searchCommits, searchIssues, searchPrs, searchRepos } from '../api.js';
+import type { Octokit } from '../../../shared/github.js';
+import { SearchApi } from '../api.js';
 import {
   formatCodeMarkdown,
   formatCommitsMarkdown,
@@ -174,8 +175,10 @@ Action Required:
 
 /**
  * Register all search tools with the MCP server.
+ * @param server The MCP server instance
+ * @param getClient Function that returns a Promise resolving to an authenticated Octokit client
  */
-export function registerSearchTools(server: McpServer): void {
+export function registerSearchTools(server: McpServer, getClient: () => Promise<Octokit>): void {
   server.registerTool(
     'search_repositories',
     {
@@ -185,7 +188,9 @@ export function registerSearchTools(server: McpServer): void {
     },
     async (input) => {
       try {
-        const result = await searchRepos({
+        const client = await getClient();
+        const searchApi = new SearchApi(client);
+        const result = await searchApi.searchRepos({
           query: input.query,
           language: input.language,
           owner: input.owner,
@@ -217,7 +222,9 @@ export function registerSearchTools(server: McpServer): void {
     },
     async (input) => {
       try {
-        const result = await searchIssues({
+        const client = await getClient();
+        const searchApi = new SearchApi(client);
+        const result = await searchApi.searchIssues({
           query: input.query,
           state: input.state,
           author: input.author,
@@ -252,7 +259,9 @@ export function registerSearchTools(server: McpServer): void {
     },
     async (input) => {
       try {
-        const result = await searchPrs({
+        const client = await getClient();
+        const searchApi = new SearchApi(client);
+        const result = await searchApi.searchPrs({
           query: input.query,
           state: input.state,
           author: input.author,
@@ -289,7 +298,9 @@ export function registerSearchTools(server: McpServer): void {
     },
     async (input) => {
       try {
-        const result = await searchCommits({
+        const client = await getClient();
+        const searchApi = new SearchApi(client);
+        const result = await searchApi.searchCommits({
           query: input.query,
           author: input.author,
           authorName: input.author_name,
@@ -324,7 +335,9 @@ export function registerSearchTools(server: McpServer): void {
     },
     async (input) => {
       try {
-        const result = await searchCode({
+        const client = await getClient();
+        const searchApi = new SearchApi(client);
+        const result = await searchApi.searchCode({
           query: input.query,
           repo: input.repo,
           owner: input.owner,

@@ -2,6 +2,9 @@ import { Octokit } from 'octokit';
 
 import { getToken } from './secrets.js';
 
+// Re-export Octokit type for consumers that need it for dependency injection
+export type { Octokit } from 'octokit';
+
 const USER_AGENT = 'gh-vault-mcp/0.1.0';
 const REQUEST_TIMEOUT_MS = 30_000;
 

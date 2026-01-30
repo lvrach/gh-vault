@@ -2,7 +2,7 @@ import { Command } from 'commander';
 
 import type { Output } from '../../../shared/output.js';
 import { resolveRepository } from '../../../shared/repo.js';
-import { getJob, getRun, rerunFailedJobs, rerunJob, rerunRun } from '../api.js';
+import type { RunApi } from '../api.js';
 import { formatRunRerunText } from '../formatters/text.js';
 
 interface RerunOptions {
@@ -12,7 +12,7 @@ interface RerunOptions {
   repo?: string | undefined;
 }
 
-export function createRerunCommand(output: Output): Command {
+export function createRerunCommand(output: Output, runApi: RunApi): Command {
   return new Command('rerun')
     .description('Rerun a workflow run')
     .argument('<run-id>', 'ID of the workflow run to rerun')
@@ -38,7 +38,7 @@ export function createRerunCommand(output: Output): Command {
         }
 
         // Get run info for display
-        const run = await getRun({ owner, repo, runId });
+        const run = await runApi.getRun({ owner, repo, runId });
 
         const useColor = process.stdout.isTTY;
 
@@ -51,9 +51,9 @@ export function createRerunCommand(output: Output): Command {
             return;
           }
 
-          const job = await getJob({ owner, repo, jobId });
+          const job = await runApi.getJob({ owner, repo, jobId });
 
-          await rerunJob({
+          await runApi.rerunJob({
             owner,
             repo,
             jobId,
@@ -66,7 +66,7 @@ export function createRerunCommand(output: Output): Command {
 
         // Rerun failed jobs only
         if (options.failed) {
-          await rerunFailedJobs({
+          await runApi.rerunFailedJobs({
             owner,
             repo,
             runId,
@@ -78,7 +78,7 @@ export function createRerunCommand(output: Output): Command {
         }
 
         // Full rerun
-        await rerunRun({
+        await runApi.rerunRun({
           owner,
           repo,
           runId,
