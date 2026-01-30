@@ -95,13 +95,13 @@ pnpm build
 npm link
 ```
 
-## Using as a `gh` Extension (Recommended)
+## Shell Alias Setup
 
-You can install gh-vault as a `gh` CLI extension, allowing you to use it as `gh vault`:
+Add gh-vault as a `gh` alias for seamless integration:
 
 ```bash
-# Install as gh extension
-gh extension install lvrach/gh-vault
+# Create a gh alias (recommended)
+gh alias set vault '!/path/to/gh-vault/dist/cli/index.js'
 
 # Now use it like any gh command
 gh vault pr list
@@ -109,25 +109,17 @@ gh vault pr view 123
 gh vault auth login
 ```
 
-This integrates seamlessly with your existing `gh` workflow while keeping tokens isolated.
-
-### Alternative: Shell Alias
-
-If you prefer not to use the extension system:
+Or add a standalone alias to `~/.bashrc` or `~/.zshrc`:
 
 ```bash
-# Add to ~/.bashrc or ~/.zshrc
 alias gh-vault='node /path/to/gh-vault/dist/cli/index.js'
-
-# Or create a gh alias
-gh alias set vault '!/path/to/gh-vault/dist/cli/index.js'
 ```
 
 ## Quick Start
 
 ### 1. Create a Scoped Token
 
-Go to [GitHub Settings → Fine-grained PATs](https://github.com/settings/tokens?type=beta):
+Go to [GitHub Settings → Fine-grained PATs](https://github.com/settings/personal-access-tokens):
 
 - Set expiration (90 days recommended)
 - Select only the repositories you want to expose
