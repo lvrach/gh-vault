@@ -81,26 +81,15 @@ When AI tools like Claude Code access your terminal, they can:
 ## Installation
 
 ```bash
-# Clone the repository
+# Clone and build
 git clone https://github.com/lvrach/gh-vault.git
 cd gh-vault
-
-# Install dependencies
 pnpm install
-
-# Build
 pnpm build
 
-# Link globally (optional)
-npm link
-```
-
-## Shell Alias
-
-Add to `~/.bashrc` or `~/.zshrc`:
-
-```bash
-alias gh-vault='node /path/to/gh-vault/dist/cli/index.js'
+# Add alias to ~/.zshrc (overrides official gh with secure version)
+pnpm --silent alias >> ~/.zshrc
+source ~/.zshrc
 ```
 
 ## Quick Start
@@ -116,90 +105,56 @@ Go to [GitHub Settings → Fine-grained PATs](https://github.com/settings/person
 ### 2. Store the Token
 
 ```bash
-gh-vault auth login
+gh auth login
 # Paste your token when prompted — it's stored in Keychain
 ```
 
 ### 3. Use the CLI
 
 ```bash
-gh-vault pr list
-gh-vault pr view 123
-gh-vault pr create --title "Fix bug" --body "Description"
+gh pr list
+gh pr view 123
+gh pr create --title "Fix bug" --body "Description"
 ```
-
-### 4. Enable MCP for Claude Code
-
-Add to `~/.claude/settings.json`:
-
-```json
-{
-  "mcpServers": {
-    "gh-vault": {
-      "command": "node",
-      "args": ["/path/to/gh-vault/dist/cli/index.js", "mcp"]
-    }
-  }
-}
-```
-
-Now Claude Code can work with your PRs directly.
 
 ## CLI Commands
 
-gh-vault mirrors the `gh pr` command structure:
+Mirrors the `gh pr` command structure:
 
 ```bash
 # List PRs
-gh-vault pr list                     # Open PRs in current repo
-gh-vault pr list --state closed      # Closed PRs
-gh-vault pr list --author octocat    # Filter by author
-gh-vault pr list --json number,title # JSON output
+gh pr list                     # Open PRs in current repo
+gh pr list --state closed      # Closed PRs
+gh pr list --author octocat    # Filter by author
+gh pr list --json number,title # JSON output
 
 # View PRs
-gh-vault pr view 123                 # View PR #123
-gh-vault pr view --comments          # Include comments
-gh-vault pr view --web               # Open in browser
+gh pr view 123                 # View PR #123
+gh pr view --comments          # Include comments
+gh pr view --web               # Open in browser
 
 # Create PRs
-gh-vault pr create -t "Title" -b "Body"
-gh-vault pr create --draft           # Create as draft
-gh-vault pr create -r reviewer       # Request reviewer
+gh pr create -t "Title" -b "Body"
+gh pr create --draft           # Create as draft
+gh pr create -r reviewer       # Request reviewer
 
 # Manage PRs
-gh-vault pr edit 123 --add-label bug
-gh-vault pr merge 123 --squash
-gh-vault pr close 123
-gh-vault pr checkout 123
+gh pr edit 123 --add-label bug
+gh pr merge 123 --squash
+gh pr close 123
+gh pr checkout 123
 
 # View changes
-gh-vault pr diff 123
-gh-vault pr diff --patch             # Full diff
-gh-vault pr checks 123               # CI status
+gh pr diff 123
+gh pr diff --patch             # Full diff
+gh pr checks 123               # CI status
 ```
 
-## MCP Tools
-
-When running as an MCP server, gh-vault exposes these tools to AI assistants:
-
-| Tool | Description |
-|------|-------------|
-| `list_pull_requests` | List and filter PRs |
-| `get_pull_request` | Get PR details with comments |
-| `create_pull_request` | Create a new PR |
-| `edit_pull_request` | Update PR title, body, labels, reviewers |
-| `merge_pull_request` | Merge a PR |
-| `get_pull_request_diff` | Get file changes |
-| `get_pull_request_checks` | Get CI/CD status |
-| `search_code` | Search code in repositories |
-| `search_issues` | Search issues and PRs |
-
-## Comparison with gh
+## Comparison with official gh
 
 ### What gh-vault does differently
 
 - **Keychain storage**: Token encrypted at rest, accessed via system APIs
-- **MCP-first design**: Built for AI assistant integration from day one
 - **Focused scope**: PR operations only (not a full GitHub CLI replacement)
 - **Token isolation**: Use different tokens for different tools
 
