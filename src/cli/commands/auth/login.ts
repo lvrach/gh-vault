@@ -1,8 +1,9 @@
 import { Command } from 'commander';
 
+import { ClassicTokenError, InvalidTokenFormatError } from '../../../shared/errors.js';
 import { verifyToken } from '../../../shared/github.js';
 import type { Output } from '../../../shared/output.js';
-import { setToken, validateTokenFormat } from '../../../shared/secrets.js';
+import { isTokenTypeAllowed, setToken, validateTokenFormat } from '../../../shared/secrets.js';
 
 export function createLoginCommand(output: Output): Command {
   const readHiddenInput = (): Promise<string> => {
@@ -32,10 +33,9 @@ export function createLoginCommand(output: Output): Command {
             break;
           }
           case '\u0003': {
-            // Ctrl+C
+            // Ctrl+C - exit cleanly (default exit code is 0)
             cleanup();
             output.print('\nCancelled.');
-            process.exitCode = 0;
             resolve('');
 
             break;
@@ -60,28 +60,63 @@ export function createLoginCommand(output: Output): Command {
     });
   };
 
-  return new Command('login').description('Authenticate with GitHub').action(async () => {
-    output.print('Enter your GitHub Personal Access Token:');
-    output.print('(Input will be hidden)\n');
+  const helpText = `
+Token Requirements:
+  gh-vault requires fine-grained personal access tokens (github_pat_*).
+  Classic tokens (ghp_*) are rejected for security reasons.
 
-    const token = await readHiddenInput();
-    output.print(''); // New line after input
+  Create a token at: https://github.com/settings/personal-access-tokens
 
-    if (!token) {
-      return;
-    }
+Required Permissions:
+  Permission          Access       Commands
+  ─────────────────────────────────────────────────────────────────
+  pull_requests       read         pr list, pr view, pr diff
+  pull_requests       write        pr create, pr edit, pr merge, pr close, pr reopen, pr comment, pr review
+  actions             read         run list, run view
+  actions             write        run cancel, run rerun, run delete
+  contents            write        pr merge --delete-branch
+  checks              read         pr checks
+  statuses            read         pr checks
+`;
 
-    const validation = validateTokenFormat(token);
-    if (!validation.valid) {
-      output.printError('Invalid token format.');
-      output.printError('Expected: ghp_... (classic) or github_pat_... (fine-grained)');
-      process.exitCode = 1;
-      return;
-    }
+  return new Command('login')
+    .description('Authenticate with GitHub')
+    .addHelpText('after', helpText)
+    .action(async () => {
+      output.print('gh-vault requires a fine-grained personal access token.');
+      output.print('');
+      output.print('Create one at: https://github.com/settings/personal-access-tokens');
+      output.print('');
+      output.print('Required permissions:');
+      output.print('  • Pull requests: Read and write');
+      output.print('  • Actions: Read and write (for workflow commands)');
+      output.print('  • Contents: Read and write (for branch deletion)');
+      output.print('  • Checks: Read');
+      output.print('  • Commit statuses: Read');
+      output.print('');
+      output.print('Run "gh-vault auth login --help" to see which commands need each permission.');
+      output.print('');
+      output.print('Paste your token below (input is hidden):');
 
-    output.print(`Token type: ${validation.type}`);
+      const token = await readHiddenInput();
+      output.print(''); // New line after input
 
-    try {
+      if (!token) {
+        return;
+      }
+
+      const validation = validateTokenFormat(token);
+      if (!validation.valid) {
+        throw new InvalidTokenFormatError();
+      }
+
+      // Policy check: only allow fine-grained tokens
+      if (!isTokenTypeAllowed(validation.type)) {
+        throw new ClassicTokenError();
+      }
+
+      output.print(`Token type: ${validation.type}`);
+
       const info = await verifyToken(token);
       output.print(`✓ Valid for user: ${info.login}`);
       output.print(`✓ Scopes: ${info.scopes.join(', ') || '(fine-grained PAT)'}`);
@@ -91,10 +126,5 @@ export function createLoginCommand(output: Output): Command {
 
       await setToken(token);
       output.print('✓ Token saved to macOS Keychain');
-    } catch (error) {
-      const message = error instanceof Error ? error.message : 'Unknown error';
-      output.printError(`Error: ${message}`);
-      process.exitCode = 1;
-    }
-  });
+    });
 }

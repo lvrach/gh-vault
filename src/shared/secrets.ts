@@ -2,7 +2,7 @@ import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
 
 const execFileAsync = promisify(execFile);
-const SERVICE_NAME = 'gh-vault-mcp';
+const SERVICE_NAME = 'gh-vault';
 const ACCOUNT_NAME = 'github-token';
 
 /**
@@ -85,12 +85,15 @@ export async function deleteToken(): Promise<void> {
   }
 }
 
+/** Token type as determined by validateTokenFormat */
+export type TokenType = 'classic' | 'fine-grained' | 'unknown';
+
 /**
  * Validate the format of a GitHub token and determine its type.
  */
 export function validateTokenFormat(token: string): {
   valid: boolean;
-  type: 'classic' | 'fine-grained' | 'unknown';
+  type: TokenType;
 } {
   // Classic PAT: ghp_ prefix followed by alphanumeric characters
   if (/^ghp_[A-Za-z0-9]{36}$/.test(token)) {
@@ -104,6 +107,18 @@ export function validateTokenFormat(token: string): {
 
   // Unknown format - might still work but we cannot validate
   return { valid: false, type: 'unknown' };
+}
+
+/**
+ * Check if a token type is allowed by policy.
+ *
+ * gh-vault requires fine-grained tokens for security:
+ * - Scoped to specific repositories
+ * - Limited to required permissions only
+ * - Required expiration date
+ */
+export function isTokenTypeAllowed(type: TokenType): boolean {
+  return type === 'fine-grained';
 }
 
 // Type guard for exec errors with code property
