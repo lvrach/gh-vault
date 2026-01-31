@@ -12,10 +12,14 @@ import { program } from 'commander';
 
 import { PrApi } from '../domains/pr/api.js';
 import { createPrCommand } from '../domains/pr/cli/index.js';
+import { RepoApi } from '../domains/repo/api.js';
+import { createRepoCommand } from '../domains/repo/cli/index.js';
 import { RunApi } from '../domains/run/api.js';
 import { createRunCommand } from '../domains/run/cli/index.js';
 import { SearchApi } from '../domains/search/api.js';
 import { createSearchCommand } from '../domains/search/cli/index.js';
+import { WorkflowApi } from '../domains/workflow/api.js';
+import { createWorkflowCommand } from '../domains/workflow/cli/index.js';
 import { createGitHubClient } from '../shared/github.js';
 import { Output } from '../shared/output.js';
 import { createApiCommand } from './commands/api.js';
@@ -45,12 +49,16 @@ async function main(): Promise<void> {
     // This will throw AuthenticationError if no token - caught at exit point
     const client = await createGitHubClient();
     const prApi = new PrApi(client);
+    const repoApi = new RepoApi(client);
     const runApi = new RunApi(client);
     const searchApi = new SearchApi(client);
+    const workflowApi = new WorkflowApi(client);
 
     program.addCommand(createPrCommand(output, prApi));
+    program.addCommand(createRepoCommand(output, repoApi));
     program.addCommand(createRunCommand(output, runApi));
     program.addCommand(createSearchCommand(output, searchApi));
+    program.addCommand(createWorkflowCommand(output, workflowApi));
     program.addCommand(createApiCommand(output));
   }
 
