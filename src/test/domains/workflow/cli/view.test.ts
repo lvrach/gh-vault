@@ -183,6 +183,38 @@ describe('workflow view command', () => {
         identifier: 'ci.yml',
       });
     });
+
+    it('outputs JSON when --json flag is provided', async () => {
+      const workflow = createMockWorkflow({ id: 123, name: 'CI' });
+      mockWorkflowApi.findWorkflow.mockResolvedValue(workflow);
+
+      const cmd = createViewCommand(
+        mockOutput as unknown as Output,
+        mockWorkflowApi as unknown as WorkflowApi
+      );
+      await cmd.parseAsync(['node', 'test', 'ci.yml', '--json']);
+
+      const output = mockOutput.print.mock.calls[0]?.[0] as string;
+      expect(() => void JSON.parse(output)).not.toThrow();
+      const parsed = JSON.parse(output) as Record<string, unknown>;
+      expect(parsed).toHaveProperty('id', 123);
+      expect(parsed).toHaveProperty('name', 'CI');
+    });
+
+    it('filters JSON fields when specified', async () => {
+      const workflow = createMockWorkflow({ id: 123, name: 'CI', state: 'active' });
+      mockWorkflowApi.findWorkflow.mockResolvedValue(workflow);
+
+      const cmd = createViewCommand(
+        mockOutput as unknown as Output,
+        mockWorkflowApi as unknown as WorkflowApi
+      );
+      await cmd.parseAsync(['node', 'test', 'ci.yml', '--json', 'name,state']);
+
+      const output = mockOutput.print.mock.calls[0]?.[0] as string;
+      const parsed = JSON.parse(output) as Record<string, unknown>;
+      expect(parsed).toEqual({ name: 'CI', state: 'active' });
+    });
   });
 
   // ============================================================================
@@ -229,6 +261,31 @@ describe('workflow view command', () => {
       await cmd.parseAsync(['node', 'test', 'ci.yml']);
 
       expect(mockOutput.printError).toHaveBeenCalledWith('Error: API rate limit');
+      expect(process.exitCode).toBe(1);
+    });
+
+    it('requires --json when --jq is specified', async () => {
+      const workflow = createMockWorkflow();
+      mockWorkflowApi.findWorkflow.mockResolvedValue(workflow);
+
+      const cmd = createViewCommand(
+        mockOutput as unknown as Output,
+        mockWorkflowApi as unknown as WorkflowApi
+      );
+      await cmd.parseAsync(['node', 'test', 'ci.yml', '--jq', '.name']);
+
+      expect(mockOutput.printError).toHaveBeenCalledWith('Error: --jq requires --json to be specified');
+      expect(process.exitCode).toBe(1);
+    });
+
+    it('requires workflow argument', async () => {
+      const cmd = createViewCommand(
+        mockOutput as unknown as Output,
+        mockWorkflowApi as unknown as WorkflowApi
+      );
+      await cmd.parseAsync(['node', 'test']);
+
+      expect(mockOutput.printError).toHaveBeenCalledWith('Error: workflow argument is required');
       expect(process.exitCode).toBe(1);
     });
   });

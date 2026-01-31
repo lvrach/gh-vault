@@ -1,15 +1,19 @@
 import { Command } from 'commander';
 import open from 'open';
 
+import { filterWithJq, JqError } from '../../../shared/jq.js';
 import type { Output } from '../../../shared/output.js';
 import { resolveRepository } from '../../../shared/repo.js';
 import type { WorkflowApi } from '../api.js';
+import { formatWorkflowViewJson, workflowToJsonFull } from '../formatters/json.js';
 import { formatWorkflowViewText, formatWorkflowYamlText } from '../formatters/text.js';
 
 interface ViewOptions {
   ref?: string | undefined;
   web?: boolean | undefined;
   yaml?: boolean | undefined;
+  json?: string | boolean | undefined;
+  jq?: string | undefined;
   repo?: string | undefined;
 }
 
@@ -20,6 +24,8 @@ export function createViewCommand(output: Output, workflowApi: WorkflowApi): Com
     .option('-r, --ref <branch>', 'The branch or tag name which contains the workflow file')
     .option('-w, --web', 'Open workflow in the browser')
     .option('-y, --yaml', 'View the workflow yaml file')
+    .option('--json [fields]', 'Output JSON with all workflow fields')
+    .option('-q, --jq <expression>', 'Filter JSON output using a jq expression')
     .option('-R, --repo <owner/repo>', 'Select another repository')
     .action(async (workflowArg: string | undefined, options: ViewOptions) => {
       try {
@@ -64,6 +70,40 @@ export function createViewCommand(output: Output, workflowApi: WorkflowApi): Com
             ...(options.ref && { ref: options.ref }),
           });
           output.print(formatWorkflowYamlText(yaml));
+          return;
+        }
+
+        // Handle --jq (requires --json)
+        if (options.jq) {
+          if (options.json === undefined) {
+            output.printError('Error: --jq requires --json to be specified');
+            output.printError('Example: gh-vault workflow view ci.yml --json id,name --jq ".name"');
+            process.exitCode = 1;
+            return;
+          }
+
+          try {
+            const jsonData = workflowToJsonFull(workflow);
+            const filtered = await filterWithJq(jsonData, options.jq);
+            output.print(filtered);
+          } catch (error) {
+            if (error instanceof JqError) {
+              output.printError('jq error: ' + error.message);
+            } else {
+              throw error;
+            }
+            process.exitCode = 1;
+          }
+          return;
+        }
+
+        // Handle --json output
+        if (options.json !== undefined) {
+          const fields =
+            typeof options.json === 'string'
+              ? options.json.split(',').map((f) => f.trim())
+              : undefined;
+          output.print(formatWorkflowViewJson(workflow, fields));
           return;
         }
 
