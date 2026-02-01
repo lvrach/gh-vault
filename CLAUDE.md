@@ -55,7 +55,7 @@ src/
 │           └── json.ts       # --json flag output
 ├── shared/                   # Cross-domain utilities
 │   ├── github.ts             # Octokit client wrapper
-│   ├── secrets.ts            # macOS Keychain integration
+│   ├── secrets.ts            # Cross-platform secure token storage
 │   ├── repo.ts               # Git remote detection
 │   └── jq.ts                 # jq filtering support
 └── test/
@@ -109,7 +109,7 @@ When adding a new command or flag:
 
 - GitHub repo names can contain dots - regex must use `[^/]+?` not `[^/.]+`
 - `mergeable` field can be `null` while GitHub computes - handle gracefully
-- macOS only: uses `security` CLI for Keychain (no cross-platform fallback)
+- Token storage uses `@napi-rs/keyring` for cross-platform vault access (macOS Keychain, Windows Credential Manager, Linux Secret Service)
 
 ## Token Requirements
 
@@ -150,8 +150,14 @@ will tell you which permission is needed and how to fix it.
 ## Token Setup
 
 ```bash
-# Configure GitHub token (stored in macOS Keychain)
+# Configure GitHub token (stored in system vault)
 gh-vault auth login
+
+# Piped input (auto-detected)
+echo "$GITHUB_PAT" | gh-vault auth login
+
+# CI/Docker environments (no vault available)
+echo "$GITHUB_PAT" | gh-vault auth login --dangerously-skip-vault
 
 # Verify token permissions
 gh-vault auth status
@@ -159,6 +165,12 @@ gh-vault auth status
 # Remove token
 gh-vault auth logout
 ```
+
+Token storage locations:
+- **macOS**: Keychain
+- **Windows**: Credential Manager
+- **Linux**: Secret Service (GNOME Keyring, KWallet)
+- **CI/Docker**: Plaintext file at `~/.config/gh-vault/token` (with `--dangerously-skip-vault`)
 
 ## Shell Alias Setup
 

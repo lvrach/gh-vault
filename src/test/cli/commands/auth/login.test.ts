@@ -99,7 +99,7 @@ function createMockStdin(token: string): NodeJS.ReadStream {
 }
 
 /**
- * Helper to create a mock stdin for piped input (--with-token mode).
+ * Helper to create a mock stdin for piped input (auto-detected via isTTY=false).
  * Emits data then triggers 'end' event.
  */
 function createPipedStdin(token: string): NodeJS.ReadStream {
@@ -350,7 +350,7 @@ describe('auth login command', () => {
         expect.stringContaining('Valid for user: octocat')
       );
       expect(mockOutput.print).toHaveBeenCalledWith(
-        expect.stringContaining('Token saved to macOS Keychain')
+        expect.stringContaining('Token saved to system vault')
       );
       expect(process.exitCode).toBeUndefined();
     });
@@ -448,7 +448,7 @@ describe('auth login command', () => {
         'Failed to store token in Keychain'
       );
 
-      expect(mockSetToken).toHaveBeenCalledWith(token);
+      expect(mockSetToken).toHaveBeenCalledWith(token, false);
     });
 
     it('handles empty token (user cancelled)', async () => {
@@ -531,10 +531,10 @@ describe('auth login command', () => {
   });
 
   // ============================================================================
-  // --with-token Flag Tests (Piped Stdin)
+  // Piped Stdin Tests (Auto-detected via isTTY=false)
   // ============================================================================
 
-  describe('--with-token flag', () => {
+  describe('piped stdin (auto-detected)', () => {
     it('reads token from piped stdin', async () => {
       const token = 'github_pat_abcdefghijklmnopqrstuvwxyz';
       const pipedStdin = createPipedStdin(token);
@@ -555,13 +555,13 @@ describe('auth login command', () => {
       mockSetToken.mockResolvedValue(undefined);
 
       const cmd = createLoginCommand(mockOutput as unknown as Output);
-      await cmd.parseAsync(['node', 'test', '--with-token']);
+      await cmd.parseAsync(['node', 'test']);
 
       expect(mockValidateTokenFormat).toHaveBeenCalledWith(token);
       expect(mockVerifyToken).toHaveBeenCalledWith(token);
-      expect(mockSetToken).toHaveBeenCalledWith(token);
+      expect(mockSetToken).toHaveBeenCalledWith(token, false);
       expect(mockOutput.print).toHaveBeenCalledWith(
-        expect.stringContaining('Token saved to macOS Keychain')
+        expect.stringContaining('Token saved to system vault')
       );
     });
 
@@ -586,12 +586,12 @@ describe('auth login command', () => {
       mockSetToken.mockResolvedValue(undefined);
 
       const cmd = createLoginCommand(mockOutput as unknown as Output);
-      await cmd.parseAsync(['node', 'test', '--with-token']);
+      await cmd.parseAsync(['node', 'test']);
 
       expect(mockValidateTokenFormat).toHaveBeenCalledWith(expectedToken);
     });
 
-    it('errors when stdin is empty with --with-token', async () => {
+    it('errors when piped stdin is empty', async () => {
       const pipedStdin = createPipedStdin('');
 
       Object.defineProperty(process, 'stdin', {
@@ -601,14 +601,14 @@ describe('auth login command', () => {
       });
 
       const cmd = createLoginCommand(mockOutput as unknown as Output);
-      await cmd.parseAsync(['node', 'test', '--with-token']);
+      await cmd.parseAsync(['node', 'test']);
 
       expect(mockOutput.printError).toHaveBeenCalledWith('Error: no token provided on stdin');
       expect(process.exitCode).toBe(1);
       expect(mockValidateTokenFormat).not.toHaveBeenCalled();
     });
 
-    it('skips interactive prompts with --with-token', async () => {
+    it('skips interactive prompts with piped input', async () => {
       const token = 'github_pat_abcdefghijklmnopqrstuvwxyz';
       const pipedStdin = createPipedStdin(token);
 
@@ -628,7 +628,7 @@ describe('auth login command', () => {
       mockSetToken.mockResolvedValue(undefined);
 
       const cmd = createLoginCommand(mockOutput as unknown as Output);
-      await cmd.parseAsync(['node', 'test', '--with-token']);
+      await cmd.parseAsync(['node', 'test']);
 
       // Should NOT print interactive prompts
       const allPrintCalls = mockOutput.print.mock.calls.flat() as string[];
@@ -636,7 +636,7 @@ describe('auth login command', () => {
       expect(allPrintCalls.join(' ')).not.toContain('Create one at');
     });
 
-    it('validates token format with --with-token', async () => {
+    it('validates token format with piped input', async () => {
       const token = 'invalid-token-format';
       const pipedStdin = createPipedStdin(token);
 
@@ -649,14 +649,12 @@ describe('auth login command', () => {
       mockValidateTokenFormat.mockReturnValue({ valid: false, type: 'unknown' });
 
       const cmd = createLoginCommand(mockOutput as unknown as Output);
-      await expect(cmd.parseAsync(['node', 'test', '--with-token'])).rejects.toThrow(
-        'Invalid token format'
-      );
+      await expect(cmd.parseAsync(['node', 'test'])).rejects.toThrow('Invalid token format');
 
       expect(mockVerifyToken).not.toHaveBeenCalled();
     });
 
-    it('rejects classic tokens with --with-token', async () => {
+    it('rejects classic tokens with piped input', async () => {
       const token = 'ghp_abcdefghijklmnopqrstuvwxyz1234567890';
       const pipedStdin = createPipedStdin(token);
 
@@ -670,8 +668,126 @@ describe('auth login command', () => {
       mockIsTokenTypeAllowed.mockReturnValue(false);
 
       const cmd = createLoginCommand(mockOutput as unknown as Output);
-      await expect(cmd.parseAsync(['node', 'test', '--with-token'])).rejects.toThrow(
+      await expect(cmd.parseAsync(['node', 'test'])).rejects.toThrow(
         'Classic personal access tokens'
+      );
+    });
+  });
+
+  // ============================================================================
+  // --dangerously-skip-vault Flag Tests
+  // ============================================================================
+
+  describe('--dangerously-skip-vault flag', () => {
+    it('passes skipVault=true to setToken when flag is provided', async () => {
+      const token = 'github_pat_abcdefghijklmnopqrstuvwxyz';
+      const pipedStdin = createPipedStdin(token);
+
+      Object.defineProperty(process, 'stdin', {
+        value: pipedStdin,
+        writable: true,
+        configurable: true,
+      });
+
+      mockValidateTokenFormat.mockReturnValue({ valid: true, type: 'fine-grained' });
+      mockIsTokenTypeAllowed.mockReturnValue(true);
+      mockVerifyToken.mockResolvedValue({
+        login: 'octocat',
+        scopes: [],
+        rateLimit: { remaining: 4999, limit: 5000 },
+      });
+      mockSetToken.mockResolvedValue(undefined);
+
+      const cmd = createLoginCommand(mockOutput as unknown as Output);
+      await cmd.parseAsync(['node', 'test', '--dangerously-skip-vault']);
+
+      expect(mockSetToken).toHaveBeenCalledWith(token, true);
+    });
+
+    it('displays warning message when skipVault is used', async () => {
+      const token = 'github_pat_abcdefghijklmnopqrstuvwxyz';
+      const pipedStdin = createPipedStdin(token);
+
+      Object.defineProperty(process, 'stdin', {
+        value: pipedStdin,
+        writable: true,
+        configurable: true,
+      });
+
+      mockValidateTokenFormat.mockReturnValue({ valid: true, type: 'fine-grained' });
+      mockIsTokenTypeAllowed.mockReturnValue(true);
+      mockVerifyToken.mockResolvedValue({
+        login: 'octocat',
+        scopes: [],
+        rateLimit: { remaining: 4999, limit: 5000 },
+      });
+      mockSetToken.mockResolvedValue(undefined);
+
+      const cmd = createLoginCommand(mockOutput as unknown as Output);
+      await cmd.parseAsync(['node', 'test', '--dangerously-skip-vault']);
+
+      expect(mockOutput.print).toHaveBeenCalledWith(
+        expect.stringContaining('Token stored in plaintext file')
+      );
+      expect(mockOutput.print).toHaveBeenCalledWith(
+        expect.stringContaining('--dangerously-skip-vault')
+      );
+    });
+
+    it('does not display vault warning when skipVault is false', async () => {
+      const token = 'github_pat_abcdefghijklmnopqrstuvwxyz';
+      const pipedStdin = createPipedStdin(token);
+
+      Object.defineProperty(process, 'stdin', {
+        value: pipedStdin,
+        writable: true,
+        configurable: true,
+      });
+
+      mockValidateTokenFormat.mockReturnValue({ valid: true, type: 'fine-grained' });
+      mockIsTokenTypeAllowed.mockReturnValue(true);
+      mockVerifyToken.mockResolvedValue({
+        login: 'octocat',
+        scopes: [],
+        rateLimit: { remaining: 4999, limit: 5000 },
+      });
+      mockSetToken.mockResolvedValue(undefined);
+
+      const cmd = createLoginCommand(mockOutput as unknown as Output);
+      await cmd.parseAsync(['node', 'test']);
+
+      const allPrintCalls = mockOutput.print.mock.calls.flat() as string[];
+      expect(allPrintCalls.join(' ')).not.toContain('plaintext');
+      expect(mockOutput.print).toHaveBeenCalledWith(
+        expect.stringContaining('Token saved to system vault')
+      );
+    });
+
+    it('works with interactive mode and --dangerously-skip-vault', async () => {
+      const token = 'github_pat_abcdefghijklmnopqrstuvwxyz';
+      const mockStdin = createMockStdin(token);
+
+      Object.defineProperty(process, 'stdin', {
+        value: mockStdin,
+        writable: true,
+        configurable: true,
+      });
+
+      mockValidateTokenFormat.mockReturnValue({ valid: true, type: 'fine-grained' });
+      mockIsTokenTypeAllowed.mockReturnValue(true);
+      mockVerifyToken.mockResolvedValue({
+        login: 'octocat',
+        scopes: [],
+        rateLimit: { remaining: 4999, limit: 5000 },
+      });
+      mockSetToken.mockResolvedValue(undefined);
+
+      const cmd = createLoginCommand(mockOutput as unknown as Output);
+      await cmd.parseAsync(['node', 'test', '--dangerously-skip-vault']);
+
+      expect(mockSetToken).toHaveBeenCalledWith(token, true);
+      expect(mockOutput.print).toHaveBeenCalledWith(
+        expect.stringContaining('Token stored in plaintext file')
       );
     });
   });

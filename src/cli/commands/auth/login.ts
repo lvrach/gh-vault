@@ -8,14 +8,31 @@ import { isTokenTypeAllowed, setToken, validateTokenFormat } from '../../../shar
 function readStdin(): Promise<string> {
   return new Promise((resolve, reject) => {
     let data = '';
-    process.stdin.setEncoding('utf8');
-    process.stdin.on('data', (chunk: string) => {
+
+    const onData = (chunk: string): void => {
       data += chunk;
-    });
-    process.stdin.on('end', () => {
+    };
+
+    const onEnd = (): void => {
+      cleanup();
       resolve(data.trim());
-    });
-    process.stdin.on('error', reject);
+    };
+
+    const onError = (error: Error): void => {
+      cleanup();
+      reject(error);
+    };
+
+    const cleanup = (): void => {
+      process.stdin.removeListener('data', onData);
+      process.stdin.removeListener('end', onEnd);
+      process.stdin.removeListener('error', onError);
+    };
+
+    process.stdin.setEncoding('utf8');
+    process.stdin.on('data', onData);
+    process.stdin.on('end', onEnd);
+    process.stdin.on('error', onError);
   });
 }
 
@@ -91,25 +108,33 @@ Required Permissions:
   contents            write        pr merge --delete-branch
   checks              read         pr checks
   statuses            read         pr checks
+
+Examples:
+  # Interactive login (prompts for token)
+  $ gh-vault auth login
+
+  # Piped input (auto-detected)
+  $ echo "$GITHUB_PAT" | gh-vault auth login
+
+  # CI/Docker (no vault available)
+  $ echo "$GITHUB_PAT" | gh-vault auth login --dangerously-skip-vault
 `;
 
   return new Command('login')
     .description('Authenticate with GitHub')
-    .option('--with-token', 'Read token from standard input')
+    .option(
+      '--dangerously-skip-vault',
+      'Store token in plaintext file instead of system vault (for CI/Docker)'
+    )
     .addHelpText('after', helpText)
-    .action(async (options: { withToken?: boolean }) => {
+    .action(async (options: { dangerouslySkipVault?: boolean }) => {
+      const skipVault = options.dangerouslySkipVault ?? false;
+
       let token: string;
 
-      if (options.withToken) {
-        // Read token from stdin (for automation/piping)
-        token = await readStdin();
-        if (!token) {
-          output.printError('Error: no token provided on stdin');
-          process.exitCode = 1;
-          return;
-        }
-      } else {
-        // Interactive mode
+      // Auto-detect piped input vs interactive mode
+      if (process.stdin.isTTY) {
+        // Interactive mode - prompt for token
         output.print('gh-vault requires a fine-grained personal access token.');
         output.print('');
         output.print('Create one at: https://github.com/settings/personal-access-tokens');
@@ -133,6 +158,14 @@ Required Permissions:
         if (!token) {
           return;
         }
+      } else {
+        // Piped input - read from stdin
+        token = await readStdin();
+        if (!token) {
+          output.printError('Error: no token provided on stdin');
+          process.exitCode = 1;
+          return;
+        }
       }
 
       const validation = validateTokenFormat(token);
@@ -154,7 +187,12 @@ Required Permissions:
         `✓ Rate limit: ${String(info.rateLimit.remaining)}/${String(info.rateLimit.limit)}`
       );
 
-      await setToken(token);
-      output.print('✓ Token saved to macOS Keychain');
+      await setToken(token, skipVault);
+
+      if (skipVault) {
+        output.print('⚠️  Token stored in plaintext file (--dangerously-skip-vault)');
+      } else {
+        output.print('✓ Token saved to system vault');
+      }
     });
 }
