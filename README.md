@@ -1,6 +1,6 @@
 # gh-vault
 
-A GitHub CLI for Pull Request operations with **secure token storage** and **MCP server support** for AI assistant integration.
+A GitHub CLI with **secure token storage** using macOS Keychain.
 
 > **Note**: This is a vibe coded project — built collaboratively with Claude Code. The irony isn't lost on us: an AI-assisted tool designed to give AI assistants *less* access to your tokens.
 
@@ -38,35 +38,6 @@ When AI tools like Claude Code access your terminal, they can:
 | Token storage | Config file (plaintext fallback) | macOS Keychain only |
 | Fine-grained PAT | Env var recommended | Native support |
 | Token output command | `gh auth token` (prints to stdout) | Intentionally omitted |
-| AI integration | None | Native MCP server |
-| Attack surface | Full GitHub CLI | PR operations only |
-
-### The MCP Advantage
-
-[Model Context Protocol (MCP)](https://modelcontextprotocol.io/) lets AI assistants like Claude Code use tools safely. With gh-vault's MCP server:
-
-- Claude Code can list, view, create, and manage PRs
-- Your token stays in the Keychain — never exposed in prompts or logs
-- You can use a **separate, scoped token** just for AI operations
-- Full audit trail of what the AI accessed
-
-```
-┌─────────────────┐     MCP Protocol      ┌─────────────────┐
-│   Claude Code   │ ◄──────────────────►  │    gh-vault     │
-│   (AI Agent)    │    JSON-RPC stdio     │   MCP Server    │
-└─────────────────┘                       └────────┬────────┘
-                                                   │
-                                                   ▼
-                                          ┌─────────────────┐
-                                          │ macOS Keychain  │
-                                          │  (encrypted)    │
-                                          └────────┬────────┘
-                                                   │
-                                                   ▼
-                                          ┌─────────────────┐
-                                          │   GitHub API    │
-                                          └─────────────────┘
-```
 
 ### Security Model
 
@@ -81,15 +52,20 @@ When AI tools like Claude Code access your terminal, they can:
 ## Installation
 
 ```bash
-# Clone and build
-git clone https://github.com/lvrach/gh-vault.git
-cd gh-vault
-pnpm install
-pnpm build
+# Install globally from npm
+npm install -g gh-vault
 
-# Add alias to ~/.zshrc (overrides official gh with secure version)
-pnpm --silent alias >> ~/.zshrc
-source ~/.zshrc
+# Or run directly with npx
+npx gh-vault pr list
+```
+
+### Shell Alias (Optional)
+
+To use `gh` as an alias for `gh-vault`:
+
+```bash
+# Add to ~/.zshrc or ~/.bashrc
+alias gh='gh-vault'
 ```
 
 ## Quick Start
@@ -155,19 +131,21 @@ gh pr checks 123               # CI status
 ### What gh-vault does differently
 
 - **Keychain storage**: Token encrypted at rest, accessed via system APIs
-- **Focused scope**: PR operations only (not a full GitHub CLI replacement)
+- **Fine-grained PAT first**: Native support for scoped tokens
 - **Token isolation**: Use different tokens for different tools
 
-### Roadmap: Pending `gh` Compatibility
+### Supported Commands
 
-These `gh` features are not yet implemented but may be added in future versions:
-
-| Feature | gh command | Status |
-|---------|------------|--------|
-| Repository management | `gh repo` | Planned |
-| Issues | `gh issue` | Planned |
-| GitHub Actions | `gh run`, `gh workflow` | Under consideration |
-| Releases | `gh release` | Under consideration |
+| Feature | gh command | gh-vault |
+|---------|------------|----------|
+| Pull Requests | `gh pr` | ✅ Full support |
+| Repository | `gh repo` | ✅ Full support |
+| Actions Runs | `gh run` | ✅ Full support |
+| Workflows | `gh workflow` | ✅ Full support |
+| Search | `gh search` | ✅ Full support |
+| API | `gh api` | ✅ Full support |
+| Issues | `gh issue` | Not yet |
+| Releases | `gh release` | Not yet |
 | Gists | `gh gist` | Not planned |
 | SSH keys | `gh ssh-key` | Not planned |
 
