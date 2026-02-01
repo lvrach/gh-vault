@@ -273,9 +273,7 @@ export type PrRef = PrRefNumber | PrRefBranch;
  *
  * @returns Extracted owner, repo, and PR number, or null if not a valid PR URL
  */
-function parseGitHubPrUrl(
-  ref: string
-): { owner: string; repo: string; prNumber: number } | null {
+function parseGitHubPrUrl(ref: string): { owner: string; repo: string; prNumber: number } | null {
   try {
     // Normalize URL - add protocol if missing
     const urlString = ref.startsWith('http') ? ref : `https://${ref}`;

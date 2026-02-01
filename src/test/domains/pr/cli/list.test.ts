@@ -4,7 +4,7 @@
  * Tests the `gh-vault pr list` CLI command with mocked dependencies.
  */
 
-import { afterEach,beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import type { PrApi } from '../../../../domains/pr/api.js';
 import { createListCommand } from '../../../../domains/pr/cli/list.js';
@@ -118,17 +118,27 @@ describe('pr list command', () => {
 
       const cmd = createListCommand(mockOutput as unknown as Output, mockPrApi as unknown as PrApi);
       await cmd.parseAsync([
-        'node', 'test',
-        '--state', 'closed',
-        '--author', 'octocat',
-        '--assignee', 'dev',
-        '--label', 'bug',
-        '--label', 'urgent',
-        '--base', 'main',
-        '--head', 'feature',
+        'node',
+        'test',
+        '--state',
+        'closed',
+        '--author',
+        'octocat',
+        '--assignee',
+        'dev',
+        '--label',
+        'bug',
+        '--label',
+        'urgent',
+        '--base',
+        'main',
+        '--head',
+        'feature',
         '--draft',
-        '--limit', '50',
-        '--search', 'fix auth',
+        '--limit',
+        '50',
+        '--search',
+        'fix auth',
       ]);
 
       expect(mockPrApi.listPrs).toHaveBeenCalledWith(
@@ -242,7 +252,9 @@ describe('pr list command', () => {
       const cmd = createListCommand(mockOutput as unknown as Output, mockPrApi as unknown as PrApi);
       await cmd.parseAsync(['node', 'test', '--jq', '.[0]']);
 
-      expect(mockOutput.printError).toHaveBeenCalledWith('Error: --jq requires --json to be specified');
+      expect(mockOutput.printError).toHaveBeenCalledWith(
+        'Error: --jq requires --json to be specified'
+      );
       expect(process.exitCode).toBe(1);
     });
   });

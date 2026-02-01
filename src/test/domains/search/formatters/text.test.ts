@@ -160,9 +160,7 @@ describe('formatReposText', () => {
   });
 
   it('formats repository with large numbers', () => {
-    const repos = [
-      createSearchRepo({ stargazersCount: 1_500_000, forksCount: 75_000 }),
-    ];
+    const repos = [createSearchRepo({ stargazersCount: 1_500_000, forksCount: 75_000 })];
     expect(formatReposText(repos, false)).toMatchSnapshot();
   });
 
@@ -272,7 +270,8 @@ describe('formatCommitsText', () => {
   it('formats commit with long message (truncates)', () => {
     const commits = [
       createSearchCommit({
-        message: 'This is a very long commit message that should be truncated because it exceeds the maximum length allowed for display in the text formatter output',
+        message:
+          'This is a very long commit message that should be truncated because it exceeds the maximum length allowed for display in the text formatter output',
       }),
     ];
     expect(formatCommitsText(commits, false)).toMatchSnapshot();

@@ -4,7 +4,7 @@
  * Tests the `gh-vault pr merge` CLI command with mocked dependencies.
  */
 
-import { afterEach,beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import type { PrApi } from '../../../../domains/pr/api.js';
 import { createMergeCommand } from '../../../../domains/pr/cli/merge.js';
@@ -20,7 +20,7 @@ vi.mock('../../../../shared/repo.js', () => ({
   resolvePrNumber: vi.fn(),
 }));
 
-import { resolvePrNumber,resolveRepository } from '../../../../shared/repo.js';
+import { resolvePrNumber, resolveRepository } from '../../../../shared/repo.js';
 
 const mockResolveRepository = vi.mocked(resolveRepository);
 const mockResolvePrNumber = vi.mocked(resolvePrNumber);
@@ -132,7 +132,10 @@ describe('pr merge command', () => {
       const result = createMockMergeResult();
       mockPrApi.mergePr.mockResolvedValue(result);
 
-      const cmd = createMergeCommand(mockOutput as unknown as Output, mockPrApi as unknown as PrApi);
+      const cmd = createMergeCommand(
+        mockOutput as unknown as Output,
+        mockPrApi as unknown as PrApi
+      );
       await cmd.parseAsync(['node', 'test', '42']);
 
       expect(mockPrApi.mergePr).toHaveBeenCalledWith(
@@ -151,7 +154,10 @@ describe('pr merge command', () => {
       const result = createMockMergeResult();
       mockPrApi.mergePr.mockResolvedValue(result);
 
-      const cmd = createMergeCommand(mockOutput as unknown as Output, mockPrApi as unknown as PrApi);
+      const cmd = createMergeCommand(
+        mockOutput as unknown as Output,
+        mockPrApi as unknown as PrApi
+      );
       await cmd.parseAsync(['node', 'test', '42', '--squash']);
 
       expect(mockPrApi.mergePr).toHaveBeenCalledWith(
@@ -165,7 +171,10 @@ describe('pr merge command', () => {
       const result = createMockMergeResult();
       mockPrApi.mergePr.mockResolvedValue(result);
 
-      const cmd = createMergeCommand(mockOutput as unknown as Output, mockPrApi as unknown as PrApi);
+      const cmd = createMergeCommand(
+        mockOutput as unknown as Output,
+        mockPrApi as unknown as PrApi
+      );
       await cmd.parseAsync(['node', 'test', '42', '--rebase']);
 
       expect(mockPrApi.mergePr).toHaveBeenCalledWith(
@@ -179,7 +188,10 @@ describe('pr merge command', () => {
       const result = createMockMergeResult();
       mockPrApi.mergePr.mockResolvedValue(result);
 
-      const cmd = createMergeCommand(mockOutput as unknown as Output, mockPrApi as unknown as PrApi);
+      const cmd = createMergeCommand(
+        mockOutput as unknown as Output,
+        mockPrApi as unknown as PrApi
+      );
       await cmd.parseAsync([
         'node',
         'test',
@@ -203,7 +215,10 @@ describe('pr merge command', () => {
       mockPrApi.mergePr.mockResolvedValue(result);
       mockPrApi.deleteBranch.mockResolvedValue(undefined);
 
-      const cmd = createMergeCommand(mockOutput as unknown as Output, mockPrApi as unknown as PrApi);
+      const cmd = createMergeCommand(
+        mockOutput as unknown as Output,
+        mockPrApi as unknown as PrApi
+      );
       await cmd.parseAsync(['node', 'test', '42', '--delete-branch']);
 
       expect(mockPrApi.mergePr).toHaveBeenCalled();
@@ -219,7 +234,10 @@ describe('pr merge command', () => {
       mockPrApi.mergePr.mockResolvedValue(result);
       mockPrApi.deleteBranch.mockRejectedValue(new Error('Branch protected'));
 
-      const cmd = createMergeCommand(mockOutput as unknown as Output, mockPrApi as unknown as PrApi);
+      const cmd = createMergeCommand(
+        mockOutput as unknown as Output,
+        mockPrApi as unknown as PrApi
+      );
       await cmd.parseAsync(['node', 'test', '42', '--delete-branch']);
 
       expect(mockPrApi.mergePr).toHaveBeenCalled();
@@ -231,7 +249,10 @@ describe('pr merge command', () => {
     it('enables auto-merge when --auto is specified', async () => {
       mockPrApi.enableAutoMerge.mockResolvedValue({ enabled: true, mergeMethod: 'merge' });
 
-      const cmd = createMergeCommand(mockOutput as unknown as Output, mockPrApi as unknown as PrApi);
+      const cmd = createMergeCommand(
+        mockOutput as unknown as Output,
+        mockPrApi as unknown as PrApi
+      );
       await cmd.parseAsync(['node', 'test', '42', '--auto']);
 
       expect(mockPrApi.enableAutoMerge).toHaveBeenCalledWith(
@@ -249,7 +270,10 @@ describe('pr merge command', () => {
     it('enables auto-merge with squash method', async () => {
       mockPrApi.enableAutoMerge.mockResolvedValue({ enabled: true, mergeMethod: 'squash' });
 
-      const cmd = createMergeCommand(mockOutput as unknown as Output, mockPrApi as unknown as PrApi);
+      const cmd = createMergeCommand(
+        mockOutput as unknown as Output,
+        mockPrApi as unknown as PrApi
+      );
       await cmd.parseAsync(['node', 'test', '42', '--auto', '--squash']);
 
       expect(mockPrApi.enableAutoMerge).toHaveBeenCalledWith(
@@ -262,7 +286,10 @@ describe('pr merge command', () => {
     it('disables auto-merge when --disable-auto is specified', async () => {
       mockPrApi.disableAutoMerge.mockResolvedValue(undefined);
 
-      const cmd = createMergeCommand(mockOutput as unknown as Output, mockPrApi as unknown as PrApi);
+      const cmd = createMergeCommand(
+        mockOutput as unknown as Output,
+        mockPrApi as unknown as PrApi
+      );
       await cmd.parseAsync(['node', 'test', '42', '--disable-auto']);
 
       expect(mockPrApi.disableAutoMerge).toHaveBeenCalledWith({
@@ -278,7 +305,10 @@ describe('pr merge command', () => {
       const result = createMockMergeResult();
       mockPrApi.mergePr.mockResolvedValue(result);
 
-      const cmd = createMergeCommand(mockOutput as unknown as Output, mockPrApi as unknown as PrApi);
+      const cmd = createMergeCommand(
+        mockOutput as unknown as Output,
+        mockPrApi as unknown as PrApi
+      );
       await cmd.parseAsync(['node', 'test', '42', '--match-head-commit', 'abc123']);
 
       expect(mockPrApi.mergePr).toHaveBeenCalledWith(
@@ -297,7 +327,10 @@ describe('pr merge command', () => {
       const result = createMockMergeResult();
       mockPrApi.mergePr.mockResolvedValue(result);
 
-      const cmd = createMergeCommand(mockOutput as unknown as Output, mockPrApi as unknown as PrApi);
+      const cmd = createMergeCommand(
+        mockOutput as unknown as Output,
+        mockPrApi as unknown as PrApi
+      );
       await cmd.parseAsync(['node', 'test', '42', '--repo', 'other-owner/other-repo']);
 
       expect(mockResolveRepository).toHaveBeenCalledWith('other-owner/other-repo');
@@ -321,7 +354,10 @@ describe('pr merge command', () => {
         error: 'Not a git repository',
       });
 
-      const cmd = createMergeCommand(mockOutput as unknown as Output, mockPrApi as unknown as PrApi);
+      const cmd = createMergeCommand(
+        mockOutput as unknown as Output,
+        mockPrApi as unknown as PrApi
+      );
       await cmd.parseAsync(['node', 'test', '42']);
 
       expect(mockOutput.printError).toHaveBeenCalledWith('Error: Not a git repository');
@@ -335,15 +371,23 @@ describe('pr merge command', () => {
         error: 'No open PR found for current branch',
       });
 
-      const cmd = createMergeCommand(mockOutput as unknown as Output, mockPrApi as unknown as PrApi);
+      const cmd = createMergeCommand(
+        mockOutput as unknown as Output,
+        mockPrApi as unknown as PrApi
+      );
       await cmd.parseAsync(['node', 'test']);
 
-      expect(mockOutput.printError).toHaveBeenCalledWith('Error: No open PR found for current branch');
+      expect(mockOutput.printError).toHaveBeenCalledWith(
+        'Error: No open PR found for current branch'
+      );
       expect(process.exitCode).toBe(1);
     });
 
     it('rejects multiple merge methods', async () => {
-      const cmd = createMergeCommand(mockOutput as unknown as Output, mockPrApi as unknown as PrApi);
+      const cmd = createMergeCommand(
+        mockOutput as unknown as Output,
+        mockPrApi as unknown as PrApi
+      );
       await cmd.parseAsync(['node', 'test', '42', '--squash', '--rebase']);
 
       expect(mockOutput.printError).toHaveBeenCalledWith(
@@ -356,7 +400,10 @@ describe('pr merge command', () => {
     it('handles merge API error', async () => {
       mockPrApi.mergePr.mockRejectedValue(new Error('Pull request is not mergeable'));
 
-      const cmd = createMergeCommand(mockOutput as unknown as Output, mockPrApi as unknown as PrApi);
+      const cmd = createMergeCommand(
+        mockOutput as unknown as Output,
+        mockPrApi as unknown as PrApi
+      );
       await cmd.parseAsync(['node', 'test', '42']);
 
       expect(mockOutput.printError).toHaveBeenCalledWith('Error: Pull request is not mergeable');
@@ -364,12 +411,19 @@ describe('pr merge command', () => {
     });
 
     it('handles auto-merge enable error', async () => {
-      mockPrApi.enableAutoMerge.mockRejectedValue(new Error('Auto-merge not enabled for repository'));
+      mockPrApi.enableAutoMerge.mockRejectedValue(
+        new Error('Auto-merge not enabled for repository')
+      );
 
-      const cmd = createMergeCommand(mockOutput as unknown as Output, mockPrApi as unknown as PrApi);
+      const cmd = createMergeCommand(
+        mockOutput as unknown as Output,
+        mockPrApi as unknown as PrApi
+      );
       await cmd.parseAsync(['node', 'test', '42', '--auto']);
 
-      expect(mockOutput.printError).toHaveBeenCalledWith('Error: Auto-merge not enabled for repository');
+      expect(mockOutput.printError).toHaveBeenCalledWith(
+        'Error: Auto-merge not enabled for repository'
+      );
       expect(process.exitCode).toBe(1);
     });
   });

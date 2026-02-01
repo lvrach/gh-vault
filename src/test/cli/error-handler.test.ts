@@ -17,7 +17,10 @@ import type { Output } from '../../shared/output.js';
 // Helpers
 // ============================================================================
 
-function createMockOutput(): { print: ReturnType<typeof vi.fn>; printError: ReturnType<typeof vi.fn> } {
+function createMockOutput(): {
+  print: ReturnType<typeof vi.fn>;
+  printError: ReturnType<typeof vi.fn>;
+} {
   return { print: vi.fn(), printError: vi.fn() };
 }
 

@@ -42,8 +42,7 @@ export function createCloneCommand(output: Output, repoApi: RepoApi): Command {
             cloneUrl = repoArg;
 
             // Extract owner/repo from URL
-            const urlMatch =
-              /(?:github\.com[/:])([\w.-]+)\/([\w.-]+?)(?:\.git)?$/.exec(repoArg);
+            const urlMatch = /(?:github\.com[/:])([\w.-]+)\/([\w.-]+?)(?:\.git)?$/.exec(repoArg);
             if (urlMatch?.[1] && urlMatch[2]) {
               owner = urlMatch[1];
               repoName = urlMatch[2];
@@ -101,11 +100,9 @@ export function createCloneCommand(output: Output, repoApi: RepoApi): Command {
               const upstreamName = options.upstreamRemoteName ?? 'upstream';
 
               output.print(`\nAdding upstream remote '${upstreamName}'...`);
-              await execFileAsync(
-                'git',
-                ['remote', 'add', upstreamName, repo.parent.cloneUrl],
-                { cwd: cloneDir }
-              );
+              await execFileAsync('git', ['remote', 'add', upstreamName, repo.parent.cloneUrl], {
+                cwd: cloneDir,
+              });
             }
           } catch {
             // Ignore errors when checking fork status

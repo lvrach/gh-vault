@@ -90,7 +90,10 @@ describe('search commits command', () => {
 
   describe('success cases', () => {
     it('searches commits with query', async () => {
-      const commits = [createMockSearchCommit({ sha: 'abc123' }), createMockSearchCommit({ sha: 'def456' })];
+      const commits = [
+        createMockSearchCommit({ sha: 'abc123' }),
+        createMockSearchCommit({ sha: 'def456' }),
+      ];
       mockSearchApi.searchCommits.mockResolvedValue(createMockSearchResult(commits));
 
       const cmd = createCommitsCommand(
@@ -323,7 +326,9 @@ describe('search commits command', () => {
       );
       await cmd.parseAsync(['node', 'test', 'fix', '--jq', '.[0]']);
 
-      expect(mockOutput.printError).toHaveBeenCalledWith('Error: --jq requires --json to be specified');
+      expect(mockOutput.printError).toHaveBeenCalledWith(
+        'Error: --jq requires --json to be specified'
+      );
       expect(process.exitCode).toBe(1);
     });
   });

@@ -23,7 +23,9 @@ export class AuthenticationError extends Error {
  * Thrown when token format is invalid (not recognized as GitHub token).
  */
 export class InvalidTokenFormatError extends Error {
-  constructor(message = 'Invalid token format. Expected: github_pat_... (fine-grained personal access token)') {
+  constructor(
+    message = 'Invalid token format. Expected: github_pat_... (fine-grained personal access token)'
+  ) {
     super(message);
     this.name = 'InvalidTokenFormatError';
   }
@@ -69,13 +71,34 @@ export const PERMISSION_MAP = new Map<string, PermissionInfo>([
   ['pr:list', { permission: 'pull_requests:read', permissionLabel: 'Pull requests → Read' }],
   ['pr:view', { permission: 'pull_requests:read', permissionLabel: 'Pull requests → Read' }],
   ['pr:diff', { permission: 'pull_requests:read', permissionLabel: 'Pull requests → Read' }],
-  ['pr:create', { permission: 'pull_requests:write', permissionLabel: 'Pull requests → Read and write' }],
-  ['pr:edit', { permission: 'pull_requests:write', permissionLabel: 'Pull requests → Read and write' }],
-  ['pr:merge', { permission: 'pull_requests:write', permissionLabel: 'Pull requests → Read and write' }],
-  ['pr:close', { permission: 'pull_requests:write', permissionLabel: 'Pull requests → Read and write' }],
-  ['pr:reopen', { permission: 'pull_requests:write', permissionLabel: 'Pull requests → Read and write' }],
-  ['pr:comment', { permission: 'pull_requests:write', permissionLabel: 'Pull requests → Read and write' }],
-  ['pr:review', { permission: 'pull_requests:write', permissionLabel: 'Pull requests → Read and write' }],
+  [
+    'pr:create',
+    { permission: 'pull_requests:write', permissionLabel: 'Pull requests → Read and write' },
+  ],
+  [
+    'pr:edit',
+    { permission: 'pull_requests:write', permissionLabel: 'Pull requests → Read and write' },
+  ],
+  [
+    'pr:merge',
+    { permission: 'pull_requests:write', permissionLabel: 'Pull requests → Read and write' },
+  ],
+  [
+    'pr:close',
+    { permission: 'pull_requests:write', permissionLabel: 'Pull requests → Read and write' },
+  ],
+  [
+    'pr:reopen',
+    { permission: 'pull_requests:write', permissionLabel: 'Pull requests → Read and write' },
+  ],
+  [
+    'pr:comment',
+    { permission: 'pull_requests:write', permissionLabel: 'Pull requests → Read and write' },
+  ],
+  [
+    'pr:review',
+    { permission: 'pull_requests:write', permissionLabel: 'Pull requests → Read and write' },
+  ],
   ['pr:checks', { permission: 'checks:read', permissionLabel: 'Checks → Read' }],
 
   // Workflow run operations

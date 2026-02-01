@@ -25,10 +25,7 @@ import type { Output } from '../shared/output.js';
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const CLI_ERROR_DETAILS = new Map<new (...args: any[]) => Error, string[]>([
-  [
-    AuthenticationError,
-    ['', 'Run: gh-vault auth login'],
-  ],
+  [AuthenticationError, ['', 'Run: gh-vault auth login']],
   [
     InvalidTokenFormatError,
     [

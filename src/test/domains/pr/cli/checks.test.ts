@@ -4,7 +4,7 @@
  * Tests the `gh-vault pr checks` CLI command with mocked dependencies.
  */
 
-import { afterEach,beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import type { PrApi } from '../../../../domains/pr/api.js';
 import { createChecksCommand } from '../../../../domains/pr/cli/checks.js';
@@ -23,7 +23,7 @@ vi.mock('../../../../shared/repo.js', () => ({
 
 import openModule from 'open';
 
-import { resolvePrNumber,resolveRepository } from '../../../../shared/repo.js';
+import { resolvePrNumber, resolveRepository } from '../../../../shared/repo.js';
 
 const mockOpen = vi.mocked(openModule);
 const mockResolveRepository = vi.mocked(resolveRepository);
@@ -121,7 +121,10 @@ describe('pr checks command', () => {
       const checks = createMockChecksResult();
       mockPrApi.listPrChecks.mockResolvedValue(checks);
 
-      const cmd = createChecksCommand(mockOutput as unknown as Output, mockPrApi as unknown as PrApi);
+      const cmd = createChecksCommand(
+        mockOutput as unknown as Output,
+        mockPrApi as unknown as PrApi
+      );
       await cmd.parseAsync(['node', 'test', '42']);
 
       expect(mockPrApi.listPrChecks).toHaveBeenCalledWith({
@@ -138,7 +141,10 @@ describe('pr checks command', () => {
       const checks = createMockChecksResult();
       mockPrApi.listPrChecks.mockResolvedValue(checks);
 
-      const cmd = createChecksCommand(mockOutput as unknown as Output, mockPrApi as unknown as PrApi);
+      const cmd = createChecksCommand(
+        mockOutput as unknown as Output,
+        mockPrApi as unknown as PrApi
+      );
       await cmd.parseAsync(['node', 'test', '42', '--required']);
 
       expect(mockPrApi.listPrChecks).toHaveBeenCalledWith(
@@ -152,7 +158,10 @@ describe('pr checks command', () => {
       const checks = createMockChecksResult();
       mockPrApi.listPrChecks.mockResolvedValue(checks);
 
-      const cmd = createChecksCommand(mockOutput as unknown as Output, mockPrApi as unknown as PrApi);
+      const cmd = createChecksCommand(
+        mockOutput as unknown as Output,
+        mockPrApi as unknown as PrApi
+      );
       await cmd.parseAsync(['node', 'test', '42', '--json']);
 
       expect(mockOutput.print).toHaveBeenCalled();
@@ -164,7 +173,10 @@ describe('pr checks command', () => {
       const checks = createMockChecksResult();
       mockPrApi.listPrChecks.mockResolvedValue(checks);
 
-      const cmd = createChecksCommand(mockOutput as unknown as Output, mockPrApi as unknown as PrApi);
+      const cmd = createChecksCommand(
+        mockOutput as unknown as Output,
+        mockPrApi as unknown as PrApi
+      );
       await cmd.parseAsync(['node', 'test', '42', '--json', 'sha,overallState']);
 
       const output = mockOutput.print.mock.calls[0]?.[0] as string;
@@ -173,7 +185,10 @@ describe('pr checks command', () => {
     });
 
     it('opens browser when --web is specified', async () => {
-      const cmd = createChecksCommand(mockOutput as unknown as Output, mockPrApi as unknown as PrApi);
+      const cmd = createChecksCommand(
+        mockOutput as unknown as Output,
+        mockPrApi as unknown as PrApi
+      );
       await cmd.parseAsync(['node', 'test', '42', '--web']);
 
       expect(mockOpen).toHaveBeenCalledWith('https://github.com/owner/repo/pull/42/checks');
@@ -198,7 +213,10 @@ describe('pr checks command', () => {
       });
       mockPrApi.listPrChecks.mockResolvedValue(checks);
 
-      const cmd = createChecksCommand(mockOutput as unknown as Output, mockPrApi as unknown as PrApi);
+      const cmd = createChecksCommand(
+        mockOutput as unknown as Output,
+        mockPrApi as unknown as PrApi
+      );
       await cmd.parseAsync(['node', 'test', '42']);
 
       expect(process.exitCode).toBe(1);
@@ -213,7 +231,10 @@ describe('pr checks command', () => {
       const checks = createMockChecksResult();
       mockPrApi.listPrChecks.mockResolvedValue(checks);
 
-      const cmd = createChecksCommand(mockOutput as unknown as Output, mockPrApi as unknown as PrApi);
+      const cmd = createChecksCommand(
+        mockOutput as unknown as Output,
+        mockPrApi as unknown as PrApi
+      );
       await cmd.parseAsync(['node', 'test', '42', '--repo', 'other-owner/other-repo']);
 
       expect(mockResolveRepository).toHaveBeenCalledWith('other-owner/other-repo');
@@ -229,7 +250,10 @@ describe('pr checks command', () => {
       const checks = createMockChecksResult();
       mockPrApi.listPrChecks.mockResolvedValue(checks);
 
-      const cmd = createChecksCommand(mockOutput as unknown as Output, mockPrApi as unknown as PrApi);
+      const cmd = createChecksCommand(
+        mockOutput as unknown as Output,
+        mockPrApi as unknown as PrApi
+      );
       await cmd.parseAsync(['node', 'test']);
 
       expect(mockResolvePrNumber).toHaveBeenCalledWith(
@@ -252,7 +276,10 @@ describe('pr checks command', () => {
         error: 'Not a git repository',
       });
 
-      const cmd = createChecksCommand(mockOutput as unknown as Output, mockPrApi as unknown as PrApi);
+      const cmd = createChecksCommand(
+        mockOutput as unknown as Output,
+        mockPrApi as unknown as PrApi
+      );
       await cmd.parseAsync(['node', 'test', '42']);
 
       expect(mockOutput.printError).toHaveBeenCalledWith('Error: Not a git repository');
@@ -266,25 +293,38 @@ describe('pr checks command', () => {
         error: 'No open PR found for current branch',
       });
 
-      const cmd = createChecksCommand(mockOutput as unknown as Output, mockPrApi as unknown as PrApi);
+      const cmd = createChecksCommand(
+        mockOutput as unknown as Output,
+        mockPrApi as unknown as PrApi
+      );
       await cmd.parseAsync(['node', 'test']);
 
-      expect(mockOutput.printError).toHaveBeenCalledWith('Error: No open PR found for current branch');
+      expect(mockOutput.printError).toHaveBeenCalledWith(
+        'Error: No open PR found for current branch'
+      );
       expect(process.exitCode).toBe(1);
     });
 
     it('requires --json when --jq is specified', async () => {
-      const cmd = createChecksCommand(mockOutput as unknown as Output, mockPrApi as unknown as PrApi);
+      const cmd = createChecksCommand(
+        mockOutput as unknown as Output,
+        mockPrApi as unknown as PrApi
+      );
       await cmd.parseAsync(['node', 'test', '42', '--jq', '.sha']);
 
-      expect(mockOutput.printError).toHaveBeenCalledWith('Error: --jq requires --json to be specified');
+      expect(mockOutput.printError).toHaveBeenCalledWith(
+        'Error: --jq requires --json to be specified'
+      );
       expect(process.exitCode).toBe(1);
     });
 
     it('handles API error', async () => {
       mockPrApi.listPrChecks.mockRejectedValue(new Error('API rate limit exceeded'));
 
-      const cmd = createChecksCommand(mockOutput as unknown as Output, mockPrApi as unknown as PrApi);
+      const cmd = createChecksCommand(
+        mockOutput as unknown as Output,
+        mockPrApi as unknown as PrApi
+      );
       await cmd.parseAsync(['node', 'test', '42']);
 
       expect(mockOutput.printError).toHaveBeenCalledWith('Error: API rate limit exceeded');
@@ -315,7 +355,10 @@ describe('pr checks command', () => {
       });
       mockPrApi.listPrChecks.mockResolvedValue(checks);
 
-      const cmd = createChecksCommand(mockOutput as unknown as Output, mockPrApi as unknown as PrApi);
+      const cmd = createChecksCommand(
+        mockOutput as unknown as Output,
+        mockPrApi as unknown as PrApi
+      );
       await cmd.parseAsync(['node', 'test', '42']);
 
       expect(mockOutput.print).toHaveBeenCalled();

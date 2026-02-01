@@ -266,7 +266,9 @@ describe('repo fork command', () => {
       );
       await cmd.parseAsync(['node', 'test']);
 
-      expect(mockOutput.printError).toHaveBeenCalledWith('Error: You have already forked this repository');
+      expect(mockOutput.printError).toHaveBeenCalledWith(
+        'Error: You have already forked this repository'
+      );
       expect(process.exitCode).toBe(1);
     });
   });

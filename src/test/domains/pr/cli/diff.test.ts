@@ -4,7 +4,7 @@
  * Tests the `gh-vault pr diff` CLI command with mocked dependencies.
  */
 
-import { afterEach,beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import type { PrApi } from '../../../../domains/pr/api.js';
 import { createDiffCommand } from '../../../../domains/pr/cli/diff.js';
@@ -23,7 +23,7 @@ vi.mock('../../../../shared/repo.js', () => ({
 
 import openModule from 'open';
 
-import { resolvePrNumber,resolveRepository } from '../../../../shared/repo.js';
+import { resolvePrNumber, resolveRepository } from '../../../../shared/repo.js';
 
 const mockOpen = vi.mocked(openModule);
 const mockResolveRepository = vi.mocked(resolveRepository);
@@ -222,9 +222,7 @@ describe('pr diff command', () => {
     });
 
     it('handles files without patches', async () => {
-      const files = [
-        createMockPrFile({ filename: 'binary.png', patch: undefined }),
-      ];
+      const files = [createMockPrFile({ filename: 'binary.png', patch: undefined })];
       mockPrApi.listPrFiles.mockResolvedValue(files);
 
       const cmd = createDiffCommand(mockOutput as unknown as Output, mockPrApi as unknown as PrApi);
@@ -299,7 +297,9 @@ describe('pr diff command', () => {
       const cmd = createDiffCommand(mockOutput as unknown as Output, mockPrApi as unknown as PrApi);
       await cmd.parseAsync(['node', 'test']);
 
-      expect(mockOutput.printError).toHaveBeenCalledWith('Error: No open PR found for current branch');
+      expect(mockOutput.printError).toHaveBeenCalledWith(
+        'Error: No open PR found for current branch'
+      );
       expect(process.exitCode).toBe(1);
     });
 

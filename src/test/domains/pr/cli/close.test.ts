@@ -4,7 +4,7 @@
  * Tests the `gh-vault pr close` CLI command with mocked dependencies.
  */
 
-import { afterEach,beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import type { PrApi } from '../../../../domains/pr/api.js';
 import { createCloseCommand } from '../../../../domains/pr/cli/close.js';
@@ -20,7 +20,7 @@ vi.mock('../../../../shared/repo.js', () => ({
   resolvePrNumber: vi.fn(),
 }));
 
-import { resolvePrNumber,resolveRepository } from '../../../../shared/repo.js';
+import { resolvePrNumber, resolveRepository } from '../../../../shared/repo.js';
 
 const mockResolveRepository = vi.mocked(resolveRepository);
 const mockResolvePrNumber = vi.mocked(resolvePrNumber);
@@ -121,7 +121,10 @@ describe('pr close command', () => {
       const closedPr = createMockPullRequest({ state: 'closed' });
       mockPrApi.updatePrState.mockResolvedValue(closedPr);
 
-      const cmd = createCloseCommand(mockOutput as unknown as Output, mockPrApi as unknown as PrApi);
+      const cmd = createCloseCommand(
+        mockOutput as unknown as Output,
+        mockPrApi as unknown as PrApi
+      );
       await cmd.parseAsync(['node', 'test', '42']);
 
       expect(mockPrApi.updatePrState).toHaveBeenCalledWith({
@@ -145,7 +148,10 @@ describe('pr close command', () => {
         htmlUrl: 'https://github.com/owner/repo/pull/42#issuecomment-1',
       });
 
-      const cmd = createCloseCommand(mockOutput as unknown as Output, mockPrApi as unknown as PrApi);
+      const cmd = createCloseCommand(
+        mockOutput as unknown as Output,
+        mockPrApi as unknown as PrApi
+      );
       await cmd.parseAsync(['node', 'test', '42', '--comment', 'Closing this PR']);
 
       expect(mockPrApi.createPrComment).toHaveBeenCalledWith({
@@ -162,7 +168,10 @@ describe('pr close command', () => {
       mockPrApi.updatePrState.mockResolvedValue(closedPr);
       mockPrApi.deleteBranch.mockResolvedValue(undefined);
 
-      const cmd = createCloseCommand(mockOutput as unknown as Output, mockPrApi as unknown as PrApi);
+      const cmd = createCloseCommand(
+        mockOutput as unknown as Output,
+        mockPrApi as unknown as PrApi
+      );
       await cmd.parseAsync(['node', 'test', '42', '--delete-branch']);
 
       expect(mockPrApi.updatePrState).toHaveBeenCalled();
@@ -178,7 +187,10 @@ describe('pr close command', () => {
       mockPrApi.updatePrState.mockResolvedValue(closedPr);
       mockPrApi.deleteBranch.mockRejectedValue(new Error('Branch protected'));
 
-      const cmd = createCloseCommand(mockOutput as unknown as Output, mockPrApi as unknown as PrApi);
+      const cmd = createCloseCommand(
+        mockOutput as unknown as Output,
+        mockPrApi as unknown as PrApi
+      );
       await cmd.parseAsync(['node', 'test', '42', '--delete-branch']);
 
       expect(mockPrApi.updatePrState).toHaveBeenCalled();
@@ -199,7 +211,10 @@ describe('pr close command', () => {
       });
       mockPrApi.deleteBranch.mockResolvedValue(undefined);
 
-      const cmd = createCloseCommand(mockOutput as unknown as Output, mockPrApi as unknown as PrApi);
+      const cmd = createCloseCommand(
+        mockOutput as unknown as Output,
+        mockPrApi as unknown as PrApi
+      );
       await cmd.parseAsync(['node', 'test', '42', '--comment', 'Done', '--delete-branch']);
 
       expect(mockPrApi.createPrComment).toHaveBeenCalled();
@@ -216,7 +231,10 @@ describe('pr close command', () => {
       const closedPr = createMockPullRequest({ state: 'closed' });
       mockPrApi.updatePrState.mockResolvedValue(closedPr);
 
-      const cmd = createCloseCommand(mockOutput as unknown as Output, mockPrApi as unknown as PrApi);
+      const cmd = createCloseCommand(
+        mockOutput as unknown as Output,
+        mockPrApi as unknown as PrApi
+      );
       await cmd.parseAsync(['node', 'test', '42', '--repo', 'other-owner/other-repo']);
 
       expect(mockResolveRepository).toHaveBeenCalledWith('other-owner/other-repo');
@@ -240,7 +258,10 @@ describe('pr close command', () => {
         error: 'Not a git repository',
       });
 
-      const cmd = createCloseCommand(mockOutput as unknown as Output, mockPrApi as unknown as PrApi);
+      const cmd = createCloseCommand(
+        mockOutput as unknown as Output,
+        mockPrApi as unknown as PrApi
+      );
       await cmd.parseAsync(['node', 'test', '42']);
 
       expect(mockOutput.printError).toHaveBeenCalledWith('Error: Not a git repository');
@@ -254,17 +275,25 @@ describe('pr close command', () => {
         error: 'No open PR found for current branch',
       });
 
-      const cmd = createCloseCommand(mockOutput as unknown as Output, mockPrApi as unknown as PrApi);
+      const cmd = createCloseCommand(
+        mockOutput as unknown as Output,
+        mockPrApi as unknown as PrApi
+      );
       await cmd.parseAsync(['node', 'test']);
 
-      expect(mockOutput.printError).toHaveBeenCalledWith('Error: No open PR found for current branch');
+      expect(mockOutput.printError).toHaveBeenCalledWith(
+        'Error: No open PR found for current branch'
+      );
       expect(process.exitCode).toBe(1);
     });
 
     it('handles API error when closing', async () => {
       mockPrApi.updatePrState.mockRejectedValue(new Error('PR already closed'));
 
-      const cmd = createCloseCommand(mockOutput as unknown as Output, mockPrApi as unknown as PrApi);
+      const cmd = createCloseCommand(
+        mockOutput as unknown as Output,
+        mockPrApi as unknown as PrApi
+      );
       await cmd.parseAsync(['node', 'test', '42']);
 
       expect(mockOutput.printError).toHaveBeenCalledWith('Error: PR already closed');
@@ -274,7 +303,10 @@ describe('pr close command', () => {
     it('handles API error when adding comment', async () => {
       mockPrApi.createPrComment.mockRejectedValue(new Error('Cannot add comment'));
 
-      const cmd = createCloseCommand(mockOutput as unknown as Output, mockPrApi as unknown as PrApi);
+      const cmd = createCloseCommand(
+        mockOutput as unknown as Output,
+        mockPrApi as unknown as PrApi
+      );
       await cmd.parseAsync(['node', 'test', '42', '--comment', 'test']);
 
       expect(mockOutput.printError).toHaveBeenCalledWith('Error: Cannot add comment');

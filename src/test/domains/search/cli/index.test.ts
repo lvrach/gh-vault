@@ -14,7 +14,10 @@ import type { Output } from '../../../../shared/output.js';
 // Mocks
 // ============================================================================
 
-function createMockOutput(): { print: ReturnType<typeof vi.fn>; printError: ReturnType<typeof vi.fn> } {
+function createMockOutput(): {
+  print: ReturnType<typeof vi.fn>;
+  printError: ReturnType<typeof vi.fn>;
+} {
   return {
     print: vi.fn(),
     printError: vi.fn(),
@@ -40,7 +43,10 @@ describe('search command index', () => {
     const mockOutput = createMockOutput();
     const mockSearchApi = createMockSearchApi();
 
-    const cmd = createSearchCommand(mockOutput as unknown as Output, mockSearchApi as unknown as SearchApi);
+    const cmd = createSearchCommand(
+      mockOutput as unknown as Output,
+      mockSearchApi as unknown as SearchApi
+    );
 
     expect(cmd.name()).toBe('search');
   });
@@ -49,16 +55,24 @@ describe('search command index', () => {
     const mockOutput = createMockOutput();
     const mockSearchApi = createMockSearchApi();
 
-    const cmd = createSearchCommand(mockOutput as unknown as Output, mockSearchApi as unknown as SearchApi);
+    const cmd = createSearchCommand(
+      mockOutput as unknown as Output,
+      mockSearchApi as unknown as SearchApi
+    );
 
-    expect(cmd.description()).toBe('Search for repositories, issues, PRs, commits, and code on GitHub');
+    expect(cmd.description()).toBe(
+      'Search for repositories, issues, PRs, commits, and code on GitHub'
+    );
   });
 
   it('registers all subcommands', () => {
     const mockOutput = createMockOutput();
     const mockSearchApi = createMockSearchApi();
 
-    const cmd = createSearchCommand(mockOutput as unknown as Output, mockSearchApi as unknown as SearchApi);
+    const cmd = createSearchCommand(
+      mockOutput as unknown as Output,
+      mockSearchApi as unknown as SearchApi
+    );
     const subcommandNames = cmd.commands.map((c) => c.name());
 
     expect(subcommandNames).toContain('code');
@@ -72,7 +86,10 @@ describe('search command index', () => {
     const mockOutput = createMockOutput();
     const mockSearchApi = createMockSearchApi();
 
-    const cmd = createSearchCommand(mockOutput as unknown as Output, mockSearchApi as unknown as SearchApi);
+    const cmd = createSearchCommand(
+      mockOutput as unknown as Output,
+      mockSearchApi as unknown as SearchApi
+    );
 
     expect(cmd.commands).toHaveLength(5);
   });

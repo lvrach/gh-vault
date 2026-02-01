@@ -5,7 +5,7 @@ import type { Output } from '../../../shared/output.js';
 import type { RepoApi } from '../api.js';
 import { formatRepoListJson, repoListItemToJson } from '../formatters/json.js';
 import { formatRepoListText } from '../formatters/text.js';
-import type { RepositoryListItem,RepoVisibility } from '../types.js';
+import type { RepositoryListItem, RepoVisibility } from '../types.js';
 
 interface ListOptions {
   limit?: string | undefined;
@@ -89,10 +89,7 @@ export function createListCommand(output: Output, repoApi: RepoApi): Command {
     });
 }
 
-function applyFilters(
-  repos: RepositoryListItem[],
-  options: ListOptions
-): RepositoryListItem[] {
+function applyFilters(repos: RepositoryListItem[], options: ListOptions): RepositoryListItem[] {
   let filtered = repos;
 
   // Language filter

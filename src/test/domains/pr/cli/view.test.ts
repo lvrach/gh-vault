@@ -4,11 +4,11 @@
  * Tests the `gh-vault pr view` CLI command with mocked dependencies.
  */
 
-import { afterEach,beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import type { PrApi } from '../../../../domains/pr/api.js';
 import { createViewCommand } from '../../../../domains/pr/cli/view.js';
-import type { PrComment,PullRequest } from '../../../../domains/pr/types.js';
+import type { PrComment, PullRequest } from '../../../../domains/pr/types.js';
 import type { Output } from '../../../../shared/output.js';
 
 // ============================================================================
@@ -23,7 +23,7 @@ vi.mock('../../../../shared/repo.js', () => ({
 
 import openModule from 'open';
 
-import { resolvePrNumber,resolveRepository } from '../../../../shared/repo.js';
+import { resolvePrNumber, resolveRepository } from '../../../../shared/repo.js';
 
 const mockOpen = vi.mocked(openModule);
 const mockResolveRepository = vi.mocked(resolveRepository);
@@ -241,7 +241,9 @@ describe('pr view command', () => {
       const cmd = createViewCommand(mockOutput as unknown as Output, mockPrApi as unknown as PrApi);
       await cmd.parseAsync(['node', 'test']);
 
-      expect(mockOutput.printError).toHaveBeenCalledWith('Error: No open PR found for current branch');
+      expect(mockOutput.printError).toHaveBeenCalledWith(
+        'Error: No open PR found for current branch'
+      );
       expect(process.exitCode).toBe(1);
     });
 
@@ -259,7 +261,9 @@ describe('pr view command', () => {
       const cmd = createViewCommand(mockOutput as unknown as Output, mockPrApi as unknown as PrApi);
       await cmd.parseAsync(['node', 'test', '42', '--jq', '.title']);
 
-      expect(mockOutput.printError).toHaveBeenCalledWith('Error: --jq requires --json to be specified');
+      expect(mockOutput.printError).toHaveBeenCalledWith(
+        'Error: --jq requires --json to be specified'
+      );
       expect(process.exitCode).toBe(1);
     });
   });

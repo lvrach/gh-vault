@@ -4,7 +4,7 @@
  * Tests the `gh-vault pr edit` CLI command with mocked dependencies.
  */
 
-import { afterEach,beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import type { PrApi } from '../../../../domains/pr/api.js';
 import { createEditCommand } from '../../../../domains/pr/cli/edit.js';
@@ -20,7 +20,7 @@ vi.mock('../../../../shared/repo.js', () => ({
   resolvePrNumber: vi.fn(),
 }));
 
-import { resolvePrNumber,resolveRepository } from '../../../../shared/repo.js';
+import { resolvePrNumber, resolveRepository } from '../../../../shared/repo.js';
 
 const mockResolveRepository = vi.mocked(resolveRepository);
 const mockResolvePrNumber = vi.mocked(resolvePrNumber);
@@ -177,7 +177,15 @@ describe('pr edit command', () => {
       mockPrApi.editPr.mockResolvedValue(result);
 
       const cmd = createEditCommand(mockOutput as unknown as Output, mockPrApi as unknown as PrApi);
-      await cmd.parseAsync(['node', 'test', '42', '--add-assignee', '@me', '--add-assignee', 'user2']);
+      await cmd.parseAsync([
+        'node',
+        'test',
+        '42',
+        '--add-assignee',
+        '@me',
+        '--add-assignee',
+        'user2',
+      ]);
 
       expect(mockPrApi.getCurrentUser).toHaveBeenCalled();
       expect(mockPrApi.editPr).toHaveBeenCalledWith(
@@ -315,7 +323,9 @@ describe('pr edit command', () => {
       const cmd = createEditCommand(mockOutput as unknown as Output, mockPrApi as unknown as PrApi);
       await cmd.parseAsync(['node', 'test', '--title', 'Test']);
 
-      expect(mockOutput.printError).toHaveBeenCalledWith('Error: No open PR found for current branch');
+      expect(mockOutput.printError).toHaveBeenCalledWith(
+        'Error: No open PR found for current branch'
+      );
       expect(process.exitCode).toBe(1);
     });
 

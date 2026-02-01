@@ -7,7 +7,10 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import type { RepoApi } from '../../../../domains/repo/api.js';
-import { createArchiveCommand, createUnarchiveCommand } from '../../../../domains/repo/cli/archive.js';
+import {
+  createArchiveCommand,
+  createUnarchiveCommand,
+} from '../../../../domains/repo/cli/archive.js';
 import type { Repository } from '../../../../domains/repo/types.js';
 import type { Output } from '../../../../shared/output.js';
 
@@ -159,9 +162,7 @@ describe('repo archive command', () => {
       );
       await cmd.parseAsync(['node', 'test']);
 
-      expect(mockOutput.printError).toHaveBeenCalledWith(
-        expect.stringContaining('--yes')
-      );
+      expect(mockOutput.printError).toHaveBeenCalledWith(expect.stringContaining('--yes'));
       expect(process.exitCode).toBe(1);
       expect(mockRepoApi.setArchived).not.toHaveBeenCalled();
     });
@@ -249,9 +250,7 @@ describe('repo unarchive command', () => {
       );
       await cmd.parseAsync(['node', 'test']);
 
-      expect(mockOutput.printError).toHaveBeenCalledWith(
-        expect.stringContaining('--yes')
-      );
+      expect(mockOutput.printError).toHaveBeenCalledWith(expect.stringContaining('--yes'));
       expect(process.exitCode).toBe(1);
     });
   });

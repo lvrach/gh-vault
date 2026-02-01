@@ -125,7 +125,10 @@ describe('run rerun command', () => {
       mockRunApi.getRun.mockResolvedValue(run);
       mockRunApi.rerunRun.mockResolvedValue(undefined);
 
-      const cmd = createRerunCommand(mockOutput as unknown as Output, mockRunApi as unknown as RunApi);
+      const cmd = createRerunCommand(
+        mockOutput as unknown as Output,
+        mockRunApi as unknown as RunApi
+      );
       await cmd.parseAsync(['node', 'test', '12345678']);
 
       expect(mockRunApi.getRun).toHaveBeenCalledWith({
@@ -148,7 +151,10 @@ describe('run rerun command', () => {
       mockRunApi.getRun.mockResolvedValue(run);
       mockRunApi.rerunRun.mockResolvedValue(undefined);
 
-      const cmd = createRerunCommand(mockOutput as unknown as Output, mockRunApi as unknown as RunApi);
+      const cmd = createRerunCommand(
+        mockOutput as unknown as Output,
+        mockRunApi as unknown as RunApi
+      );
       await cmd.parseAsync(['node', 'test', '12345678', '--debug']);
 
       expect(mockRunApi.rerunRun).toHaveBeenCalledWith(
@@ -163,7 +169,10 @@ describe('run rerun command', () => {
       mockRunApi.getRun.mockResolvedValue(run);
       mockRunApi.rerunFailedJobs.mockResolvedValue(undefined);
 
-      const cmd = createRerunCommand(mockOutput as unknown as Output, mockRunApi as unknown as RunApi);
+      const cmd = createRerunCommand(
+        mockOutput as unknown as Output,
+        mockRunApi as unknown as RunApi
+      );
       await cmd.parseAsync(['node', 'test', '12345678', '--failed']);
 
       expect(mockRunApi.rerunFailedJobs).toHaveBeenCalledWith({
@@ -182,7 +191,10 @@ describe('run rerun command', () => {
       mockRunApi.getJob.mockResolvedValue(job);
       mockRunApi.rerunJob.mockResolvedValue(undefined);
 
-      const cmd = createRerunCommand(mockOutput as unknown as Output, mockRunApi as unknown as RunApi);
+      const cmd = createRerunCommand(
+        mockOutput as unknown as Output,
+        mockRunApi as unknown as RunApi
+      );
       await cmd.parseAsync(['node', 'test', '12345678', '--job', '999']);
 
       expect(mockRunApi.getJob).toHaveBeenCalledWith({
@@ -209,7 +221,10 @@ describe('run rerun command', () => {
       mockRunApi.getRun.mockResolvedValue(run);
       mockRunApi.rerunRun.mockResolvedValue(undefined);
 
-      const cmd = createRerunCommand(mockOutput as unknown as Output, mockRunApi as unknown as RunApi);
+      const cmd = createRerunCommand(
+        mockOutput as unknown as Output,
+        mockRunApi as unknown as RunApi
+      );
       await cmd.parseAsync(['node', 'test', '12345678', '--repo', 'other-owner/other-repo']);
 
       expect(mockResolveRepository).toHaveBeenCalledWith('other-owner/other-repo');
@@ -233,7 +248,10 @@ describe('run rerun command', () => {
         error: 'Not a git repository',
       });
 
-      const cmd = createRerunCommand(mockOutput as unknown as Output, mockRunApi as unknown as RunApi);
+      const cmd = createRerunCommand(
+        mockOutput as unknown as Output,
+        mockRunApi as unknown as RunApi
+      );
       await cmd.parseAsync(['node', 'test', '12345678']);
 
       expect(mockOutput.printError).toHaveBeenCalledWith('Error: Not a git repository');
@@ -241,7 +259,10 @@ describe('run rerun command', () => {
     });
 
     it('handles invalid run ID', async () => {
-      const cmd = createRerunCommand(mockOutput as unknown as Output, mockRunApi as unknown as RunApi);
+      const cmd = createRerunCommand(
+        mockOutput as unknown as Output,
+        mockRunApi as unknown as RunApi
+      );
       await cmd.parseAsync(['node', 'test', 'abc']);
 
       expect(mockOutput.printError).toHaveBeenCalledWith('Error: Invalid run ID "abc"');
@@ -252,7 +273,10 @@ describe('run rerun command', () => {
       const run = createMockRunListItem();
       mockRunApi.getRun.mockResolvedValue(run);
 
-      const cmd = createRerunCommand(mockOutput as unknown as Output, mockRunApi as unknown as RunApi);
+      const cmd = createRerunCommand(
+        mockOutput as unknown as Output,
+        mockRunApi as unknown as RunApi
+      );
       await cmd.parseAsync(['node', 'test', '12345678', '--job', 'abc']);
 
       expect(mockOutput.printError).toHaveBeenCalledWith('Error: Invalid job ID "abc"');
@@ -264,10 +288,15 @@ describe('run rerun command', () => {
       mockRunApi.getRun.mockResolvedValue(run);
       mockRunApi.rerunRun.mockRejectedValue(new Error('Cannot rerun - workflow is disabled'));
 
-      const cmd = createRerunCommand(mockOutput as unknown as Output, mockRunApi as unknown as RunApi);
+      const cmd = createRerunCommand(
+        mockOutput as unknown as Output,
+        mockRunApi as unknown as RunApi
+      );
       await cmd.parseAsync(['node', 'test', '12345678']);
 
-      expect(mockOutput.printError).toHaveBeenCalledWith('Error: Cannot rerun - workflow is disabled');
+      expect(mockOutput.printError).toHaveBeenCalledWith(
+        'Error: Cannot rerun - workflow is disabled'
+      );
       expect(process.exitCode).toBe(1);
     });
   });

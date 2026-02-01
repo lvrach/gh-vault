@@ -30,7 +30,9 @@ export function createDeleteCommand(output: Output, repoApi: RepoApi): Command {
         // Require explicit repo argument and --yes for non-interactive deletion
         if (!repoArg) {
           output.printError('Error: for safety, --yes is ignored when no repository is specified');
-          output.printError(`To delete this repository, run: gh-vault repo delete ${fullName} --yes`);
+          output.printError(
+            `To delete this repository, run: gh-vault repo delete ${fullName} --yes`
+          );
           process.exitCode = 1;
           return;
         }

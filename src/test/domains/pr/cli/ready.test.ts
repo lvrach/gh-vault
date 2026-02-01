@@ -4,7 +4,7 @@
  * Tests the `gh-vault pr ready` CLI command with mocked dependencies.
  */
 
-import { afterEach,beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import type { PrApi } from '../../../../domains/pr/api.js';
 import { createReadyCommand } from '../../../../domains/pr/cli/ready.js';
@@ -20,7 +20,7 @@ vi.mock('../../../../shared/repo.js', () => ({
   resolvePrNumber: vi.fn(),
 }));
 
-import { resolvePrNumber,resolveRepository } from '../../../../shared/repo.js';
+import { resolvePrNumber, resolveRepository } from '../../../../shared/repo.js';
 
 const mockResolveRepository = vi.mocked(resolveRepository);
 const mockResolvePrNumber = vi.mocked(resolvePrNumber);
@@ -113,7 +113,10 @@ describe('pr ready command', () => {
       const readyPr = createMockPullRequest({ draft: false });
       mockPrApi.updatePrDraft.mockResolvedValue(readyPr);
 
-      const cmd = createReadyCommand(mockOutput as unknown as Output, mockPrApi as unknown as PrApi);
+      const cmd = createReadyCommand(
+        mockOutput as unknown as Output,
+        mockPrApi as unknown as PrApi
+      );
       await cmd.parseAsync(['node', 'test', '42']);
 
       expect(mockPrApi.updatePrDraft).toHaveBeenCalledWith({
@@ -130,7 +133,10 @@ describe('pr ready command', () => {
       const draftPr = createMockPullRequest({ draft: true });
       mockPrApi.updatePrDraft.mockResolvedValue(draftPr);
 
-      const cmd = createReadyCommand(mockOutput as unknown as Output, mockPrApi as unknown as PrApi);
+      const cmd = createReadyCommand(
+        mockOutput as unknown as Output,
+        mockPrApi as unknown as PrApi
+      );
       await cmd.parseAsync(['node', 'test', '42', '--undo']);
 
       expect(mockPrApi.updatePrDraft).toHaveBeenCalledWith({
@@ -151,7 +157,10 @@ describe('pr ready command', () => {
       const readyPr = createMockPullRequest({ draft: false });
       mockPrApi.updatePrDraft.mockResolvedValue(readyPr);
 
-      const cmd = createReadyCommand(mockOutput as unknown as Output, mockPrApi as unknown as PrApi);
+      const cmd = createReadyCommand(
+        mockOutput as unknown as Output,
+        mockPrApi as unknown as PrApi
+      );
       await cmd.parseAsync(['node', 'test', '42', '--repo', 'other-owner/other-repo']);
 
       expect(mockResolveRepository).toHaveBeenCalledWith('other-owner/other-repo');
@@ -167,7 +176,10 @@ describe('pr ready command', () => {
       const readyPr = createMockPullRequest({ draft: false });
       mockPrApi.updatePrDraft.mockResolvedValue(readyPr);
 
-      const cmd = createReadyCommand(mockOutput as unknown as Output, mockPrApi as unknown as PrApi);
+      const cmd = createReadyCommand(
+        mockOutput as unknown as Output,
+        mockPrApi as unknown as PrApi
+      );
       await cmd.parseAsync(['node', 'test']);
 
       expect(mockResolvePrNumber).toHaveBeenCalledWith(
@@ -191,7 +203,10 @@ describe('pr ready command', () => {
         error: 'Not a git repository',
       });
 
-      const cmd = createReadyCommand(mockOutput as unknown as Output, mockPrApi as unknown as PrApi);
+      const cmd = createReadyCommand(
+        mockOutput as unknown as Output,
+        mockPrApi as unknown as PrApi
+      );
       await cmd.parseAsync(['node', 'test', '42']);
 
       expect(mockOutput.printError).toHaveBeenCalledWith('Error: Not a git repository');
@@ -205,17 +220,25 @@ describe('pr ready command', () => {
         error: 'No open PR found for current branch',
       });
 
-      const cmd = createReadyCommand(mockOutput as unknown as Output, mockPrApi as unknown as PrApi);
+      const cmd = createReadyCommand(
+        mockOutput as unknown as Output,
+        mockPrApi as unknown as PrApi
+      );
       await cmd.parseAsync(['node', 'test']);
 
-      expect(mockOutput.printError).toHaveBeenCalledWith('Error: No open PR found for current branch');
+      expect(mockOutput.printError).toHaveBeenCalledWith(
+        'Error: No open PR found for current branch'
+      );
       expect(process.exitCode).toBe(1);
     });
 
     it('handles API error when marking ready', async () => {
       mockPrApi.updatePrDraft.mockRejectedValue(new Error('PR is already ready for review'));
 
-      const cmd = createReadyCommand(mockOutput as unknown as Output, mockPrApi as unknown as PrApi);
+      const cmd = createReadyCommand(
+        mockOutput as unknown as Output,
+        mockPrApi as unknown as PrApi
+      );
       await cmd.parseAsync(['node', 'test', '42']);
 
       expect(mockOutput.printError).toHaveBeenCalledWith('Error: PR is already ready for review');
@@ -225,10 +248,15 @@ describe('pr ready command', () => {
     it('handles API error when converting to draft', async () => {
       mockPrApi.updatePrDraft.mockRejectedValue(new Error('Cannot convert merged PR to draft'));
 
-      const cmd = createReadyCommand(mockOutput as unknown as Output, mockPrApi as unknown as PrApi);
+      const cmd = createReadyCommand(
+        mockOutput as unknown as Output,
+        mockPrApi as unknown as PrApi
+      );
       await cmd.parseAsync(['node', 'test', '42', '--undo']);
 
-      expect(mockOutput.printError).toHaveBeenCalledWith('Error: Cannot convert merged PR to draft');
+      expect(mockOutput.printError).toHaveBeenCalledWith(
+        'Error: Cannot convert merged PR to draft'
+      );
       expect(process.exitCode).toBe(1);
     });
   });

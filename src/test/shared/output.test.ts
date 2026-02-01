@@ -5,7 +5,7 @@
  * Uses dependency injection pattern for testability.
  */
 
-import { beforeEach,describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { type ConsoleInterface, Output } from '../../shared/output.js';
 

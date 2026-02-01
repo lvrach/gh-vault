@@ -5,7 +5,7 @@
  * Uses table-driven tests for comprehensive coverage with minimal repetition.
  */
 
-import { describe, expect,it } from 'vitest';
+import { describe, expect, it } from 'vitest';
 
 import {
   formatPrCommentsJson,
@@ -350,7 +350,10 @@ describe('formatPrViewJson', () => {
 
 describe('formatPrFilesJson', () => {
   it('formats file list as JSON array', () => {
-    const files = [createTestPrFile({ filename: 'src/a.ts' }), createTestPrFile({ filename: 'src/b.ts' })];
+    const files = [
+      createTestPrFile({ filename: 'src/a.ts' }),
+      createTestPrFile({ filename: 'src/b.ts' }),
+    ];
     const result = formatPrFilesJson(files);
     const parsed = JSON.parse(result) as unknown[];
 

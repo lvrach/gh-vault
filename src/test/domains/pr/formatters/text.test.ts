@@ -386,8 +386,22 @@ describe('formatPrChecksText', () => {
       sha: 'abc123def',
       overallState: 'success',
       checkRuns: [
-        { name: 'CI', status: 'completed', conclusion: 'success', detailsUrl: null, startedAt: null, completedAt: null },
-        { name: 'Lint', status: 'completed', conclusion: 'success', detailsUrl: null, startedAt: null, completedAt: null },
+        {
+          name: 'CI',
+          status: 'completed',
+          conclusion: 'success',
+          detailsUrl: null,
+          startedAt: null,
+          completedAt: null,
+        },
+        {
+          name: 'Lint',
+          status: 'completed',
+          conclusion: 'success',
+          detailsUrl: null,
+          startedAt: null,
+          completedAt: null,
+        },
       ],
       statuses: [],
       passing: 2,
@@ -403,9 +417,30 @@ describe('formatPrChecksText', () => {
       sha: 'abc123def',
       overallState: 'failure',
       checkRuns: [
-        { name: 'CI', status: 'completed', conclusion: 'success', detailsUrl: null, startedAt: null, completedAt: null },
-        { name: 'Tests', status: 'completed', conclusion: 'failure', detailsUrl: null, startedAt: null, completedAt: null },
-        { name: 'Deploy', status: 'in_progress', conclusion: null, detailsUrl: null, startedAt: null, completedAt: null },
+        {
+          name: 'CI',
+          status: 'completed',
+          conclusion: 'success',
+          detailsUrl: null,
+          startedAt: null,
+          completedAt: null,
+        },
+        {
+          name: 'Tests',
+          status: 'completed',
+          conclusion: 'failure',
+          detailsUrl: null,
+          startedAt: null,
+          completedAt: null,
+        },
+        {
+          name: 'Deploy',
+          status: 'in_progress',
+          conclusion: null,
+          detailsUrl: null,
+          startedAt: null,
+          completedAt: null,
+        },
       ],
       statuses: [
         { state: 'success', context: 'coverage/codecov', description: '80%', targetUrl: null },
@@ -423,10 +458,22 @@ describe('formatPrChecksText', () => {
       sha: 'abc123def',
       overallState: 'pending',
       checkRuns: [
-        { name: 'CI', status: 'queued', conclusion: null, detailsUrl: null, startedAt: null, completedAt: null },
+        {
+          name: 'CI',
+          status: 'queued',
+          conclusion: null,
+          detailsUrl: null,
+          startedAt: null,
+          completedAt: null,
+        },
       ],
       statuses: [
-        { state: 'pending', context: 'deploy/preview', description: 'Building...', targetUrl: null },
+        {
+          state: 'pending',
+          context: 'deploy/preview',
+          description: 'Building...',
+          targetUrl: null,
+        },
       ],
       passing: 0,
       failing: 0,
@@ -470,10 +517,18 @@ describe('formatPrStatusText', () => {
         createPrListItem({ number: 3, title: 'My PR 2', draft: true }),
       ],
       reviewRequested: [
-        createPrListItem({ number: 4, title: 'Review requested', user: { login: 'author', htmlUrl: '#' } }),
+        createPrListItem({
+          number: 4,
+          title: 'Review requested',
+          user: { login: 'author', htmlUrl: '#' },
+        }),
       ],
       assignedToYou: [
-        createPrListItem({ number: 5, title: 'Assigned to me', user: { login: 'assigner', htmlUrl: '#' } }),
+        createPrListItem({
+          number: 5,
+          title: 'Assigned to me',
+          user: { login: 'assigner', htmlUrl: '#' },
+        }),
       ],
     };
     expect(formatPrStatusText(status, false)).toMatchSnapshot();

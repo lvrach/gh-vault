@@ -4,7 +4,7 @@
  * Tests the `gh-vault pr comment` CLI command with mocked dependencies.
  */
 
-import { afterEach,beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import type { PrApi } from '../../../../domains/pr/api.js';
 import { createCommentCommand } from '../../../../domains/pr/cli/comment.js';
@@ -23,7 +23,7 @@ vi.mock('../../../../shared/repo.js', () => ({
 
 import openModule from 'open';
 
-import { resolvePrNumber,resolveRepository } from '../../../../shared/repo.js';
+import { resolvePrNumber, resolveRepository } from '../../../../shared/repo.js';
 
 const mockOpen = vi.mocked(openModule);
 const mockResolveRepository = vi.mocked(resolveRepository);
@@ -112,7 +112,10 @@ describe('pr comment command', () => {
       const comment = createMockComment({ body: 'My comment' });
       mockPrApi.createPrComment.mockResolvedValue(comment);
 
-      const cmd = createCommentCommand(mockOutput as unknown as Output, mockPrApi as unknown as PrApi);
+      const cmd = createCommentCommand(
+        mockOutput as unknown as Output,
+        mockPrApi as unknown as PrApi
+      );
       await cmd.parseAsync(['node', 'test', '42', '--body', 'My comment']);
 
       expect(mockPrApi.createPrComment).toHaveBeenCalledWith({
@@ -126,7 +129,10 @@ describe('pr comment command', () => {
     });
 
     it('opens browser when --web is specified', async () => {
-      const cmd = createCommentCommand(mockOutput as unknown as Output, mockPrApi as unknown as PrApi);
+      const cmd = createCommentCommand(
+        mockOutput as unknown as Output,
+        mockPrApi as unknown as PrApi
+      );
       await cmd.parseAsync(['node', 'test', '42', '--web']);
 
       expect(mockOpen).toHaveBeenCalledWith(
@@ -144,7 +150,10 @@ describe('pr comment command', () => {
       const comment = createMockComment();
       mockPrApi.createPrComment.mockResolvedValue(comment);
 
-      const cmd = createCommentCommand(mockOutput as unknown as Output, mockPrApi as unknown as PrApi);
+      const cmd = createCommentCommand(
+        mockOutput as unknown as Output,
+        mockPrApi as unknown as PrApi
+      );
       await cmd.parseAsync([
         'node',
         'test',
@@ -176,7 +185,10 @@ describe('pr comment command', () => {
       mockPrApi.listPrComments.mockResolvedValue([existingComment]);
       mockPrApi.updatePrComment.mockResolvedValue(updatedComment);
 
-      const cmd = createCommentCommand(mockOutput as unknown as Output, mockPrApi as unknown as PrApi);
+      const cmd = createCommentCommand(
+        mockOutput as unknown as Output,
+        mockPrApi as unknown as PrApi
+      );
       await cmd.parseAsync(['node', 'test', '42', '--edit-last', '--body', 'New comment']);
 
       expect(mockPrApi.getCurrentUser).toHaveBeenCalled();
@@ -199,7 +211,10 @@ describe('pr comment command', () => {
       const existingComment = createMockComment({ id: 123 });
       mockPrApi.listPrComments.mockResolvedValue([existingComment]);
 
-      const cmd = createCommentCommand(mockOutput as unknown as Output, mockPrApi as unknown as PrApi);
+      const cmd = createCommentCommand(
+        mockOutput as unknown as Output,
+        mockPrApi as unknown as PrApi
+      );
       await cmd.parseAsync(['node', 'test', '42', '--edit-last']);
 
       expect(mockOutput.printError).toHaveBeenCalledWith(
@@ -214,7 +229,10 @@ describe('pr comment command', () => {
       });
       mockPrApi.listPrComments.mockResolvedValue([otherUserComment]);
 
-      const cmd = createCommentCommand(mockOutput as unknown as Output, mockPrApi as unknown as PrApi);
+      const cmd = createCommentCommand(
+        mockOutput as unknown as Output,
+        mockPrApi as unknown as PrApi
+      );
       await cmd.parseAsync(['node', 'test', '42', '--edit-last', '--body', 'New']);
 
       expect(mockOutput.printError).toHaveBeenCalledWith(
@@ -234,7 +252,10 @@ describe('pr comment command', () => {
       mockPrApi.listPrComments.mockResolvedValue([existingComment]);
       mockPrApi.deletePrComment.mockResolvedValue(undefined);
 
-      const cmd = createCommentCommand(mockOutput as unknown as Output, mockPrApi as unknown as PrApi);
+      const cmd = createCommentCommand(
+        mockOutput as unknown as Output,
+        mockPrApi as unknown as PrApi
+      );
       await cmd.parseAsync(['node', 'test', '42', '--delete-last', '--yes']);
 
       expect(mockPrApi.getCurrentUser).toHaveBeenCalled();
@@ -249,7 +270,10 @@ describe('pr comment command', () => {
     it('errors when no comments by user for --delete-last', async () => {
       mockPrApi.listPrComments.mockResolvedValue([]);
 
-      const cmd = createCommentCommand(mockOutput as unknown as Output, mockPrApi as unknown as PrApi);
+      const cmd = createCommentCommand(
+        mockOutput as unknown as Output,
+        mockPrApi as unknown as PrApi
+      );
       await cmd.parseAsync(['node', 'test', '42', '--delete-last', '--yes']);
 
       expect(mockOutput.printError).toHaveBeenCalledWith(
@@ -267,7 +291,10 @@ describe('pr comment command', () => {
       mockPrApi.listPrComments.mockResolvedValue([otherComment, userComment]);
       mockPrApi.deletePrComment.mockResolvedValue(undefined);
 
-      const cmd = createCommentCommand(mockOutput as unknown as Output, mockPrApi as unknown as PrApi);
+      const cmd = createCommentCommand(
+        mockOutput as unknown as Output,
+        mockPrApi as unknown as PrApi
+      );
       await cmd.parseAsync(['node', 'test', '42', '--delete-last', '--yes']);
 
       expect(mockPrApi.deletePrComment).toHaveBeenCalledWith(
@@ -289,7 +316,10 @@ describe('pr comment command', () => {
         error: 'Not a git repository',
       });
 
-      const cmd = createCommentCommand(mockOutput as unknown as Output, mockPrApi as unknown as PrApi);
+      const cmd = createCommentCommand(
+        mockOutput as unknown as Output,
+        mockPrApi as unknown as PrApi
+      );
       await cmd.parseAsync(['node', 'test', '42', '--body', 'test']);
 
       expect(mockOutput.printError).toHaveBeenCalledWith('Error: Not a git repository');
@@ -303,25 +333,38 @@ describe('pr comment command', () => {
         error: 'No open PR found for current branch',
       });
 
-      const cmd = createCommentCommand(mockOutput as unknown as Output, mockPrApi as unknown as PrApi);
+      const cmd = createCommentCommand(
+        mockOutput as unknown as Output,
+        mockPrApi as unknown as PrApi
+      );
       await cmd.parseAsync(['node', 'test', '--body', 'test']);
 
-      expect(mockOutput.printError).toHaveBeenCalledWith('Error: No open PR found for current branch');
+      expect(mockOutput.printError).toHaveBeenCalledWith(
+        'Error: No open PR found for current branch'
+      );
       expect(process.exitCode).toBe(1);
     });
 
     it('requires body when creating comment', async () => {
-      const cmd = createCommentCommand(mockOutput as unknown as Output, mockPrApi as unknown as PrApi);
+      const cmd = createCommentCommand(
+        mockOutput as unknown as Output,
+        mockPrApi as unknown as PrApi
+      );
       await cmd.parseAsync(['node', 'test', '42']);
 
-      expect(mockOutput.printError).toHaveBeenCalledWith('Error: Comment body is required (-b or -F)');
+      expect(mockOutput.printError).toHaveBeenCalledWith(
+        'Error: Comment body is required (-b or -F)'
+      );
       expect(process.exitCode).toBe(1);
     });
 
     it('handles API error when creating comment', async () => {
       mockPrApi.createPrComment.mockRejectedValue(new Error('Permission denied'));
 
-      const cmd = createCommentCommand(mockOutput as unknown as Output, mockPrApi as unknown as PrApi);
+      const cmd = createCommentCommand(
+        mockOutput as unknown as Output,
+        mockPrApi as unknown as PrApi
+      );
       await cmd.parseAsync(['node', 'test', '42', '--body', 'test']);
 
       expect(mockOutput.printError).toHaveBeenCalledWith('Error: Permission denied');
@@ -333,7 +376,10 @@ describe('pr comment command', () => {
       mockPrApi.listPrComments.mockResolvedValue([existingComment]);
       mockPrApi.updatePrComment.mockRejectedValue(new Error('Comment not found'));
 
-      const cmd = createCommentCommand(mockOutput as unknown as Output, mockPrApi as unknown as PrApi);
+      const cmd = createCommentCommand(
+        mockOutput as unknown as Output,
+        mockPrApi as unknown as PrApi
+      );
       await cmd.parseAsync(['node', 'test', '42', '--edit-last', '--body', 'New']);
 
       expect(mockOutput.printError).toHaveBeenCalledWith('Error: Comment not found');
@@ -345,7 +391,10 @@ describe('pr comment command', () => {
       mockPrApi.listPrComments.mockResolvedValue([existingComment]);
       mockPrApi.deletePrComment.mockRejectedValue(new Error('Cannot delete'));
 
-      const cmd = createCommentCommand(mockOutput as unknown as Output, mockPrApi as unknown as PrApi);
+      const cmd = createCommentCommand(
+        mockOutput as unknown as Output,
+        mockPrApi as unknown as PrApi
+      );
       await cmd.parseAsync(['node', 'test', '42', '--delete-last', '--yes']);
 
       expect(mockOutput.printError).toHaveBeenCalledWith('Error: Cannot delete');

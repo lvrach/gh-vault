@@ -134,7 +134,9 @@ describe('workflow view command', () => {
     });
 
     it('opens workflow in browser with --web flag', async () => {
-      const workflow = createMockWorkflow({ htmlUrl: 'https://github.com/owner/repo/actions/workflows/ci.yml' });
+      const workflow = createMockWorkflow({
+        htmlUrl: 'https://github.com/owner/repo/actions/workflows/ci.yml',
+      });
       mockWorkflowApi.findWorkflow.mockResolvedValue(workflow);
 
       const cmd = createViewCommand(
@@ -143,7 +145,9 @@ describe('workflow view command', () => {
       );
       await cmd.parseAsync(['node', 'test', 'ci.yml', '--web']);
 
-      expect(mockOpen).toHaveBeenCalledWith('https://github.com/owner/repo/actions/workflows/ci.yml');
+      expect(mockOpen).toHaveBeenCalledWith(
+        'https://github.com/owner/repo/actions/workflows/ci.yml'
+      );
     });
 
     it('shows YAML content with --yaml flag', async () => {
@@ -274,7 +278,9 @@ describe('workflow view command', () => {
       );
       await cmd.parseAsync(['node', 'test', 'ci.yml', '--jq', '.name']);
 
-      expect(mockOutput.printError).toHaveBeenCalledWith('Error: --jq requires --json to be specified');
+      expect(mockOutput.printError).toHaveBeenCalledWith(
+        'Error: --jq requires --json to be specified'
+      );
       expect(process.exitCode).toBe(1);
     });
 

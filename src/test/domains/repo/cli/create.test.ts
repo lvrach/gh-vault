@@ -156,7 +156,14 @@ describe('repo create command', () => {
         mockOutput as unknown as Output,
         mockRepoApi as unknown as RepoApi
       );
-      await cmd.parseAsync(['node', 'test', 'my-repo', '--public', '--description', 'My awesome repo']);
+      await cmd.parseAsync([
+        'node',
+        'test',
+        'my-repo',
+        '--public',
+        '--description',
+        'My awesome repo',
+      ]);
 
       expect(mockRepoApi.createRepo).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -230,9 +237,7 @@ describe('repo create command', () => {
       );
       await cmd.parseAsync(['node', 'test', '--public']);
 
-      expect(mockOutput.printError).toHaveBeenCalledWith(
-        'Error: repository name is required'
-      );
+      expect(mockOutput.printError).toHaveBeenCalledWith('Error: repository name is required');
       expect(process.exitCode).toBe(1);
     });
 

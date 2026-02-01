@@ -3,7 +3,6 @@
  * These functions create realistic GitHub API responses for testing.
  */
 
-
 /**
  * Create a mock repository (for GET /repos/:owner/:repo).
  */

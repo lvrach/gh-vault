@@ -216,7 +216,9 @@ export class RepoApi {
     // List authenticated user's repos
     // Note: REST API visibility only accepts 'all' | 'public' | 'private'
     const visibilityParam =
-      input.visibility === 'internal' ? undefined : (input.visibility as 'all' | 'public' | 'private');
+      input.visibility === 'internal'
+        ? undefined
+        : (input.visibility as 'all' | 'public' | 'private');
     const { data } = await this.client.rest.repos.listForAuthenticatedUser({
       per_page: perPage,
       page,

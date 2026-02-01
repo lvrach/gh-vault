@@ -4,7 +4,7 @@
  * Tests pure functions that transform workflow run types to JSON output.
  */
 
-import { describe, expect,it } from 'vitest';
+import { describe, expect, it } from 'vitest';
 
 import {
   formatJobViewJson,
@@ -42,7 +42,10 @@ function createTestRunJob(overrides: Partial<RunJob> = {}): RunJob {
     startedAt: '2024-01-15T10:00:00Z',
     completedAt: '2024-01-15T10:05:00Z',
     htmlUrl: 'https://github.com/octocat/Hello-World/actions/runs/1/jobs/1000',
-    steps: [createTestRunStep({ number: 1, name: 'Set up job' }), createTestRunStep({ number: 2, name: 'Build' })],
+    steps: [
+      createTestRunStep({ number: 1, name: 'Set up job' }),
+      createTestRunStep({ number: 2, name: 'Build' }),
+    ],
     ...overrides,
   };
 }

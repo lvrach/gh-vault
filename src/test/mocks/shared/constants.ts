@@ -5,7 +5,7 @@
  * These constants are used in the magic number pattern for error testing.
  */
 
-import { getReasonPhrase,StatusCodes } from 'http-status-codes';
+import { getReasonPhrase, StatusCodes } from 'http-status-codes';
 
 /**
  * Magic number pattern for error testing.
@@ -53,5 +53,4 @@ export function getMagicErrorMessage(id: MagicErrorId): string {
 
 // Re-export StatusCodes for convenience
 
-
-export {getReasonPhrase, StatusCodes} from 'http-status-codes';
+export { getReasonPhrase, StatusCodes } from 'http-status-codes';

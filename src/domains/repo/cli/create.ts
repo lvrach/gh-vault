@@ -72,7 +72,9 @@ export function createCreateCommand(output: Output, repoApi: RepoApi): Command {
 
         // Check if visibility is specified
         if (!options.public && !options.private && !options.internal) {
-          output.printError('Error: visibility must be specified (--public, --private, or --internal)');
+          output.printError(
+            'Error: visibility must be specified (--public, --private, or --internal)'
+          );
           process.exitCode = 1;
           return;
         }

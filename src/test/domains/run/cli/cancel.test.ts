@@ -104,7 +104,10 @@ describe('run cancel command', () => {
       mockRunApi.getRun.mockResolvedValue(run);
       mockRunApi.cancelRun.mockResolvedValue(undefined);
 
-      const cmd = createCancelCommand(mockOutput as unknown as Output, mockRunApi as unknown as RunApi);
+      const cmd = createCancelCommand(
+        mockOutput as unknown as Output,
+        mockRunApi as unknown as RunApi
+      );
       await cmd.parseAsync(['node', 'test', '12345678']);
 
       expect(mockRunApi.getRun).toHaveBeenCalledWith({
@@ -131,7 +134,10 @@ describe('run cancel command', () => {
       mockRunApi.getRun.mockResolvedValue(run);
       mockRunApi.cancelRun.mockResolvedValue(undefined);
 
-      const cmd = createCancelCommand(mockOutput as unknown as Output, mockRunApi as unknown as RunApi);
+      const cmd = createCancelCommand(
+        mockOutput as unknown as Output,
+        mockRunApi as unknown as RunApi
+      );
       await cmd.parseAsync(['node', 'test', '12345678', '--repo', 'other-owner/other-repo']);
 
       expect(mockResolveRepository).toHaveBeenCalledWith('other-owner/other-repo');
@@ -155,7 +161,10 @@ describe('run cancel command', () => {
         error: 'Not a git repository',
       });
 
-      const cmd = createCancelCommand(mockOutput as unknown as Output, mockRunApi as unknown as RunApi);
+      const cmd = createCancelCommand(
+        mockOutput as unknown as Output,
+        mockRunApi as unknown as RunApi
+      );
       await cmd.parseAsync(['node', 'test', '12345678']);
 
       expect(mockOutput.printError).toHaveBeenCalledWith('Error: Not a git repository');
@@ -163,7 +172,10 @@ describe('run cancel command', () => {
     });
 
     it('handles invalid run ID', async () => {
-      const cmd = createCancelCommand(mockOutput as unknown as Output, mockRunApi as unknown as RunApi);
+      const cmd = createCancelCommand(
+        mockOutput as unknown as Output,
+        mockRunApi as unknown as RunApi
+      );
       await cmd.parseAsync(['node', 'test', 'abc']);
 
       expect(mockOutput.printError).toHaveBeenCalledWith('Error: Invalid run ID "abc"');
@@ -174,7 +186,10 @@ describe('run cancel command', () => {
       const run = createMockRunListItem({ status: 'completed', conclusion: 'success' });
       mockRunApi.getRun.mockResolvedValue(run);
 
-      const cmd = createCancelCommand(mockOutput as unknown as Output, mockRunApi as unknown as RunApi);
+      const cmd = createCancelCommand(
+        mockOutput as unknown as Output,
+        mockRunApi as unknown as RunApi
+      );
       await cmd.parseAsync(['node', 'test', '12345678']);
 
       expect(mockOutput.printError).toHaveBeenCalledWith('Error: Run #42 is already completed');
@@ -187,7 +202,10 @@ describe('run cancel command', () => {
       mockRunApi.getRun.mockResolvedValue(run);
       mockRunApi.cancelRun.mockRejectedValue(new Error('Permission denied'));
 
-      const cmd = createCancelCommand(mockOutput as unknown as Output, mockRunApi as unknown as RunApi);
+      const cmd = createCancelCommand(
+        mockOutput as unknown as Output,
+        mockRunApi as unknown as RunApi
+      );
       await cmd.parseAsync(['node', 'test', '12345678']);
 
       expect(mockOutput.printError).toHaveBeenCalledWith('Error: Permission denied');
@@ -199,10 +217,15 @@ describe('run cancel command', () => {
       mockRunApi.getRun.mockResolvedValue(run);
       mockRunApi.cancelRun.mockRejectedValue(new Error('409 Conflict'));
 
-      const cmd = createCancelCommand(mockOutput as unknown as Output, mockRunApi as unknown as RunApi);
+      const cmd = createCancelCommand(
+        mockOutput as unknown as Output,
+        mockRunApi as unknown as RunApi
+      );
       await cmd.parseAsync(['node', 'test', '12345678']);
 
-      expect(mockOutput.printError).toHaveBeenCalledWith('Error: Cannot cancel - run has already completed');
+      expect(mockOutput.printError).toHaveBeenCalledWith(
+        'Error: Cannot cancel - run has already completed'
+      );
       expect(process.exitCode).toBe(1);
     });
   });

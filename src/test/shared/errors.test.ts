@@ -4,11 +4,7 @@
 
 import { describe, expect, it } from 'vitest';
 
-import {
-  formatPermissionError,
-  isPermissionError,
-  PERMISSION_MAP,
-} from '../../shared/errors.js';
+import { formatPermissionError, isPermissionError, PERMISSION_MAP } from '../../shared/errors.js';
 
 // ============================================================================
 // PERMISSION_MAP Tests
@@ -71,8 +67,16 @@ describe('formatPermissionError', () => {
 
 describe('isPermissionError', () => {
   const testCases = [
-    { input: Object.assign(new Error('Forbidden'), { status: 403 }), expected: true, desc: '403 error' },
-    { input: Object.assign(new Error('Unauthorized'), { status: 401 }), expected: false, desc: '401 error' },
+    {
+      input: Object.assign(new Error('Forbidden'), { status: 403 }),
+      expected: true,
+      desc: '403 error',
+    },
+    {
+      input: Object.assign(new Error('Unauthorized'), { status: 401 }),
+      expected: false,
+      desc: '401 error',
+    },
     { input: new Error('Generic'), expected: false, desc: 'error without status' },
     { input: 'string', expected: false, desc: 'string' },
     { input: null, expected: false, desc: 'null' },

@@ -104,7 +104,10 @@ describe('run list command', () => {
       const runs = [createMockRunListItem({ id: 1 }), createMockRunListItem({ id: 2 })];
       mockRunApi.listRuns.mockResolvedValue(runs);
 
-      const cmd = createListCommand(mockOutput as unknown as Output, mockRunApi as unknown as RunApi);
+      const cmd = createListCommand(
+        mockOutput as unknown as Output,
+        mockRunApi as unknown as RunApi
+      );
       await cmd.parseAsync(['node', 'test']);
 
       expect(mockRunApi.listRuns).toHaveBeenCalledWith(
@@ -121,7 +124,10 @@ describe('run list command', () => {
     it('passes filter options to API', async () => {
       mockRunApi.listRuns.mockResolvedValue([]);
 
-      const cmd = createListCommand(mockOutput as unknown as Output, mockRunApi as unknown as RunApi);
+      const cmd = createListCommand(
+        mockOutput as unknown as Output,
+        mockRunApi as unknown as RunApi
+      );
       await cmd.parseAsync([
         'node',
         'test',
@@ -160,7 +166,10 @@ describe('run list command', () => {
       mockRunApi.getWorkflowIdByName.mockResolvedValue(123);
       mockRunApi.listRuns.mockResolvedValue([]);
 
-      const cmd = createListCommand(mockOutput as unknown as Output, mockRunApi as unknown as RunApi);
+      const cmd = createListCommand(
+        mockOutput as unknown as Output,
+        mockRunApi as unknown as RunApi
+      );
       await cmd.parseAsync(['node', 'test', '--workflow', 'CI']);
 
       expect(mockRunApi.getWorkflowIdByName).toHaveBeenCalledWith({
@@ -178,7 +187,10 @@ describe('run list command', () => {
     it('uses numeric workflow ID directly when provided', async () => {
       mockRunApi.listRuns.mockResolvedValue([]);
 
-      const cmd = createListCommand(mockOutput as unknown as Output, mockRunApi as unknown as RunApi);
+      const cmd = createListCommand(
+        mockOutput as unknown as Output,
+        mockRunApi as unknown as RunApi
+      );
       await cmd.parseAsync(['node', 'test', '--workflow', '456']);
 
       expect(mockRunApi.getWorkflowIdByName).not.toHaveBeenCalled();
@@ -193,7 +205,10 @@ describe('run list command', () => {
       const runs = [createMockRunListItem()];
       mockRunApi.listRuns.mockResolvedValue(runs);
 
-      const cmd = createListCommand(mockOutput as unknown as Output, mockRunApi as unknown as RunApi);
+      const cmd = createListCommand(
+        mockOutput as unknown as Output,
+        mockRunApi as unknown as RunApi
+      );
       await cmd.parseAsync(['node', 'test', '--json']);
 
       expect(mockOutput.print).toHaveBeenCalled();
@@ -205,7 +220,10 @@ describe('run list command', () => {
       const runs = [createMockRunListItem({ id: 42, status: 'completed' })];
       mockRunApi.listRuns.mockResolvedValue(runs);
 
-      const cmd = createListCommand(mockOutput as unknown as Output, mockRunApi as unknown as RunApi);
+      const cmd = createListCommand(
+        mockOutput as unknown as Output,
+        mockRunApi as unknown as RunApi
+      );
       await cmd.parseAsync(['node', 'test', '--json', 'databaseId,status']);
 
       const output = mockOutput.print.mock.calls[0]?.[0] as string;
@@ -221,7 +239,10 @@ describe('run list command', () => {
       });
       mockRunApi.listRuns.mockResolvedValue([]);
 
-      const cmd = createListCommand(mockOutput as unknown as Output, mockRunApi as unknown as RunApi);
+      const cmd = createListCommand(
+        mockOutput as unknown as Output,
+        mockRunApi as unknown as RunApi
+      );
       await cmd.parseAsync(['node', 'test', '--repo', 'custom-owner/custom-repo']);
 
       expect(mockResolveRepository).toHaveBeenCalledWith('custom-owner/custom-repo');
@@ -236,7 +257,10 @@ describe('run list command', () => {
     it('handles empty run list', async () => {
       mockRunApi.listRuns.mockResolvedValue([]);
 
-      const cmd = createListCommand(mockOutput as unknown as Output, mockRunApi as unknown as RunApi);
+      const cmd = createListCommand(
+        mockOutput as unknown as Output,
+        mockRunApi as unknown as RunApi
+      );
       await cmd.parseAsync(['node', 'test']);
 
       expect(mockOutput.print).toHaveBeenCalled();
@@ -255,7 +279,10 @@ describe('run list command', () => {
         error: 'Not a git repository',
       });
 
-      const cmd = createListCommand(mockOutput as unknown as Output, mockRunApi as unknown as RunApi);
+      const cmd = createListCommand(
+        mockOutput as unknown as Output,
+        mockRunApi as unknown as RunApi
+      );
       await cmd.parseAsync(['node', 'test']);
 
       expect(mockOutput.printError).toHaveBeenCalledWith('Error: Not a git repository');
@@ -266,7 +293,10 @@ describe('run list command', () => {
     it('handles API error', async () => {
       mockRunApi.listRuns.mockRejectedValue(new Error('API rate limit exceeded'));
 
-      const cmd = createListCommand(mockOutput as unknown as Output, mockRunApi as unknown as RunApi);
+      const cmd = createListCommand(
+        mockOutput as unknown as Output,
+        mockRunApi as unknown as RunApi
+      );
       await cmd.parseAsync(['node', 'test']);
 
       expect(mockOutput.printError).toHaveBeenCalledWith('Error: API rate limit exceeded');
@@ -274,7 +304,10 @@ describe('run list command', () => {
     });
 
     it('handles invalid status value', async () => {
-      const cmd = createListCommand(mockOutput as unknown as Output, mockRunApi as unknown as RunApi);
+      const cmd = createListCommand(
+        mockOutput as unknown as Output,
+        mockRunApi as unknown as RunApi
+      );
       await cmd.parseAsync(['node', 'test', '--status', 'invalid']);
 
       expect(mockOutput.printError).toHaveBeenCalledWith(
@@ -287,7 +320,10 @@ describe('run list command', () => {
     it('handles workflow not found', async () => {
       mockRunApi.getWorkflowIdByName.mockResolvedValue(null);
 
-      const cmd = createListCommand(mockOutput as unknown as Output, mockRunApi as unknown as RunApi);
+      const cmd = createListCommand(
+        mockOutput as unknown as Output,
+        mockRunApi as unknown as RunApi
+      );
       await cmd.parseAsync(['node', 'test', '--workflow', 'NonExistent']);
 
       expect(mockOutput.printError).toHaveBeenCalledWith('Error: Workflow "NonExistent" not found');
@@ -296,10 +332,15 @@ describe('run list command', () => {
     });
 
     it('requires --json when --jq is specified', async () => {
-      const cmd = createListCommand(mockOutput as unknown as Output, mockRunApi as unknown as RunApi);
+      const cmd = createListCommand(
+        mockOutput as unknown as Output,
+        mockRunApi as unknown as RunApi
+      );
       await cmd.parseAsync(['node', 'test', '--jq', '.[0]']);
 
-      expect(mockOutput.printError).toHaveBeenCalledWith('Error: --jq requires --json to be specified');
+      expect(mockOutput.printError).toHaveBeenCalledWith(
+        'Error: --jq requires --json to be specified'
+      );
       expect(process.exitCode).toBe(1);
     });
   });
@@ -316,7 +357,10 @@ describe('run list command', () => {
       ];
       mockRunApi.listRuns.mockResolvedValue(runs);
 
-      const cmd = createListCommand(mockOutput as unknown as Output, mockRunApi as unknown as RunApi);
+      const cmd = createListCommand(
+        mockOutput as unknown as Output,
+        mockRunApi as unknown as RunApi
+      );
       await cmd.parseAsync(['node', 'test', '--json', '--jq', '.[0].databaseId']);
 
       expect(mockOutput.print).toHaveBeenCalled();

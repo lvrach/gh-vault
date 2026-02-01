@@ -259,7 +259,9 @@ describe('workflow run command', () => {
       );
       await cmd.parseAsync(['node', 'test', 'ci.yml']);
 
-      expect(mockOutput.printError).toHaveBeenCalledWith(expect.stringContaining('could not determine current branch'));
+      expect(mockOutput.printError).toHaveBeenCalledWith(
+        expect.stringContaining('could not determine current branch')
+      );
       expect(process.exitCode).toBe(1);
     });
   });

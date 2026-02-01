@@ -4,7 +4,7 @@
  * Tests the `gh-vault pr checkout` CLI command with mocked dependencies.
  */
 
-import { afterEach,beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import type { PrApi } from '../../../../domains/pr/api.js';
 import { createCheckoutCommand } from '../../../../domains/pr/cli/checkout.js';
@@ -150,7 +150,10 @@ describe('pr checkout command', () => {
 
   describe('success cases', () => {
     it('checks out PR to new branch', async () => {
-      const cmd = createCheckoutCommand(mockOutput as unknown as Output, mockPrApi as unknown as PrApi);
+      const cmd = createCheckoutCommand(
+        mockOutput as unknown as Output,
+        mockPrApi as unknown as PrApi
+      );
       await cmd.parseAsync(['node', 'test', '42']);
 
       expect(mockGitFetch).toHaveBeenCalledWith('origin', 'pull/42/head');
@@ -163,7 +166,10 @@ describe('pr checkout command', () => {
     it('updates existing branch when it exists', async () => {
       mockLocalBranchExists.mockResolvedValue(true);
 
-      const cmd = createCheckoutCommand(mockOutput as unknown as Output, mockPrApi as unknown as PrApi);
+      const cmd = createCheckoutCommand(
+        mockOutput as unknown as Output,
+        mockPrApi as unknown as PrApi
+      );
       await cmd.parseAsync(['node', 'test', '42']);
 
       expect(mockGitCheckout).toHaveBeenCalledWith('feature-branch');
@@ -171,14 +177,20 @@ describe('pr checkout command', () => {
     });
 
     it('uses custom branch name with --branch', async () => {
-      const cmd = createCheckoutCommand(mockOutput as unknown as Output, mockPrApi as unknown as PrApi);
+      const cmd = createCheckoutCommand(
+        mockOutput as unknown as Output,
+        mockPrApi as unknown as PrApi
+      );
       await cmd.parseAsync(['node', 'test', '42', '--branch', 'my-local-branch']);
 
       expect(mockGitCheckout).toHaveBeenCalledWith('my-local-branch', { create: true });
     });
 
     it('checks out in detached mode with --detach', async () => {
-      const cmd = createCheckoutCommand(mockOutput as unknown as Output, mockPrApi as unknown as PrApi);
+      const cmd = createCheckoutCommand(
+        mockOutput as unknown as Output,
+        mockPrApi as unknown as PrApi
+      );
       await cmd.parseAsync(['node', 'test', '42', '--detach']);
 
       expect(mockGitCheckout).toHaveBeenCalledWith('FETCH_HEAD', { detach: true });
@@ -188,7 +200,10 @@ describe('pr checkout command', () => {
     it('forces checkout with --force', async () => {
       mockLocalBranchExists.mockResolvedValue(true);
 
-      const cmd = createCheckoutCommand(mockOutput as unknown as Output, mockPrApi as unknown as PrApi);
+      const cmd = createCheckoutCommand(
+        mockOutput as unknown as Output,
+        mockPrApi as unknown as PrApi
+      );
       await cmd.parseAsync(['node', 'test', '42', '--force']);
 
       expect(mockGitCheckout).toHaveBeenCalledWith('feature-branch', { force: true });
@@ -196,7 +211,10 @@ describe('pr checkout command', () => {
     });
 
     it('updates submodules with --recurse-submodules', async () => {
-      const cmd = createCheckoutCommand(mockOutput as unknown as Output, mockPrApi as unknown as PrApi);
+      const cmd = createCheckoutCommand(
+        mockOutput as unknown as Output,
+        mockPrApi as unknown as PrApi
+      );
       await cmd.parseAsync(['node', 'test', '42', '--recurse-submodules']);
 
       expect(mockUpdateSubmodules).toHaveBeenCalled();
@@ -209,7 +227,10 @@ describe('pr checkout command', () => {
         repo: 'other-repo',
       });
 
-      const cmd = createCheckoutCommand(mockOutput as unknown as Output, mockPrApi as unknown as PrApi);
+      const cmd = createCheckoutCommand(
+        mockOutput as unknown as Output,
+        mockPrApi as unknown as PrApi
+      );
       await cmd.parseAsync(['node', 'test', '42', '--repo', 'other-owner/other-repo']);
 
       expect(mockResolveRepository).toHaveBeenCalledWith('other-owner/other-repo');
@@ -222,7 +243,10 @@ describe('pr checkout command', () => {
     });
 
     it('resolves PR from current branch when no argument given', async () => {
-      const cmd = createCheckoutCommand(mockOutput as unknown as Output, mockPrApi as unknown as PrApi);
+      const cmd = createCheckoutCommand(
+        mockOutput as unknown as Output,
+        mockPrApi as unknown as PrApi
+      );
       await cmd.parseAsync(['node', 'test']);
 
       expect(mockResolvePrNumber).toHaveBeenCalledWith(
@@ -246,7 +270,10 @@ describe('pr checkout command', () => {
         directory: '/test',
       });
 
-      const cmd = createCheckoutCommand(mockOutput as unknown as Output, mockPrApi as unknown as PrApi);
+      const cmd = createCheckoutCommand(
+        mockOutput as unknown as Output,
+        mockPrApi as unknown as PrApi
+      );
       await cmd.parseAsync(['node', 'test', '42']);
 
       expect(mockGitFetch).toHaveBeenCalledWith('upstream', 'pull/42/head');
@@ -256,7 +283,10 @@ describe('pr checkout command', () => {
       mockLocalBranchExists.mockResolvedValue(true);
       mockGitReset.mockRejectedValueOnce(new Error('Reset failed'));
 
-      const cmd = createCheckoutCommand(mockOutput as unknown as Output, mockPrApi as unknown as PrApi);
+      const cmd = createCheckoutCommand(
+        mockOutput as unknown as Output,
+        mockPrApi as unknown as PrApi
+      );
       await cmd.parseAsync(['node', 'test', '42']);
 
       expect(mockOutput.printError).toHaveBeenCalledWith(
@@ -278,7 +308,10 @@ describe('pr checkout command', () => {
         error: 'Not a git repository',
       });
 
-      const cmd = createCheckoutCommand(mockOutput as unknown as Output, mockPrApi as unknown as PrApi);
+      const cmd = createCheckoutCommand(
+        mockOutput as unknown as Output,
+        mockPrApi as unknown as PrApi
+      );
       await cmd.parseAsync(['node', 'test', '42']);
 
       expect(mockOutput.printError).toHaveBeenCalledWith('Error: Not a git repository');
@@ -292,17 +325,25 @@ describe('pr checkout command', () => {
         error: 'No open PR found for current branch',
       });
 
-      const cmd = createCheckoutCommand(mockOutput as unknown as Output, mockPrApi as unknown as PrApi);
+      const cmd = createCheckoutCommand(
+        mockOutput as unknown as Output,
+        mockPrApi as unknown as PrApi
+      );
       await cmd.parseAsync(['node', 'test']);
 
-      expect(mockOutput.printError).toHaveBeenCalledWith('Error: No open PR found for current branch');
+      expect(mockOutput.printError).toHaveBeenCalledWith(
+        'Error: No open PR found for current branch'
+      );
       expect(process.exitCode).toBe(1);
     });
 
     it('handles fetch error', async () => {
       mockGitFetch.mockRejectedValue(new Error('Failed to fetch'));
 
-      const cmd = createCheckoutCommand(mockOutput as unknown as Output, mockPrApi as unknown as PrApi);
+      const cmd = createCheckoutCommand(
+        mockOutput as unknown as Output,
+        mockPrApi as unknown as PrApi
+      );
       await cmd.parseAsync(['node', 'test', '42']);
 
       expect(mockOutput.printError).toHaveBeenCalledWith('Error: Failed to fetch');
@@ -312,17 +353,25 @@ describe('pr checkout command', () => {
     it('handles checkout error', async () => {
       mockGitCheckout.mockRejectedValue(new Error('Local changes would be overwritten'));
 
-      const cmd = createCheckoutCommand(mockOutput as unknown as Output, mockPrApi as unknown as PrApi);
+      const cmd = createCheckoutCommand(
+        mockOutput as unknown as Output,
+        mockPrApi as unknown as PrApi
+      );
       await cmd.parseAsync(['node', 'test', '42']);
 
-      expect(mockOutput.printError).toHaveBeenCalledWith('Error: Local changes would be overwritten');
+      expect(mockOutput.printError).toHaveBeenCalledWith(
+        'Error: Local changes would be overwritten'
+      );
       expect(process.exitCode).toBe(1);
     });
 
     it('handles API error when getting PR', async () => {
       mockPrApi.getPr.mockRejectedValue(new Error('PR not found'));
 
-      const cmd = createCheckoutCommand(mockOutput as unknown as Output, mockPrApi as unknown as PrApi);
+      const cmd = createCheckoutCommand(
+        mockOutput as unknown as Output,
+        mockPrApi as unknown as PrApi
+      );
       await cmd.parseAsync(['node', 'test', '42']);
 
       expect(mockOutput.printError).toHaveBeenCalledWith('Error: PR not found');
@@ -336,7 +385,10 @@ describe('pr checkout command', () => {
         directory: '/test',
       });
 
-      const cmd = createCheckoutCommand(mockOutput as unknown as Output, mockPrApi as unknown as PrApi);
+      const cmd = createCheckoutCommand(
+        mockOutput as unknown as Output,
+        mockPrApi as unknown as PrApi
+      );
       await cmd.parseAsync(['node', 'test', '42']);
 
       // Should fall back to 'origin'

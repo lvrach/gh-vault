@@ -154,8 +154,16 @@ describe('repo list command', () => {
     // Language filter is client-side, not passed to API
     it('filters by language client-side', async () => {
       const repos = [
-        createMockRepoListItem({ name: 'ts-repo', fullName: 'octocat/ts-repo', language: 'TypeScript' }),
-        createMockRepoListItem({ name: 'js-repo', fullName: 'octocat/js-repo', language: 'JavaScript' }),
+        createMockRepoListItem({
+          name: 'ts-repo',
+          fullName: 'octocat/ts-repo',
+          language: 'TypeScript',
+        }),
+        createMockRepoListItem({
+          name: 'js-repo',
+          fullName: 'octocat/js-repo',
+          language: 'JavaScript',
+        }),
       ];
       mockRepoApi.listRepos.mockResolvedValue(repos);
 
@@ -175,7 +183,11 @@ describe('repo list command', () => {
     // Archived filter is client-side
     it('filters archived repos client-side with --archived flag', async () => {
       const repos = [
-        createMockRepoListItem({ name: 'active-repo', fullName: 'octocat/active-repo', archived: false }),
+        createMockRepoListItem({
+          name: 'active-repo',
+          fullName: 'octocat/active-repo',
+          archived: false,
+        }),
         createMockRepoListItem({ name: 'old-repo', fullName: 'octocat/old-repo', archived: true }),
       ];
       mockRepoApi.listRepos.mockResolvedValue(repos);
@@ -195,8 +207,16 @@ describe('repo list command', () => {
     // Source filter is client-side
     it('filters by source (non-fork) repos client-side', async () => {
       const repos = [
-        createMockRepoListItem({ name: 'original-repo', fullName: 'octocat/original-repo', fork: false }),
-        createMockRepoListItem({ name: 'forked-repo', fullName: 'octocat/forked-repo', fork: true }),
+        createMockRepoListItem({
+          name: 'original-repo',
+          fullName: 'octocat/original-repo',
+          fork: false,
+        }),
+        createMockRepoListItem({
+          name: 'forked-repo',
+          fullName: 'octocat/forked-repo',
+          fork: true,
+        }),
       ];
       mockRepoApi.listRepos.mockResolvedValue(repos);
 
@@ -215,8 +235,16 @@ describe('repo list command', () => {
     // Fork filter is client-side
     it('filters by fork repos client-side', async () => {
       const repos = [
-        createMockRepoListItem({ name: 'original-repo', fullName: 'octocat/original-repo', fork: false }),
-        createMockRepoListItem({ name: 'forked-repo', fullName: 'octocat/forked-repo', fork: true }),
+        createMockRepoListItem({
+          name: 'original-repo',
+          fullName: 'octocat/original-repo',
+          fork: false,
+        }),
+        createMockRepoListItem({
+          name: 'forked-repo',
+          fullName: 'octocat/forked-repo',
+          fork: true,
+        }),
       ];
       mockRepoApi.listRepos.mockResolvedValue(repos);
 
@@ -299,7 +327,9 @@ describe('repo list command', () => {
       );
       await cmd.parseAsync(['node', 'test', '--jq', '.[0]']);
 
-      expect(mockOutput.printError).toHaveBeenCalledWith('Error: --jq requires --json to be specified');
+      expect(mockOutput.printError).toHaveBeenCalledWith(
+        'Error: --jq requires --json to be specified'
+      );
       expect(process.exitCode).toBe(1);
     });
   });

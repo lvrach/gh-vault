@@ -4,7 +4,7 @@
  * Tests pure functions that transform search results to JSON output.
  */
 
-import { describe, expect,it } from 'vitest';
+import { describe, expect, it } from 'vitest';
 
 import {
   codeToJson,
@@ -93,7 +93,8 @@ function createTestSearchPr(overrides: Partial<SearchPullRequest> = {}): SearchP
 function createTestSearchCommit(overrides: Partial<SearchCommit> = {}): SearchCommit {
   return {
     sha: '6dcb09b5b57875f334f61aebed695e2e4193db5e',
-    htmlUrl: 'https://github.com/octocat/Hello-World/commit/6dcb09b5b57875f334f61aebed695e2e4193db5e',
+    htmlUrl:
+      'https://github.com/octocat/Hello-World/commit/6dcb09b5b57875f334f61aebed695e2e4193db5e',
     message: 'Fix authentication bug',
     author: { name: 'The Octocat', email: 'octocat@github.com', date: '2024-01-15T10:00:00Z' },
     committer: { name: 'The Octocat', email: 'octocat@github.com', date: '2024-01-15T10:00:00Z' },

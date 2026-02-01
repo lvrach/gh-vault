@@ -77,7 +77,10 @@ describe('run delete command', () => {
     it('deletes a workflow run', async () => {
       mockRunApi.deleteRun.mockResolvedValue(undefined);
 
-      const cmd = createDeleteCommand(mockOutput as unknown as Output, mockRunApi as unknown as RunApi);
+      const cmd = createDeleteCommand(
+        mockOutput as unknown as Output,
+        mockRunApi as unknown as RunApi
+      );
       await cmd.parseAsync(['node', 'test', '12345678']);
 
       expect(mockRunApi.deleteRun).toHaveBeenCalledWith({
@@ -97,7 +100,10 @@ describe('run delete command', () => {
       });
       mockRunApi.deleteRun.mockResolvedValue(undefined);
 
-      const cmd = createDeleteCommand(mockOutput as unknown as Output, mockRunApi as unknown as RunApi);
+      const cmd = createDeleteCommand(
+        mockOutput as unknown as Output,
+        mockRunApi as unknown as RunApi
+      );
       await cmd.parseAsync(['node', 'test', '12345678', '--repo', 'other-owner/other-repo']);
 
       expect(mockResolveRepository).toHaveBeenCalledWith('other-owner/other-repo');
@@ -121,7 +127,10 @@ describe('run delete command', () => {
         error: 'Not a git repository',
       });
 
-      const cmd = createDeleteCommand(mockOutput as unknown as Output, mockRunApi as unknown as RunApi);
+      const cmd = createDeleteCommand(
+        mockOutput as unknown as Output,
+        mockRunApi as unknown as RunApi
+      );
       await cmd.parseAsync(['node', 'test', '12345678']);
 
       expect(mockOutput.printError).toHaveBeenCalledWith('Error: Not a git repository');
@@ -129,7 +138,10 @@ describe('run delete command', () => {
     });
 
     it('handles invalid run ID', async () => {
-      const cmd = createDeleteCommand(mockOutput as unknown as Output, mockRunApi as unknown as RunApi);
+      const cmd = createDeleteCommand(
+        mockOutput as unknown as Output,
+        mockRunApi as unknown as RunApi
+      );
       await cmd.parseAsync(['node', 'test', 'abc']);
 
       expect(mockOutput.printError).toHaveBeenCalledWith('Error: Invalid run ID "abc"');
@@ -139,7 +151,10 @@ describe('run delete command', () => {
     it('handles API error', async () => {
       mockRunApi.deleteRun.mockRejectedValue(new Error('Run not found'));
 
-      const cmd = createDeleteCommand(mockOutput as unknown as Output, mockRunApi as unknown as RunApi);
+      const cmd = createDeleteCommand(
+        mockOutput as unknown as Output,
+        mockRunApi as unknown as RunApi
+      );
       await cmd.parseAsync(['node', 'test', '12345678']);
 
       expect(mockOutput.printError).toHaveBeenCalledWith('Error: Run not found');
@@ -149,10 +164,15 @@ describe('run delete command', () => {
     it('handles permission denied error', async () => {
       mockRunApi.deleteRun.mockRejectedValue(new Error('Must have admin rights to Repository'));
 
-      const cmd = createDeleteCommand(mockOutput as unknown as Output, mockRunApi as unknown as RunApi);
+      const cmd = createDeleteCommand(
+        mockOutput as unknown as Output,
+        mockRunApi as unknown as RunApi
+      );
       await cmd.parseAsync(['node', 'test', '12345678']);
 
-      expect(mockOutput.printError).toHaveBeenCalledWith('Error: Must have admin rights to Repository');
+      expect(mockOutput.printError).toHaveBeenCalledWith(
+        'Error: Must have admin rights to Repository'
+      );
       expect(process.exitCode).toBe(1);
     });
   });

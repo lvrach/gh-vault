@@ -313,7 +313,9 @@ describe('search prs command', () => {
       );
       await cmd.parseAsync(['node', 'test', 'fix', '--jq', '.[0]']);
 
-      expect(mockOutput.printError).toHaveBeenCalledWith('Error: --jq requires --json to be specified');
+      expect(mockOutput.printError).toHaveBeenCalledWith(
+        'Error: --jq requires --json to be specified'
+      );
       expect(process.exitCode).toBe(1);
     });
   });

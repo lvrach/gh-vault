@@ -59,9 +59,7 @@ export function createForkCommand(output: Output, repoApi: RepoApi): Command {
 
         if (options.remote) {
           output.print('\nTo add the fork as a remote:');
-          output.print(
-            `  git remote add ${options.remoteName ?? 'origin'} ${forkedRepo.cloneUrl}`
-          );
+          output.print(`  git remote add ${options.remoteName ?? 'origin'} ${forkedRepo.cloneUrl}`);
         }
       } catch (error) {
         const message = error instanceof Error ? error.message : 'Unknown error';

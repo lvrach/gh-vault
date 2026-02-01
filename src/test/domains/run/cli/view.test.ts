@@ -133,7 +133,10 @@ describe('run view command', () => {
       const run = createMockRunDetail();
       mockRunApi.getRunWithJobs.mockResolvedValue(run);
 
-      const cmd = createViewCommand(mockOutput as unknown as Output, mockRunApi as unknown as RunApi);
+      const cmd = createViewCommand(
+        mockOutput as unknown as Output,
+        mockRunApi as unknown as RunApi
+      );
       await cmd.parseAsync(['node', 'test', '12345678']);
 
       expect(mockRunApi.getRunWithJobs).toHaveBeenCalledWith({
@@ -150,7 +153,10 @@ describe('run view command', () => {
       const run = createMockRunDetail({ runAttempt: 2 });
       mockRunApi.getRunWithJobs.mockResolvedValue(run);
 
-      const cmd = createViewCommand(mockOutput as unknown as Output, mockRunApi as unknown as RunApi);
+      const cmd = createViewCommand(
+        mockOutput as unknown as Output,
+        mockRunApi as unknown as RunApi
+      );
       await cmd.parseAsync(['node', 'test', '12345678', '--attempt', '2']);
 
       expect(mockRunApi.getRunWithJobs).toHaveBeenCalledWith(
@@ -165,7 +171,10 @@ describe('run view command', () => {
       const job = createMockRunJob({ id: 999, name: 'test' });
       mockRunApi.getJob.mockResolvedValue(job);
 
-      const cmd = createViewCommand(mockOutput as unknown as Output, mockRunApi as unknown as RunApi);
+      const cmd = createViewCommand(
+        mockOutput as unknown as Output,
+        mockRunApi as unknown as RunApi
+      );
       await cmd.parseAsync(['node', 'test', '12345678', '--job', '999']);
 
       expect(mockRunApi.getJob).toHaveBeenCalledWith({
@@ -180,7 +189,10 @@ describe('run view command', () => {
       const run = createMockRunDetail();
       mockRunApi.getRunWithJobs.mockResolvedValue(run);
 
-      const cmd = createViewCommand(mockOutput as unknown as Output, mockRunApi as unknown as RunApi);
+      const cmd = createViewCommand(
+        mockOutput as unknown as Output,
+        mockRunApi as unknown as RunApi
+      );
       await cmd.parseAsync(['node', 'test', '12345678', '--json']);
 
       const output = mockOutput.print.mock.calls[0]?.[0] as string;
@@ -191,7 +203,10 @@ describe('run view command', () => {
       const run = createMockRunDetail({ id: 42, status: 'completed' });
       mockRunApi.getRunWithJobs.mockResolvedValue(run);
 
-      const cmd = createViewCommand(mockOutput as unknown as Output, mockRunApi as unknown as RunApi);
+      const cmd = createViewCommand(
+        mockOutput as unknown as Output,
+        mockRunApi as unknown as RunApi
+      );
       await cmd.parseAsync(['node', 'test', '42', '--json', 'databaseId,status']);
 
       const output = mockOutput.print.mock.calls[0]?.[0] as string;
@@ -203,7 +218,10 @@ describe('run view command', () => {
       const run = createMockRunDetail();
       mockRunApi.getRunWithJobs.mockResolvedValue(run);
 
-      const cmd = createViewCommand(mockOutput as unknown as Output, mockRunApi as unknown as RunApi);
+      const cmd = createViewCommand(
+        mockOutput as unknown as Output,
+        mockRunApi as unknown as RunApi
+      );
       await cmd.parseAsync(['node', 'test', '12345678', '--web']);
 
       expect(mockOpen).toHaveBeenCalledWith('https://github.com/owner/repo/actions/runs/12345678');
@@ -218,7 +236,10 @@ describe('run view command', () => {
       const run = createMockRunDetail();
       mockRunApi.getRunWithJobs.mockResolvedValue(run);
 
-      const cmd = createViewCommand(mockOutput as unknown as Output, mockRunApi as unknown as RunApi);
+      const cmd = createViewCommand(
+        mockOutput as unknown as Output,
+        mockRunApi as unknown as RunApi
+      );
       await cmd.parseAsync(['node', 'test', '12345678', '--repo', 'other-owner/other-repo']);
 
       expect(mockResolveRepository).toHaveBeenCalledWith('other-owner/other-repo');
@@ -234,7 +255,10 @@ describe('run view command', () => {
       const run = createMockRunDetail({ conclusion: 'failure' });
       mockRunApi.getRunWithJobs.mockResolvedValue(run);
 
-      const cmd = createViewCommand(mockOutput as unknown as Output, mockRunApi as unknown as RunApi);
+      const cmd = createViewCommand(
+        mockOutput as unknown as Output,
+        mockRunApi as unknown as RunApi
+      );
       await cmd.parseAsync(['node', 'test', '12345678', '--exit-status']);
 
       expect(process.exitCode).toBe(1);
@@ -252,7 +276,10 @@ describe('run view command', () => {
         error: 'Not a git repository',
       });
 
-      const cmd = createViewCommand(mockOutput as unknown as Output, mockRunApi as unknown as RunApi);
+      const cmd = createViewCommand(
+        mockOutput as unknown as Output,
+        mockRunApi as unknown as RunApi
+      );
       await cmd.parseAsync(['node', 'test', '12345678']);
 
       expect(mockOutput.printError).toHaveBeenCalledWith('Error: Not a git repository');
@@ -260,7 +287,10 @@ describe('run view command', () => {
     });
 
     it('requires run-id argument', async () => {
-      const cmd = createViewCommand(mockOutput as unknown as Output, mockRunApi as unknown as RunApi);
+      const cmd = createViewCommand(
+        mockOutput as unknown as Output,
+        mockRunApi as unknown as RunApi
+      );
       await cmd.parseAsync(['node', 'test']);
 
       expect(mockOutput.printError).toHaveBeenCalledWith('Error: run-id is required');
@@ -268,7 +298,10 @@ describe('run view command', () => {
     });
 
     it('handles invalid run ID', async () => {
-      const cmd = createViewCommand(mockOutput as unknown as Output, mockRunApi as unknown as RunApi);
+      const cmd = createViewCommand(
+        mockOutput as unknown as Output,
+        mockRunApi as unknown as RunApi
+      );
       await cmd.parseAsync(['node', 'test', 'abc']);
 
       expect(mockOutput.printError).toHaveBeenCalledWith('Error: Invalid run ID "abc"');
@@ -276,7 +309,10 @@ describe('run view command', () => {
     });
 
     it('handles invalid job ID', async () => {
-      const cmd = createViewCommand(mockOutput as unknown as Output, mockRunApi as unknown as RunApi);
+      const cmd = createViewCommand(
+        mockOutput as unknown as Output,
+        mockRunApi as unknown as RunApi
+      );
       await cmd.parseAsync(['node', 'test', '12345678', '--job', 'abc']);
 
       expect(mockOutput.printError).toHaveBeenCalledWith('Error: Invalid job ID "abc"');
@@ -286,7 +322,10 @@ describe('run view command', () => {
     it('handles API error', async () => {
       mockRunApi.getRunWithJobs.mockRejectedValue(new Error('Run not found'));
 
-      const cmd = createViewCommand(mockOutput as unknown as Output, mockRunApi as unknown as RunApi);
+      const cmd = createViewCommand(
+        mockOutput as unknown as Output,
+        mockRunApi as unknown as RunApi
+      );
       await cmd.parseAsync(['node', 'test', '12345678']);
 
       expect(mockOutput.printError).toHaveBeenCalledWith('Error: Run not found');
@@ -294,10 +333,15 @@ describe('run view command', () => {
     });
 
     it('requires --json when --jq is specified', async () => {
-      const cmd = createViewCommand(mockOutput as unknown as Output, mockRunApi as unknown as RunApi);
+      const cmd = createViewCommand(
+        mockOutput as unknown as Output,
+        mockRunApi as unknown as RunApi
+      );
       await cmd.parseAsync(['node', 'test', '12345678', '--jq', '.status']);
 
-      expect(mockOutput.printError).toHaveBeenCalledWith('Error: --jq requires --json to be specified');
+      expect(mockOutput.printError).toHaveBeenCalledWith(
+        'Error: --jq requires --json to be specified'
+      );
       expect(process.exitCode).toBe(1);
     });
   });
@@ -311,7 +355,10 @@ describe('run view command', () => {
       const run = createMockRunDetail({ id: 42, status: 'completed' });
       mockRunApi.getRunWithJobs.mockResolvedValue(run);
 
-      const cmd = createViewCommand(mockOutput as unknown as Output, mockRunApi as unknown as RunApi);
+      const cmd = createViewCommand(
+        mockOutput as unknown as Output,
+        mockRunApi as unknown as RunApi
+      );
       await cmd.parseAsync(['node', 'test', '42', '--json', '--jq', '.databaseId']);
 
       const output = mockOutput.print.mock.calls[0]?.[0] as string;

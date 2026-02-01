@@ -4,7 +4,7 @@
  * Tests the `gh-vault pr status` CLI command with mocked dependencies.
  */
 
-import { afterEach,beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import type { PrApi } from '../../../../domains/pr/api.js';
 import { createStatusCommand } from '../../../../domains/pr/cli/status.js';
@@ -20,7 +20,7 @@ vi.mock('../../../../shared/repo.js', () => ({
   getCurrentBranch: vi.fn(),
 }));
 
-import { getCurrentBranch,resolveRepository } from '../../../../shared/repo.js';
+import { getCurrentBranch, resolveRepository } from '../../../../shared/repo.js';
 
 const mockResolveRepository = vi.mocked(resolveRepository);
 const mockGetCurrentBranch = vi.mocked(getCurrentBranch);
@@ -117,7 +117,10 @@ describe('pr status command', () => {
       });
       mockPrApi.getPrStatus.mockResolvedValue(status);
 
-      const cmd = createStatusCommand(mockOutput as unknown as Output, mockPrApi as unknown as PrApi);
+      const cmd = createStatusCommand(
+        mockOutput as unknown as Output,
+        mockPrApi as unknown as PrApi
+      );
       await cmd.parseAsync(['node', 'test']);
 
       expect(mockPrApi.getPrStatus).toHaveBeenCalledWith({
@@ -143,7 +146,10 @@ describe('pr status command', () => {
       });
       mockPrApi.getPrStatus.mockResolvedValue(status);
 
-      const cmd = createStatusCommand(mockOutput as unknown as Output, mockPrApi as unknown as PrApi);
+      const cmd = createStatusCommand(
+        mockOutput as unknown as Output,
+        mockPrApi as unknown as PrApi
+      );
       await cmd.parseAsync(['node', 'test', '--conflict-status']);
 
       expect(mockPrApi.getPrStatus).toHaveBeenCalledWith(
@@ -159,7 +165,10 @@ describe('pr status command', () => {
       });
       mockPrApi.getPrStatus.mockResolvedValue(status);
 
-      const cmd = createStatusCommand(mockOutput as unknown as Output, mockPrApi as unknown as PrApi);
+      const cmd = createStatusCommand(
+        mockOutput as unknown as Output,
+        mockPrApi as unknown as PrApi
+      );
       await cmd.parseAsync(['node', 'test', '--json']);
 
       expect(mockOutput.print).toHaveBeenCalled();
@@ -173,7 +182,10 @@ describe('pr status command', () => {
       });
       mockPrApi.getPrStatus.mockResolvedValue(status);
 
-      const cmd = createStatusCommand(mockOutput as unknown as Output, mockPrApi as unknown as PrApi);
+      const cmd = createStatusCommand(
+        mockOutput as unknown as Output,
+        mockPrApi as unknown as PrApi
+      );
       await cmd.parseAsync(['node', 'test', '--json', 'createdByYou']);
 
       const output = mockOutput.print.mock.calls[0]?.[0] as string;
@@ -190,7 +202,10 @@ describe('pr status command', () => {
       const status = createMockStatusResult();
       mockPrApi.getPrStatus.mockResolvedValue(status);
 
-      const cmd = createStatusCommand(mockOutput as unknown as Output, mockPrApi as unknown as PrApi);
+      const cmd = createStatusCommand(
+        mockOutput as unknown as Output,
+        mockPrApi as unknown as PrApi
+      );
       await cmd.parseAsync(['node', 'test', '--repo', 'other-owner/other-repo']);
 
       expect(mockResolveRepository).toHaveBeenCalledWith('other-owner/other-repo');
@@ -206,7 +221,10 @@ describe('pr status command', () => {
       const status = createMockStatusResult();
       mockPrApi.getPrStatus.mockResolvedValue(status);
 
-      const cmd = createStatusCommand(mockOutput as unknown as Output, mockPrApi as unknown as PrApi);
+      const cmd = createStatusCommand(
+        mockOutput as unknown as Output,
+        mockPrApi as unknown as PrApi
+      );
       await cmd.parseAsync(['node', 'test']);
 
       expect(mockOutput.print).toHaveBeenCalled();
@@ -218,7 +236,10 @@ describe('pr status command', () => {
       const status = createMockStatusResult();
       mockPrApi.getPrStatus.mockResolvedValue(status);
 
-      const cmd = createStatusCommand(mockOutput as unknown as Output, mockPrApi as unknown as PrApi);
+      const cmd = createStatusCommand(
+        mockOutput as unknown as Output,
+        mockPrApi as unknown as PrApi
+      );
       await cmd.parseAsync(['node', 'test']);
 
       expect(mockPrApi.getPrStatus).toHaveBeenCalledWith(
@@ -240,7 +261,10 @@ describe('pr status command', () => {
         error: 'Not a git repository',
       });
 
-      const cmd = createStatusCommand(mockOutput as unknown as Output, mockPrApi as unknown as PrApi);
+      const cmd = createStatusCommand(
+        mockOutput as unknown as Output,
+        mockPrApi as unknown as PrApi
+      );
       await cmd.parseAsync(['node', 'test']);
 
       expect(mockOutput.printError).toHaveBeenCalledWith('Error: Not a git repository');
@@ -249,17 +273,25 @@ describe('pr status command', () => {
     });
 
     it('requires --json when --jq is specified', async () => {
-      const cmd = createStatusCommand(mockOutput as unknown as Output, mockPrApi as unknown as PrApi);
+      const cmd = createStatusCommand(
+        mockOutput as unknown as Output,
+        mockPrApi as unknown as PrApi
+      );
       await cmd.parseAsync(['node', 'test', '--jq', '.createdByYou']);
 
-      expect(mockOutput.printError).toHaveBeenCalledWith('Error: --jq requires --json to be specified');
+      expect(mockOutput.printError).toHaveBeenCalledWith(
+        'Error: --jq requires --json to be specified'
+      );
       expect(process.exitCode).toBe(1);
     });
 
     it('handles API error', async () => {
       mockPrApi.getPrStatus.mockRejectedValue(new Error('API rate limit exceeded'));
 
-      const cmd = createStatusCommand(mockOutput as unknown as Output, mockPrApi as unknown as PrApi);
+      const cmd = createStatusCommand(
+        mockOutput as unknown as Output,
+        mockPrApi as unknown as PrApi
+      );
       await cmd.parseAsync(['node', 'test']);
 
       expect(mockOutput.printError).toHaveBeenCalledWith('Error: API rate limit exceeded');
@@ -269,7 +301,10 @@ describe('pr status command', () => {
     it('handles getCurrentUser error', async () => {
       mockPrApi.getCurrentUser.mockRejectedValue(new Error('Not authenticated'));
 
-      const cmd = createStatusCommand(mockOutput as unknown as Output, mockPrApi as unknown as PrApi);
+      const cmd = createStatusCommand(
+        mockOutput as unknown as Output,
+        mockPrApi as unknown as PrApi
+      );
       await cmd.parseAsync(['node', 'test']);
 
       expect(mockOutput.printError).toHaveBeenCalledWith('Error: Not authenticated');
@@ -291,7 +326,10 @@ describe('pr status command', () => {
       });
       mockPrApi.getPrStatus.mockResolvedValue(status);
 
-      const cmd = createStatusCommand(mockOutput as unknown as Output, mockPrApi as unknown as PrApi);
+      const cmd = createStatusCommand(
+        mockOutput as unknown as Output,
+        mockPrApi as unknown as PrApi
+      );
       await cmd.parseAsync(['node', 'test', '--json', '--jq', '.createdByYou[0].number']);
 
       expect(mockOutput.print).toHaveBeenCalled();

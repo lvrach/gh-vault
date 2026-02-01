@@ -108,11 +108,7 @@ export function formatWorkflowViewText(workflow: Workflow, color = true): string
 /**
  * Format workflow run trigger result.
  */
-export function formatWorkflowRunText(
-  workflow: Workflow,
-  ref: string,
-  color = true
-): string {
+export function formatWorkflowRunText(workflow: Workflow, ref: string, color = true): string {
   const reset = color ? RESET : '';
   const bold = color ? BOLD : '';
   const green = color ? GREEN : '';

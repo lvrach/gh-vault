@@ -121,8 +121,7 @@ export function formatRepoViewText(repo: Repository, readme?: string | null, col
   const stats: string[] = [];
   if (repo.stargazersCount > 0) stats.push(`⭐ ${formatNumber(repo.stargazersCount)} stars`);
   if (repo.forksCount > 0) stats.push(`🔀 ${formatNumber(repo.forksCount)} forks`);
-  if (repo.openIssuesCount > 0)
-    stats.push(`📋 ${formatNumber(repo.openIssuesCount)} open issues`);
+  if (repo.openIssuesCount > 0) stats.push(`📋 ${formatNumber(repo.openIssuesCount)} open issues`);
   if (repo.watchersCount > 0) stats.push(`👀 ${formatNumber(repo.watchersCount)} watching`);
 
   if (stats.length > 0) {

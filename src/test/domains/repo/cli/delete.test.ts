@@ -147,9 +147,7 @@ describe('repo delete command', () => {
       );
       await cmd.parseAsync(['node', 'test', 'octocat/Hello-World']);
 
-      expect(mockOutput.printError).toHaveBeenCalledWith(
-        expect.stringContaining('--yes')
-      );
+      expect(mockOutput.printError).toHaveBeenCalledWith(expect.stringContaining('--yes'));
       expect(process.exitCode).toBe(1);
       expect(mockRepoApi.deleteRepo).not.toHaveBeenCalled();
     });

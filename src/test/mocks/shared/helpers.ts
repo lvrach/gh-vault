@@ -5,10 +5,7 @@
 
 import { HttpResponse } from 'msw';
 
-import {
-  getMagicErrorMessage,
-  isMagicErrorId,
-} from './constants.js';
+import { getMagicErrorMessage, isMagicErrorId } from './constants.js';
 
 /**
  * Generate standard GitHub API rate limit headers.
@@ -87,5 +84,4 @@ export function handleMagicNumber(id: number): Response | null {
 
 // Re-export constants for convenience
 
-
-export {MAGIC_ERROR_IDS, StatusCodes} from './constants.js';
+export { MAGIC_ERROR_IDS, StatusCodes } from './constants.js';

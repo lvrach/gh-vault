@@ -79,7 +79,9 @@ describe('auth logout command', () => {
       await cmd.parseAsync(['node', 'test']);
 
       expect(mockDeleteToken).toHaveBeenCalled();
-      expect(mockOutput.print).toHaveBeenCalledWith(expect.stringContaining('Token removed from Keychain'));
+      expect(mockOutput.print).toHaveBeenCalledWith(
+        expect.stringContaining('Token removed from Keychain')
+      );
       expect(process.exitCode).toBeUndefined();
     });
 
@@ -91,7 +93,9 @@ describe('auth logout command', () => {
       await cmd.parseAsync(['node', 'test']);
 
       expect(mockDeleteToken).toHaveBeenCalled();
-      expect(mockOutput.print).toHaveBeenCalledWith(expect.stringContaining('Token removed from Keychain'));
+      expect(mockOutput.print).toHaveBeenCalledWith(
+        expect.stringContaining('Token removed from Keychain')
+      );
       expect(process.exitCode).toBeUndefined();
     });
   });
@@ -108,7 +112,9 @@ describe('auth logout command', () => {
       await cmd.parseAsync(['node', 'test']);
 
       expect(mockDeleteToken).toHaveBeenCalled();
-      expect(mockOutput.printError).toHaveBeenCalledWith('Error: Failed to delete token from Keychain');
+      expect(mockOutput.printError).toHaveBeenCalledWith(
+        'Error: Failed to delete token from Keychain'
+      );
       expect(process.exitCode).toBe(1);
     });
 

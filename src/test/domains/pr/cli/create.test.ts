@@ -4,7 +4,7 @@
  * Tests the `gh-vault pr create` CLI command with mocked dependencies.
  */
 
-import { afterEach,beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import type { PrApi } from '../../../../domains/pr/api.js';
 import { createCreateCommand } from '../../../../domains/pr/cli/create.js';
@@ -111,7 +111,10 @@ describe('pr create command', () => {
       const createdPr = createMockCreatedPr();
       mockPrApi.createPr.mockResolvedValue(createdPr);
 
-      const cmd = createCreateCommand(mockOutput as unknown as Output, mockPrApi as unknown as PrApi);
+      const cmd = createCreateCommand(
+        mockOutput as unknown as Output,
+        mockPrApi as unknown as PrApi
+      );
       await cmd.parseAsync(['node', 'test', '--title', 'My PR', '--body', 'PR description']);
 
       expect(mockPrApi.createPr).toHaveBeenCalledWith(
@@ -132,7 +135,10 @@ describe('pr create command', () => {
       const createdPr = createMockCreatedPr({ draft: true });
       mockPrApi.createPr.mockResolvedValue(createdPr);
 
-      const cmd = createCreateCommand(mockOutput as unknown as Output, mockPrApi as unknown as PrApi);
+      const cmd = createCreateCommand(
+        mockOutput as unknown as Output,
+        mockPrApi as unknown as PrApi
+      );
       await cmd.parseAsync(['node', 'test', '--title', 'Draft PR', '--draft']);
 
       expect(mockPrApi.createPr).toHaveBeenCalledWith(
@@ -146,7 +152,10 @@ describe('pr create command', () => {
       const createdPr = createMockCreatedPr();
       mockPrApi.createPr.mockResolvedValue(createdPr);
 
-      const cmd = createCreateCommand(mockOutput as unknown as Output, mockPrApi as unknown as PrApi);
+      const cmd = createCreateCommand(
+        mockOutput as unknown as Output,
+        mockPrApi as unknown as PrApi
+      );
       await cmd.parseAsync(['node', 'test', '--fill']);
 
       expect(mockGetCommitInfo).toHaveBeenCalledWith('main');
@@ -162,7 +171,10 @@ describe('pr create command', () => {
       const createdPr = createMockCreatedPr();
       mockPrApi.createPr.mockResolvedValue(createdPr);
 
-      const cmd = createCreateCommand(mockOutput as unknown as Output, mockPrApi as unknown as PrApi);
+      const cmd = createCreateCommand(
+        mockOutput as unknown as Output,
+        mockPrApi as unknown as PrApi
+      );
       await cmd.parseAsync([
         'node',
         'test',
@@ -186,7 +198,10 @@ describe('pr create command', () => {
       const createdPr = createMockCreatedPr();
       mockPrApi.createPr.mockResolvedValue(createdPr);
 
-      const cmd = createCreateCommand(mockOutput as unknown as Output, mockPrApi as unknown as PrApi);
+      const cmd = createCreateCommand(
+        mockOutput as unknown as Output,
+        mockPrApi as unknown as PrApi
+      );
       await cmd.parseAsync([
         'node',
         'test',
@@ -217,7 +232,10 @@ describe('pr create command', () => {
       const createdPr = createMockCreatedPr();
       mockPrApi.createPr.mockResolvedValue(createdPr);
 
-      const cmd = createCreateCommand(mockOutput as unknown as Output, mockPrApi as unknown as PrApi);
+      const cmd = createCreateCommand(
+        mockOutput as unknown as Output,
+        mockPrApi as unknown as PrApi
+      );
       await cmd.parseAsync(['node', 'test', '--title', 'Self-assigned', '--assignee', '@me']);
 
       expect(mockPrApi.getCurrentUser).toHaveBeenCalled();
@@ -229,7 +247,10 @@ describe('pr create command', () => {
     });
 
     it('opens browser when --web is specified', async () => {
-      const cmd = createCreateCommand(mockOutput as unknown as Output, mockPrApi as unknown as PrApi);
+      const cmd = createCreateCommand(
+        mockOutput as unknown as Output,
+        mockPrApi as unknown as PrApi
+      );
       await cmd.parseAsync(['node', 'test', '--web']);
 
       expect(mockOpen).toHaveBeenCalledWith(
@@ -239,7 +260,10 @@ describe('pr create command', () => {
     });
 
     it('includes title and body in web URL when provided', async () => {
-      const cmd = createCreateCommand(mockOutput as unknown as Output, mockPrApi as unknown as PrApi);
+      const cmd = createCreateCommand(
+        mockOutput as unknown as Output,
+        mockPrApi as unknown as PrApi
+      );
       await cmd.parseAsync(['node', 'test', '--web', '--title', 'My Title', '--body', 'My Body']);
 
       expect(mockOpen).toHaveBeenCalledWith(
@@ -256,7 +280,10 @@ describe('pr create command', () => {
       const createdPr = createMockCreatedPr();
       mockPrApi.createPr.mockResolvedValue(createdPr);
 
-      const cmd = createCreateCommand(mockOutput as unknown as Output, mockPrApi as unknown as PrApi);
+      const cmd = createCreateCommand(
+        mockOutput as unknown as Output,
+        mockPrApi as unknown as PrApi
+      );
       await cmd.parseAsync([
         'node',
         'test',
@@ -279,7 +306,10 @@ describe('pr create command', () => {
       const createdPr = createMockCreatedPr();
       mockPrApi.createPr.mockResolvedValue(createdPr);
 
-      const cmd = createCreateCommand(mockOutput as unknown as Output, mockPrApi as unknown as PrApi);
+      const cmd = createCreateCommand(
+        mockOutput as unknown as Output,
+        mockPrApi as unknown as PrApi
+      );
       await cmd.parseAsync(['node', 'test', '--title', 'Test']);
 
       expect(mockPrApi.createPr).toHaveBeenCalledWith(
@@ -301,7 +331,10 @@ describe('pr create command', () => {
         error: 'Not a git repository',
       });
 
-      const cmd = createCreateCommand(mockOutput as unknown as Output, mockPrApi as unknown as PrApi);
+      const cmd = createCreateCommand(
+        mockOutput as unknown as Output,
+        mockPrApi as unknown as PrApi
+      );
       await cmd.parseAsync(['node', 'test', '--title', 'Test']);
 
       expect(mockOutput.printError).toHaveBeenCalledWith('Error: Not a git repository');
@@ -310,7 +343,10 @@ describe('pr create command', () => {
     });
 
     it('requires title when --fill is not used', async () => {
-      const cmd = createCreateCommand(mockOutput as unknown as Output, mockPrApi as unknown as PrApi);
+      const cmd = createCreateCommand(
+        mockOutput as unknown as Output,
+        mockPrApi as unknown as PrApi
+      );
       await cmd.parseAsync(['node', 'test', '--body', 'Just a body']);
 
       expect(mockOutput.printError).toHaveBeenCalledWith(
@@ -322,7 +358,10 @@ describe('pr create command', () => {
     it('handles missing head branch', async () => {
       mockGetCurrentBranch.mockResolvedValue(null);
 
-      const cmd = createCreateCommand(mockOutput as unknown as Output, mockPrApi as unknown as PrApi);
+      const cmd = createCreateCommand(
+        mockOutput as unknown as Output,
+        mockPrApi as unknown as PrApi
+      );
       await cmd.parseAsync(['node', 'test', '--title', 'Test']);
 
       expect(mockOutput.printError).toHaveBeenCalledWith(
@@ -334,7 +373,10 @@ describe('pr create command', () => {
     it('handles API error', async () => {
       mockPrApi.createPr.mockRejectedValue(new Error('Validation failed'));
 
-      const cmd = createCreateCommand(mockOutput as unknown as Output, mockPrApi as unknown as PrApi);
+      const cmd = createCreateCommand(
+        mockOutput as unknown as Output,
+        mockPrApi as unknown as PrApi
+      );
       await cmd.parseAsync(['node', 'test', '--title', 'Test']);
 
       expect(mockOutput.printError).toHaveBeenCalledWith('Error: Validation failed');

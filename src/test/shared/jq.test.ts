@@ -5,7 +5,7 @@
  * Note: These tests require node-jq to be installed with its bundled jq binary.
  */
 
-import { afterEach,beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { filterWithJq, JqError } from '../../shared/jq.js';
 
@@ -106,7 +106,10 @@ describe('filterWithJq', () => {
     });
 
     it('maps array elements', async () => {
-      const data = [{ a: 1, b: 2 }, { a: 3, b: 4 }];
+      const data = [
+        { a: 1, b: 2 },
+        { a: 3, b: 4 },
+      ];
       const result = await filterWithJq(data, '[.[] | .a]');
 
       const parsed = JSON.parse(result) as unknown;
@@ -245,7 +248,8 @@ describe('filterWithJq with mocked node-jq', () => {
       run: vi.fn().mockRejectedValue(new Error('jq: compile error: syntax error')),
     }));
 
-    const { filterWithJq: mockedFilter, JqError: MockedJqError } = await import('../../shared/jq.js');
+    const { filterWithJq: mockedFilter, JqError: MockedJqError } =
+      await import('../../shared/jq.js');
 
     await expect(mockedFilter({}, '.invalid[[')).rejects.toSatisfy((error) => {
       return error instanceof MockedJqError && error.message.includes('Invalid jq expression');

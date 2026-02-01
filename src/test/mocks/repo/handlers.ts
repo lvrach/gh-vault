@@ -105,23 +105,26 @@ export const repoHandlers = [
   }),
 
   // POST /orgs/:org/repos - Create a repository in an organization
-  http.post<{ org: string }>('https://api.github.com/orgs/:org/repos', async ({ params, request }) => {
-    const body = (await request.json()) as {
-      name: string;
-      description?: string;
-      private?: boolean;
-    };
+  http.post<{ org: string }>(
+    'https://api.github.com/orgs/:org/repos',
+    async ({ params, request }) => {
+      const body = (await request.json()) as {
+        name: string;
+        description?: string;
+        private?: boolean;
+      };
 
-    const repo = createMockRepository(body.name, params.org, {
-      ...(body.private !== undefined && { private: body.private }),
-      ...(body.description && { description: body.description }),
-    });
+      const repo = createMockRepository(body.name, params.org, {
+        ...(body.private !== undefined && { private: body.private }),
+        ...(body.description && { description: body.description }),
+      });
 
-    return HttpResponse.json(repo, {
-      status: 201,
-      headers: ratelimitHeaders(),
-    });
-  }),
+      return HttpResponse.json(repo, {
+        status: 201,
+        headers: ratelimitHeaders(),
+      });
+    }
+  ),
 
   // POST /repos/:owner/:repo/forks - Fork a repository
   http.post<{ owner: string; repo: string }>(
@@ -182,7 +185,10 @@ export const repoHandlers = [
         ...(body.description !== undefined && { description: body.description }),
         ...(isPrivate !== undefined && { private: isPrivate }),
         ...(body.archived !== undefined && { archived: body.archived }),
-        ...(body.default_branch && { default_branch: body.default_branch, defaultBranch: body.default_branch }),
+        ...(body.default_branch && {
+          default_branch: body.default_branch,
+          defaultBranch: body.default_branch,
+        }),
       };
 
       return HttpResponse.json(repo, {
@@ -273,10 +279,7 @@ See documentation for more details.
     async ({ request }) => {
       const body = (await request.json()) as { names: string[] };
 
-      return HttpResponse.json(
-        { names: body.names },
-        { headers: ratelimitHeaders() }
-      );
+      return HttpResponse.json({ names: body.names }, { headers: ratelimitHeaders() });
     }
   ),
 ];

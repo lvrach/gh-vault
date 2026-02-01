@@ -4,7 +4,7 @@
  * Tests the `gh-vault pr review` CLI command with mocked dependencies.
  */
 
-import { afterEach,beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import type { PrApi } from '../../../../domains/pr/api.js';
 import { createReviewCommand } from '../../../../domains/pr/cli/review.js';
@@ -20,7 +20,7 @@ vi.mock('../../../../shared/repo.js', () => ({
   resolvePrNumber: vi.fn(),
 }));
 
-import { resolvePrNumber,resolveRepository } from '../../../../shared/repo.js';
+import { resolvePrNumber, resolveRepository } from '../../../../shared/repo.js';
 
 const mockResolveRepository = vi.mocked(resolveRepository);
 const mockResolvePrNumber = vi.mocked(resolvePrNumber);
@@ -99,7 +99,10 @@ describe('pr review command', () => {
       const review = createMockReview({ state: 'APPROVED' });
       mockPrApi.createPrReview.mockResolvedValue(review);
 
-      const cmd = createReviewCommand(mockOutput as unknown as Output, mockPrApi as unknown as PrApi);
+      const cmd = createReviewCommand(
+        mockOutput as unknown as Output,
+        mockPrApi as unknown as PrApi
+      );
       await cmd.parseAsync(['node', 'test', '42', '--approve']);
 
       expect(mockPrApi.createPrReview).toHaveBeenCalledWith({
@@ -117,7 +120,10 @@ describe('pr review command', () => {
       const review = createMockReview({ state: 'APPROVED', body: 'Great work!' });
       mockPrApi.createPrReview.mockResolvedValue(review);
 
-      const cmd = createReviewCommand(mockOutput as unknown as Output, mockPrApi as unknown as PrApi);
+      const cmd = createReviewCommand(
+        mockOutput as unknown as Output,
+        mockPrApi as unknown as PrApi
+      );
       await cmd.parseAsync(['node', 'test', '42', '--approve', '--body', 'Great work!']);
 
       expect(mockPrApi.createPrReview).toHaveBeenCalledWith(
@@ -138,7 +144,10 @@ describe('pr review command', () => {
       const review = createMockReview({ state: 'CHANGES_REQUESTED' });
       mockPrApi.createPrReview.mockResolvedValue(review);
 
-      const cmd = createReviewCommand(mockOutput as unknown as Output, mockPrApi as unknown as PrApi);
+      const cmd = createReviewCommand(
+        mockOutput as unknown as Output,
+        mockPrApi as unknown as PrApi
+      );
       await cmd.parseAsync([
         'node',
         'test',
@@ -159,7 +168,10 @@ describe('pr review command', () => {
     });
 
     it('requires body for --request-changes', async () => {
-      const cmd = createReviewCommand(mockOutput as unknown as Output, mockPrApi as unknown as PrApi);
+      const cmd = createReviewCommand(
+        mockOutput as unknown as Output,
+        mockPrApi as unknown as PrApi
+      );
       await cmd.parseAsync(['node', 'test', '42', '--request-changes']);
 
       expect(mockOutput.printError).toHaveBeenCalledWith(
@@ -179,7 +191,10 @@ describe('pr review command', () => {
       const review = createMockReview({ state: 'COMMENTED' });
       mockPrApi.createPrReview.mockResolvedValue(review);
 
-      const cmd = createReviewCommand(mockOutput as unknown as Output, mockPrApi as unknown as PrApi);
+      const cmd = createReviewCommand(
+        mockOutput as unknown as Output,
+        mockPrApi as unknown as PrApi
+      );
       await cmd.parseAsync(['node', 'test', '42', '--comment']);
 
       expect(mockPrApi.createPrReview).toHaveBeenCalledWith({
@@ -195,7 +210,10 @@ describe('pr review command', () => {
       const review = createMockReview({ state: 'COMMENTED', body: 'Looks interesting' });
       mockPrApi.createPrReview.mockResolvedValue(review);
 
-      const cmd = createReviewCommand(mockOutput as unknown as Output, mockPrApi as unknown as PrApi);
+      const cmd = createReviewCommand(
+        mockOutput as unknown as Output,
+        mockPrApi as unknown as PrApi
+      );
       await cmd.parseAsync(['node', 'test', '42', '--comment', '--body', 'Looks interesting']);
 
       expect(mockPrApi.createPrReview).toHaveBeenCalledWith(
@@ -221,15 +239,11 @@ describe('pr review command', () => {
       const review = createMockReview();
       mockPrApi.createPrReview.mockResolvedValue(review);
 
-      const cmd = createReviewCommand(mockOutput as unknown as Output, mockPrApi as unknown as PrApi);
-      await cmd.parseAsync([
-        'node',
-        'test',
-        '42',
-        '--repo',
-        'other-owner/other-repo',
-        '--approve',
-      ]);
+      const cmd = createReviewCommand(
+        mockOutput as unknown as Output,
+        mockPrApi as unknown as PrApi
+      );
+      await cmd.parseAsync(['node', 'test', '42', '--repo', 'other-owner/other-repo', '--approve']);
 
       expect(mockResolveRepository).toHaveBeenCalledWith('other-owner/other-repo');
       expect(mockPrApi.createPrReview).toHaveBeenCalledWith(
@@ -244,7 +258,10 @@ describe('pr review command', () => {
       const review = createMockReview();
       mockPrApi.createPrReview.mockResolvedValue(review);
 
-      const cmd = createReviewCommand(mockOutput as unknown as Output, mockPrApi as unknown as PrApi);
+      const cmd = createReviewCommand(
+        mockOutput as unknown as Output,
+        mockPrApi as unknown as PrApi
+      );
       await cmd.parseAsync(['node', 'test', '--approve']);
 
       expect(mockResolvePrNumber).toHaveBeenCalledWith(
@@ -267,7 +284,10 @@ describe('pr review command', () => {
         error: 'Not a git repository',
       });
 
-      const cmd = createReviewCommand(mockOutput as unknown as Output, mockPrApi as unknown as PrApi);
+      const cmd = createReviewCommand(
+        mockOutput as unknown as Output,
+        mockPrApi as unknown as PrApi
+      );
       await cmd.parseAsync(['node', 'test', '42', '--approve']);
 
       expect(mockOutput.printError).toHaveBeenCalledWith('Error: Not a git repository');
@@ -281,15 +301,23 @@ describe('pr review command', () => {
         error: 'No open PR found for current branch',
       });
 
-      const cmd = createReviewCommand(mockOutput as unknown as Output, mockPrApi as unknown as PrApi);
+      const cmd = createReviewCommand(
+        mockOutput as unknown as Output,
+        mockPrApi as unknown as PrApi
+      );
       await cmd.parseAsync(['node', 'test', '--approve']);
 
-      expect(mockOutput.printError).toHaveBeenCalledWith('Error: No open PR found for current branch');
+      expect(mockOutput.printError).toHaveBeenCalledWith(
+        'Error: No open PR found for current branch'
+      );
       expect(process.exitCode).toBe(1);
     });
 
     it('requires review type to be specified', async () => {
-      const cmd = createReviewCommand(mockOutput as unknown as Output, mockPrApi as unknown as PrApi);
+      const cmd = createReviewCommand(
+        mockOutput as unknown as Output,
+        mockPrApi as unknown as PrApi
+      );
       await cmd.parseAsync(['node', 'test', '42']);
 
       expect(mockOutput.printError).toHaveBeenCalledWith(
@@ -301,7 +329,10 @@ describe('pr review command', () => {
     it('handles API error', async () => {
       mockPrApi.createPrReview.mockRejectedValue(new Error('Cannot review your own PR'));
 
-      const cmd = createReviewCommand(mockOutput as unknown as Output, mockPrApi as unknown as PrApi);
+      const cmd = createReviewCommand(
+        mockOutput as unknown as Output,
+        mockPrApi as unknown as PrApi
+      );
       await cmd.parseAsync(['node', 'test', '42', '--approve']);
 
       expect(mockOutput.printError).toHaveBeenCalledWith('Error: Cannot review your own PR');
@@ -311,7 +342,10 @@ describe('pr review command', () => {
     it('handles already reviewed error', async () => {
       mockPrApi.createPrReview.mockRejectedValue(new Error('PR is already merged'));
 
-      const cmd = createReviewCommand(mockOutput as unknown as Output, mockPrApi as unknown as PrApi);
+      const cmd = createReviewCommand(
+        mockOutput as unknown as Output,
+        mockPrApi as unknown as PrApi
+      );
       await cmd.parseAsync(['node', 'test', '42', '--approve']);
 
       expect(mockOutput.printError).toHaveBeenCalledWith('Error: PR is already merged');

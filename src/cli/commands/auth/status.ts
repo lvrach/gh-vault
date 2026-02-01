@@ -17,8 +17,6 @@ export function createStatusCommand(output: Output): Command {
 
     output.print(`User: ${info.login}`);
     output.print(`Token type: ${tokenInfo.type}`);
-    output.print(
-      `Rate limit: ${String(info.rateLimit.remaining)}/${String(info.rateLimit.limit)}`
-    );
+    output.print(`Rate limit: ${String(info.rateLimit.remaining)}/${String(info.rateLimit.limit)}`);
   });
 }

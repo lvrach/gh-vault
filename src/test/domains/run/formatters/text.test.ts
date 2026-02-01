@@ -115,7 +115,12 @@ describe('formatRunListText', () => {
     const runs = [
       createRunListItem({ id: 1, displayTitle: 'Successful run', conclusion: 'success' }),
       createRunListItem({ id: 2, displayTitle: 'Failed run', conclusion: 'failure' }),
-      createRunListItem({ id: 3, displayTitle: 'In progress', status: 'in_progress', conclusion: null }),
+      createRunListItem({
+        id: 3,
+        displayTitle: 'In progress',
+        status: 'in_progress',
+        conclusion: null,
+      }),
       createRunListItem({ id: 4, displayTitle: 'Cancelled', conclusion: 'cancelled' }),
     ];
     expect(formatRunListText(runs, false)).toMatchSnapshot();
@@ -224,9 +229,7 @@ describe('formatJobViewText', () => {
   it('formats failed job', () => {
     const job = createRunJob({
       conclusion: 'failure',
-      steps: [
-        createRunStep({ name: 'Build', conclusion: 'failure' }),
-      ],
+      steps: [createRunStep({ name: 'Build', conclusion: 'failure' })],
     });
     expect(formatJobViewText(job, true, false)).toMatchSnapshot();
   });

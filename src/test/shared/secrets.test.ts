@@ -6,7 +6,7 @@
  * to test the real implementation.
  */
 
-import { afterEach,beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 // ============================================================================
 // validateTokenFormat Tests (Pure Function)

@@ -4,7 +4,7 @@
  * Tests the `gh-vault pr reopen` CLI command with mocked dependencies.
  */
 
-import { afterEach,beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import type { PrApi } from '../../../../domains/pr/api.js';
 import { createReopenCommand } from '../../../../domains/pr/cli/reopen.js';
@@ -20,7 +20,7 @@ vi.mock('../../../../shared/repo.js', () => ({
   resolvePrNumber: vi.fn(),
 }));
 
-import { resolvePrNumber,resolveRepository } from '../../../../shared/repo.js';
+import { resolvePrNumber, resolveRepository } from '../../../../shared/repo.js';
 
 const mockResolveRepository = vi.mocked(resolveRepository);
 const mockResolvePrNumber = vi.mocked(resolvePrNumber);
@@ -115,7 +115,10 @@ describe('pr reopen command', () => {
       const reopenedPr = createMockPullRequest({ state: 'open' });
       mockPrApi.updatePrState.mockResolvedValue(reopenedPr);
 
-      const cmd = createReopenCommand(mockOutput as unknown as Output, mockPrApi as unknown as PrApi);
+      const cmd = createReopenCommand(
+        mockOutput as unknown as Output,
+        mockPrApi as unknown as PrApi
+      );
       await cmd.parseAsync(['node', 'test', '42']);
 
       expect(mockPrApi.updatePrState).toHaveBeenCalledWith({
@@ -139,7 +142,10 @@ describe('pr reopen command', () => {
         htmlUrl: 'https://github.com/owner/repo/pull/42#issuecomment-1',
       });
 
-      const cmd = createReopenCommand(mockOutput as unknown as Output, mockPrApi as unknown as PrApi);
+      const cmd = createReopenCommand(
+        mockOutput as unknown as Output,
+        mockPrApi as unknown as PrApi
+      );
       await cmd.parseAsync(['node', 'test', '42', '--comment', 'Reopening this PR']);
 
       expect(mockPrApi.createPrComment).toHaveBeenCalledWith({
@@ -165,7 +171,10 @@ describe('pr reopen command', () => {
       const reopenedPr = createMockPullRequest({ state: 'open' });
       mockPrApi.updatePrState.mockResolvedValue(reopenedPr);
 
-      const cmd = createReopenCommand(mockOutput as unknown as Output, mockPrApi as unknown as PrApi);
+      const cmd = createReopenCommand(
+        mockOutput as unknown as Output,
+        mockPrApi as unknown as PrApi
+      );
       await cmd.parseAsync(['node', 'test', '42', '--repo', 'other-owner/other-repo']);
 
       expect(mockResolveRepository).toHaveBeenCalledWith('other-owner/other-repo');
@@ -181,7 +190,10 @@ describe('pr reopen command', () => {
       const reopenedPr = createMockPullRequest({ state: 'open' });
       mockPrApi.updatePrState.mockResolvedValue(reopenedPr);
 
-      const cmd = createReopenCommand(mockOutput as unknown as Output, mockPrApi as unknown as PrApi);
+      const cmd = createReopenCommand(
+        mockOutput as unknown as Output,
+        mockPrApi as unknown as PrApi
+      );
       await cmd.parseAsync(['node', 'test', '123']);
 
       expect(mockResolvePrNumber).toHaveBeenCalledWith(
@@ -204,7 +216,10 @@ describe('pr reopen command', () => {
         error: 'Not a git repository',
       });
 
-      const cmd = createReopenCommand(mockOutput as unknown as Output, mockPrApi as unknown as PrApi);
+      const cmd = createReopenCommand(
+        mockOutput as unknown as Output,
+        mockPrApi as unknown as PrApi
+      );
       await cmd.parseAsync(['node', 'test', '42']);
 
       expect(mockOutput.printError).toHaveBeenCalledWith('Error: Not a git repository');
@@ -218,7 +233,10 @@ describe('pr reopen command', () => {
         error: 'PR not found',
       });
 
-      const cmd = createReopenCommand(mockOutput as unknown as Output, mockPrApi as unknown as PrApi);
+      const cmd = createReopenCommand(
+        mockOutput as unknown as Output,
+        mockPrApi as unknown as PrApi
+      );
       await cmd.parseAsync(['node', 'test', '999']);
 
       expect(mockOutput.printError).toHaveBeenCalledWith('Error: PR not found');
@@ -228,7 +246,10 @@ describe('pr reopen command', () => {
     it('handles API error when reopening', async () => {
       mockPrApi.updatePrState.mockRejectedValue(new Error('Cannot reopen merged PR'));
 
-      const cmd = createReopenCommand(mockOutput as unknown as Output, mockPrApi as unknown as PrApi);
+      const cmd = createReopenCommand(
+        mockOutput as unknown as Output,
+        mockPrApi as unknown as PrApi
+      );
       await cmd.parseAsync(['node', 'test', '42']);
 
       expect(mockOutput.printError).toHaveBeenCalledWith('Error: Cannot reopen merged PR');
@@ -238,7 +259,10 @@ describe('pr reopen command', () => {
     it('handles API error when adding comment', async () => {
       mockPrApi.createPrComment.mockRejectedValue(new Error('Cannot add comment'));
 
-      const cmd = createReopenCommand(mockOutput as unknown as Output, mockPrApi as unknown as PrApi);
+      const cmd = createReopenCommand(
+        mockOutput as unknown as Output,
+        mockPrApi as unknown as PrApi
+      );
       await cmd.parseAsync(['node', 'test', '42', '--comment', 'test']);
 
       expect(mockOutput.printError).toHaveBeenCalledWith('Error: Cannot add comment');
