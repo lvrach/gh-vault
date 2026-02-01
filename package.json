@@ -2,6 +2,27 @@
   "name": "gh-vault",
   "version": "0.1.0",
   "description": "GitHub CLI for Pull Request operations with secure token storage",
+  "license": "MIT",
+  "author": "Leonidas Vrachnis",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lvrach/gh-vault.git"
+  },
+  "homepage": "https://github.com/lvrach/gh-vault#readme",
+  "bugs": {
+    "url": "https://github.com/lvrach/gh-vault/issues"
+  },
+  "keywords": [
+    "cli",
+    "github",
+    "gh",
+    "pull-request",
+    "pr",
+    "workflow",
+    "repository",
+    "token",
+    "keychain"
+  ],
   "type": "module",
   "engines": {
     "node": ">=20"
@@ -9,6 +30,10 @@
   "bin": {
     "gh-vault": "dist/cli/index.js"
   },
+  "files": [
+    "dist",
+    "!dist/test"
+  ],
   "scripts": {
     "dev": "tsx watch src/cli/index.ts",
     "build": "tsc",
