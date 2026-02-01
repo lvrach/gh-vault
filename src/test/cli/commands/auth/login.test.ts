@@ -99,6 +99,43 @@ function createMockStdin(token: string): NodeJS.ReadStream {
 }
 
 /**
+ * Helper to create a mock stdin for piped input (--with-token mode).
+ * Emits data then triggers 'end' event.
+ */
+function createPipedStdin(token: string): NodeJS.ReadStream {
+  const listeners = new Map<string, ((data?: string) => void)[]>();
+
+  const pipedStdin = {
+    isTTY: false, // Piped stdin is not a TTY
+    setEncoding: vi.fn(),
+    on: vi.fn().mockImplementation((event: string, listener: (data?: string) => void) => {
+      if (!listeners.has(event)) {
+        listeners.set(event, []);
+      }
+      listeners.get(event)?.push(listener);
+
+      // Emit data and end after listeners are registered
+      if (event === 'end') {
+        queueMicrotask(() => {
+          const dataListeners = listeners.get('data') ?? [];
+          for (const dataListener of dataListeners) {
+            dataListener(token);
+          }
+          const endListeners = listeners.get('end') ?? [];
+          for (const endListener of endListeners) {
+            endListener();
+          }
+        });
+      }
+
+      return pipedStdin;
+    }),
+  } as unknown as NodeJS.ReadStream;
+
+  return pipedStdin;
+}
+
+/**
  * Helper to create a mock stdin that emits Ctrl+C (cancellation).
  */
 function createCtrlCStdin(): NodeJS.ReadStream {
@@ -309,8 +346,12 @@ describe('auth login command', () => {
       await cmd.parseAsync(['node', 'test']);
 
       expect(mockOutput.print).toHaveBeenCalledWith('Token type: fine-grained');
-      expect(mockOutput.print).toHaveBeenCalledWith(expect.stringContaining('Valid for user: octocat'));
-      expect(mockOutput.print).toHaveBeenCalledWith(expect.stringContaining('Token saved to macOS Keychain'));
+      expect(mockOutput.print).toHaveBeenCalledWith(
+        expect.stringContaining('Valid for user: octocat')
+      );
+      expect(mockOutput.print).toHaveBeenCalledWith(
+        expect.stringContaining('Token saved to macOS Keychain')
+      );
       expect(process.exitCode).toBeUndefined();
     });
 
@@ -329,7 +370,9 @@ describe('auth login command', () => {
 
       const cmd = createLoginCommand(mockOutput as unknown as Output);
       // Domain-specific error bubbles up to single exit point
-      await expect(cmd.parseAsync(['node', 'test'])).rejects.toThrow('Classic personal access tokens');
+      await expect(cmd.parseAsync(['node', 'test'])).rejects.toThrow(
+        'Classic personal access tokens'
+      );
 
       expect(mockValidateTokenFormat).toHaveBeenCalledWith(token);
       expect(mockIsTokenTypeAllowed).toHaveBeenCalledWith('classic');
@@ -401,7 +444,9 @@ describe('auth login command', () => {
       mockSetToken.mockRejectedValue(new Error('Failed to store token in Keychain'));
 
       const cmd = createLoginCommand(mockOutput as unknown as Output);
-      await expect(cmd.parseAsync(['node', 'test'])).rejects.toThrow('Failed to store token in Keychain');
+      await expect(cmd.parseAsync(['node', 'test'])).rejects.toThrow(
+        'Failed to store token in Keychain'
+      );
 
       expect(mockSetToken).toHaveBeenCalledWith(token);
     });
@@ -448,7 +493,9 @@ describe('auth login command', () => {
       const cmd = createLoginCommand(mockOutput as unknown as Output);
       await cmd.parseAsync(['node', 'test']);
 
-      expect(mockOutput.print).toHaveBeenCalledWith(expect.stringContaining('Rate limit: 4500/5000'));
+      expect(mockOutput.print).toHaveBeenCalledWith(
+        expect.stringContaining('Rate limit: 4500/5000')
+      );
     });
 
     it('never prints the actual token value to output (security)', async () => {
@@ -480,6 +527,152 @@ describe('auth login command', () => {
 
       expect(allOutput).not.toContain(token);
       expect(allOutput).not.toContain('github_pat_secret');
+    });
+  });
+
+  // ============================================================================
+  // --with-token Flag Tests (Piped Stdin)
+  // ============================================================================
+
+  describe('--with-token flag', () => {
+    it('reads token from piped stdin', async () => {
+      const token = 'github_pat_abcdefghijklmnopqrstuvwxyz';
+      const pipedStdin = createPipedStdin(token);
+
+      Object.defineProperty(process, 'stdin', {
+        value: pipedStdin,
+        writable: true,
+        configurable: true,
+      });
+
+      mockValidateTokenFormat.mockReturnValue({ valid: true, type: 'fine-grained' });
+      mockIsTokenTypeAllowed.mockReturnValue(true);
+      mockVerifyToken.mockResolvedValue({
+        login: 'octocat',
+        scopes: [],
+        rateLimit: { remaining: 4999, limit: 5000 },
+      });
+      mockSetToken.mockResolvedValue(undefined);
+
+      const cmd = createLoginCommand(mockOutput as unknown as Output);
+      await cmd.parseAsync(['node', 'test', '--with-token']);
+
+      expect(mockValidateTokenFormat).toHaveBeenCalledWith(token);
+      expect(mockVerifyToken).toHaveBeenCalledWith(token);
+      expect(mockSetToken).toHaveBeenCalledWith(token);
+      expect(mockOutput.print).toHaveBeenCalledWith(
+        expect.stringContaining('Token saved to macOS Keychain')
+      );
+    });
+
+    it('trims whitespace from piped token', async () => {
+      const token = '  github_pat_abcdefghijklmnopqrstuvwxyz  \n';
+      const expectedToken = 'github_pat_abcdefghijklmnopqrstuvwxyz';
+      const pipedStdin = createPipedStdin(token);
+
+      Object.defineProperty(process, 'stdin', {
+        value: pipedStdin,
+        writable: true,
+        configurable: true,
+      });
+
+      mockValidateTokenFormat.mockReturnValue({ valid: true, type: 'fine-grained' });
+      mockIsTokenTypeAllowed.mockReturnValue(true);
+      mockVerifyToken.mockResolvedValue({
+        login: 'octocat',
+        scopes: [],
+        rateLimit: { remaining: 4999, limit: 5000 },
+      });
+      mockSetToken.mockResolvedValue(undefined);
+
+      const cmd = createLoginCommand(mockOutput as unknown as Output);
+      await cmd.parseAsync(['node', 'test', '--with-token']);
+
+      expect(mockValidateTokenFormat).toHaveBeenCalledWith(expectedToken);
+    });
+
+    it('errors when stdin is empty with --with-token', async () => {
+      const pipedStdin = createPipedStdin('');
+
+      Object.defineProperty(process, 'stdin', {
+        value: pipedStdin,
+        writable: true,
+        configurable: true,
+      });
+
+      const cmd = createLoginCommand(mockOutput as unknown as Output);
+      await cmd.parseAsync(['node', 'test', '--with-token']);
+
+      expect(mockOutput.printError).toHaveBeenCalledWith('Error: no token provided on stdin');
+      expect(process.exitCode).toBe(1);
+      expect(mockValidateTokenFormat).not.toHaveBeenCalled();
+    });
+
+    it('skips interactive prompts with --with-token', async () => {
+      const token = 'github_pat_abcdefghijklmnopqrstuvwxyz';
+      const pipedStdin = createPipedStdin(token);
+
+      Object.defineProperty(process, 'stdin', {
+        value: pipedStdin,
+        writable: true,
+        configurable: true,
+      });
+
+      mockValidateTokenFormat.mockReturnValue({ valid: true, type: 'fine-grained' });
+      mockIsTokenTypeAllowed.mockReturnValue(true);
+      mockVerifyToken.mockResolvedValue({
+        login: 'octocat',
+        scopes: [],
+        rateLimit: { remaining: 4999, limit: 5000 },
+      });
+      mockSetToken.mockResolvedValue(undefined);
+
+      const cmd = createLoginCommand(mockOutput as unknown as Output);
+      await cmd.parseAsync(['node', 'test', '--with-token']);
+
+      // Should NOT print interactive prompts
+      const allPrintCalls = mockOutput.print.mock.calls.flat() as string[];
+      expect(allPrintCalls.join(' ')).not.toContain('Paste your token below');
+      expect(allPrintCalls.join(' ')).not.toContain('Create one at');
+    });
+
+    it('validates token format with --with-token', async () => {
+      const token = 'invalid-token-format';
+      const pipedStdin = createPipedStdin(token);
+
+      Object.defineProperty(process, 'stdin', {
+        value: pipedStdin,
+        writable: true,
+        configurable: true,
+      });
+
+      mockValidateTokenFormat.mockReturnValue({ valid: false, type: 'unknown' });
+
+      const cmd = createLoginCommand(mockOutput as unknown as Output);
+      await expect(cmd.parseAsync(['node', 'test', '--with-token'])).rejects.toThrow(
+        'Invalid token format'
+      );
+
+      expect(mockVerifyToken).not.toHaveBeenCalled();
+    });
+
+    it('rejects classic tokens with --with-token', async () => {
+      const token = 'ghp_abcdefghijklmnopqrstuvwxyz1234567890';
+      const pipedStdin = createPipedStdin(token);
+
+      Object.defineProperty(process, 'stdin', {
+        value: pipedStdin,
+        writable: true,
+        configurable: true,
+      });
+
+      mockValidateTokenFormat.mockReturnValue({ valid: true, type: 'classic' });
+      mockIsTokenTypeAllowed.mockReturnValue(false);
+
+      const cmd = createLoginCommand(mockOutput as unknown as Output);
+      await expect(cmd.parseAsync(['node', 'test', '--with-token'])).rejects.toThrow(
+        'Classic personal access tokens'
+      );
     });
   });
 });

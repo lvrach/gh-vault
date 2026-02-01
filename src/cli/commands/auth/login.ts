@@ -5,6 +5,20 @@ import { verifyToken } from '../../../shared/github.js';
 import type { Output } from '../../../shared/output.js';
 import { isTokenTypeAllowed, setToken, validateTokenFormat } from '../../../shared/secrets.js';
 
+function readStdin(): Promise<string> {
+  return new Promise((resolve, reject) => {
+    let data = '';
+    process.stdin.setEncoding('utf8');
+    process.stdin.on('data', (chunk: string) => {
+      data += chunk;
+    });
+    process.stdin.on('end', () => {
+      resolve(data.trim());
+    });
+    process.stdin.on('error', reject);
+  });
+}
+
 export function createLoginCommand(output: Output): Command {
   const readHiddenInput = (): Promise<string> => {
     return new Promise((resolve) => {
@@ -81,28 +95,44 @@ Required Permissions:
 
   return new Command('login')
     .description('Authenticate with GitHub')
+    .option('--with-token', 'Read token from standard input')
     .addHelpText('after', helpText)
-    .action(async () => {
-      output.print('gh-vault requires a fine-grained personal access token.');
-      output.print('');
-      output.print('Create one at: https://github.com/settings/personal-access-tokens');
-      output.print('');
-      output.print('Required permissions:');
-      output.print('  • Pull requests: Read and write');
-      output.print('  • Actions: Read and write (for workflow commands)');
-      output.print('  • Contents: Read and write (for branch deletion)');
-      output.print('  • Checks: Read');
-      output.print('  • Commit statuses: Read');
-      output.print('');
-      output.print('Run "gh-vault auth login --help" to see which commands need each permission.');
-      output.print('');
-      output.print('Paste your token below (input is hidden):');
+    .action(async (options: { withToken?: boolean }) => {
+      let token: string;
 
-      const token = await readHiddenInput();
-      output.print(''); // New line after input
+      if (options.withToken) {
+        // Read token from stdin (for automation/piping)
+        token = await readStdin();
+        if (!token) {
+          output.printError('Error: no token provided on stdin');
+          process.exitCode = 1;
+          return;
+        }
+      } else {
+        // Interactive mode
+        output.print('gh-vault requires a fine-grained personal access token.');
+        output.print('');
+        output.print('Create one at: https://github.com/settings/personal-access-tokens');
+        output.print('');
+        output.print('Required permissions:');
+        output.print('  • Pull requests: Read and write');
+        output.print('  • Actions: Read and write (for workflow commands)');
+        output.print('  • Contents: Read and write (for branch deletion)');
+        output.print('  • Checks: Read');
+        output.print('  • Commit statuses: Read');
+        output.print('');
+        output.print(
+          'Run "gh-vault auth login --help" to see which commands need each permission.'
+        );
+        output.print('');
+        output.print('Paste your token below (input is hidden):');
 
-      if (!token) {
-        return;
+        token = await readHiddenInput();
+        output.print(''); // New line after input
+
+        if (!token) {
+          return;
+        }
       }
 
       const validation = validateTokenFormat(token);
