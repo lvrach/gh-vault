@@ -41,14 +41,6 @@ When AI tools like Claude Code access your terminal, they can:
 - Execute commands that output tokens (`gh auth token`)
 - Access config files with stored credentials
 
-**gh-vault** takes a security-first approach:
-
-| Risk | gh | gh-vault |
-|------|-----|----------|
-| Token leaked to disk | Yes — falls back to plaintext `~/.config/gh/hosts.yaml` | No — system vault only (Keychain, Credential Manager, Secret Service) |
-| Token exposed via command | Yes — `gh auth token` prints to stdout | No — command intentionally omitted |
-| Token in environment | Yes — `GH_TOKEN` commonly used | No — reads from vault at runtime |
-
 ### Security Model
 
 **With `gh`**: Your token has access to everything — repos, gists, orgs, SSH keys, GPG keys. If you share this with an AI tool, you're trusting it with all of that.
