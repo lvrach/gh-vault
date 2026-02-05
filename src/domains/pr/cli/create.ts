@@ -38,8 +38,18 @@ function readBodyFile(path: string): string {
   return fs.readFileSync(path, 'utf8');
 }
 
+/**
+ * Collect multiple flag values into an array.
+ * Supports both comma-separated values (--flag a,b) and repeated flags (--flag a --flag b).
+ * This matches the official gh CLI behavior.
+ */
 function collect(value: string, previous: string[]): string[] {
-  return [...previous, value];
+  // Split by comma to support comma-separated values like "--reviewer user1,user2"
+  const values = value
+    .split(',')
+    .map((v) => v.trim())
+    .filter((v) => v.length > 0);
+  return [...previous, ...values];
 }
 
 export function createCreateCommand(output: Output, prApi: PrApi): Command {

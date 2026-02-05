@@ -20,7 +20,7 @@ export interface PrNestedData {
   files?: PrFile[] | undefined;
   comments?: PrComment[] | undefined;
   reviews?: PrReview[] | undefined;
-  statusCheckRollup?: PrChecksResult | undefined;
+  statusCheckRollup?: PrChecksResult | null | undefined;
 }
 
 type JsonValue = string | number | boolean | null | JsonValue[] | { [key: string]: JsonValue };
@@ -132,35 +132,41 @@ export function prToJson(pr: PullRequest, nestedData?: PrNestedData): Record<str
 
   // statusCheckRollup combines check runs and commit statuses
   // Format matches gh CLI's statusCheckRollup field
-  if (nestedData?.statusCheckRollup) {
+  // Check if key exists (not just truthy) to handle explicit null from permission errors
+  if (nestedData && 'statusCheckRollup' in nestedData) {
     const checks = nestedData.statusCheckRollup;
-    const rollup: JsonValue[] = [];
+    if (checks === null) {
+      // Explicit null means permission error - include null in output like gh CLI
+      result['statusCheckRollup'] = null;
+    } else if (checks !== undefined) {
+      const rollup: JsonValue[] = [];
 
-    // Add check runs
-    for (const c of checks.checkRuns) {
-      rollup.push({
-        name: c.name,
-        status: c.status,
-        conclusion: c.conclusion,
-        detailsUrl: c.detailsUrl,
-        startedAt: c.startedAt,
-        completedAt: c.completedAt,
-      });
+      // Add check runs
+      for (const c of checks.checkRuns) {
+        rollup.push({
+          name: c.name,
+          status: c.status,
+          conclusion: c.conclusion,
+          detailsUrl: c.detailsUrl,
+          startedAt: c.startedAt,
+          completedAt: c.completedAt,
+        });
+      }
+
+      // Add commit statuses (legacy checks)
+      for (const s of checks.statuses) {
+        rollup.push({
+          name: s.context,
+          status: s.state === 'pending' ? 'pending' : 'completed',
+          conclusion: s.state === 'pending' ? null : s.state,
+          detailsUrl: s.targetUrl,
+          startedAt: null,
+          completedAt: null,
+        });
+      }
+
+      result['statusCheckRollup'] = rollup;
     }
-
-    // Add commit statuses (legacy checks)
-    for (const s of checks.statuses) {
-      rollup.push({
-        name: s.context,
-        status: s.state === 'pending' ? 'pending' : 'completed',
-        conclusion: s.state === 'pending' ? null : s.state,
-        detailsUrl: s.targetUrl,
-        startedAt: null,
-        completedAt: null,
-      });
-    }
-
-    result['statusCheckRollup'] = rollup;
   }
 
   return result;

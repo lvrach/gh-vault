@@ -1,6 +1,7 @@
 import { Command } from 'commander';
 import open from 'open';
 
+import { isPermissionError } from '../../../shared/errors.js';
 import { filterWithJq, JqError } from '../../../shared/jq.js';
 import type { Output } from '../../../shared/output.js';
 import { resolvePrNumber, resolveRepository } from '../../../shared/repo.js';
@@ -149,9 +150,14 @@ export function createViewCommand(output: Output, prApi: PrApi): Command {
                 .then((result) => {
                   nestedData = { ...nestedData, statusCheckRollup: result };
                 })
-                .catch(() => {
-                  // Checks API may fail due to permission errors - return null like gh CLI
-                  // This allows other fields to still be fetched
+                .catch((error: unknown) => {
+                  // Only suppress permission errors (403) - return null like gh CLI
+                  // Re-throw other errors (network, server errors) to surface failures
+                  if (isPermissionError(error)) {
+                    nestedData = { ...nestedData, statusCheckRollup: null };
+                  } else {
+                    throw error;
+                  }
                 })
             );
           }
