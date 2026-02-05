@@ -3,7 +3,25 @@
  * Supports field selection similar to `gh` CLI.
  */
 
-import type { PrComment, PrFile, PullRequest, PullRequestListItem } from '../types.js';
+import type {
+  PrChecksResult,
+  PrComment,
+  PrFile,
+  PrReview,
+  PullRequest,
+  PullRequestListItem,
+} from '../types.js';
+
+/**
+ * Optional nested data that requires additional API calls.
+ * These fields are fetched on-demand when requested via --json.
+ */
+export interface PrNestedData {
+  files?: PrFile[] | undefined;
+  comments?: PrComment[] | undefined;
+  reviews?: PrReview[] | undefined;
+  statusCheckRollup?: PrChecksResult | undefined;
+}
 
 type JsonValue = string | number | boolean | null | JsonValue[] | { [key: string]: JsonValue };
 
@@ -56,8 +74,8 @@ export function prListItemToJson(pr: PullRequestListItem): Record<string, JsonVa
   };
 }
 
-export function prToJson(pr: PullRequest): Record<string, JsonValue> {
-  return {
+export function prToJson(pr: PullRequest, nestedData?: PrNestedData): Record<string, JsonValue> {
+  const result: Record<string, JsonValue> = {
     number: pr.number,
     title: pr.title,
     body: pr.body,
@@ -81,6 +99,71 @@ export function prToJson(pr: PullRequest): Record<string, JsonValue> {
     closedAt: pr.closedAt,
     mergedAt: pr.mergedAt,
   };
+
+  // Add nested data if provided (fetched via additional API calls)
+  if (nestedData?.files) {
+    result['files'] = nestedData.files.map((f) => ({
+      path: f.filename,
+      additions: f.additions,
+      deletions: f.deletions,
+    }));
+  }
+
+  if (nestedData?.comments) {
+    result['comments'] = nestedData.comments.map((c) => ({
+      id: c.id,
+      author: c.user ? { login: c.user.login } : null,
+      body: c.body,
+      createdAt: c.createdAt,
+      url: c.htmlUrl,
+    }));
+  }
+
+  if (nestedData?.reviews) {
+    result['reviews'] = nestedData.reviews.map((r) => ({
+      id: r.id,
+      author: r.user ? { login: r.user.login } : null,
+      body: r.body,
+      state: r.state,
+      submittedAt: r.submittedAt,
+      url: r.htmlUrl,
+    }));
+  }
+
+  // statusCheckRollup combines check runs and commit statuses
+  // Format matches gh CLI's statusCheckRollup field
+  if (nestedData?.statusCheckRollup) {
+    const checks = nestedData.statusCheckRollup;
+    const rollup: JsonValue[] = [];
+
+    // Add check runs
+    for (const c of checks.checkRuns) {
+      rollup.push({
+        name: c.name,
+        status: c.status,
+        conclusion: c.conclusion,
+        detailsUrl: c.detailsUrl,
+        startedAt: c.startedAt,
+        completedAt: c.completedAt,
+      });
+    }
+
+    // Add commit statuses (legacy checks)
+    for (const s of checks.statuses) {
+      rollup.push({
+        name: s.context,
+        status: s.state === 'pending' ? 'pending' : 'completed',
+        conclusion: s.state === 'pending' ? null : s.state,
+        detailsUrl: s.targetUrl,
+        startedAt: null,
+        completedAt: null,
+      });
+    }
+
+    result['statusCheckRollup'] = rollup;
+  }
+
+  return result;
 }
 
 export function formatPrListJson(prs: PullRequestListItem[], fields?: string[]): string {
@@ -96,8 +179,12 @@ export function formatPrListJson(prs: PullRequestListItem[], fields?: string[]):
   return JSON.stringify(jsonPrs, null, 2);
 }
 
-export function formatPrViewJson(pr: PullRequest, fields?: string[]): string {
-  const jsonPr = prToJson(pr);
+export function formatPrViewJson(
+  pr: PullRequest,
+  fields?: string[],
+  nestedData?: PrNestedData
+): string {
+  const jsonPr = prToJson(pr, nestedData);
 
   // Only filter if fields are explicitly provided and non-empty
   // Empty array or undefined returns full object (matches gh CLI behavior)
