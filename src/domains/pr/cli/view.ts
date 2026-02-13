@@ -1,12 +1,52 @@
 import { Command } from 'commander';
 import open from 'open';
 
+import { isPermissionError } from '../../../shared/errors.js';
 import { filterWithJq, JqError } from '../../../shared/jq.js';
 import type { Output } from '../../../shared/output.js';
 import { resolvePrNumber, resolveRepository } from '../../../shared/repo.js';
 import type { PrApi } from '../api.js';
-import { formatPrCommentsJson, formatPrViewJson, prToJson } from '../formatters/json.js';
+import {
+  formatPrCommentsJson,
+  formatPrViewJson,
+  type PrNestedData,
+  prToJson,
+} from '../formatters/json.js';
 import { formatPrCommentsText, formatPrViewText } from '../formatters/text.js';
+
+/** Fields that require additional API calls */
+const NESTED_FIELDS = ['files', 'comments', 'reviews', 'statusCheckRollup'] as const;
+
+/**
+ * Parse requested JSON fields and determine which nested data to fetch.
+ * Returns null if no JSON output requested.
+ *
+ * Note: Nested data (files, comments, reviews) is only fetched when explicitly requested.
+ * Using `--json` without fields returns base PR data only (matches gh CLI's lazy loading).
+ */
+function parseJsonFields(
+  jsonOption: string | boolean | undefined
+): { fields: string[] | undefined; nestedFields: Set<string> } | null {
+  if (jsonOption === undefined || jsonOption === false) {
+    return null;
+  }
+
+  // --json without value = all base fields (no nested data)
+  if (jsonOption === true || jsonOption === '') {
+    return {
+      fields: undefined, // undefined = return all base fields
+      nestedFields: new Set<string>(), // don't fetch nested data by default
+    };
+  }
+
+  // --json with specific fields - only fetch nested data if explicitly requested
+  const fields = jsonOption.split(',').map((f: string) => f.trim());
+  const nestedFields = new Set<string>(
+    fields.filter((f: string) => NESTED_FIELDS.includes(f as (typeof NESTED_FIELDS)[number]))
+  );
+
+  return { fields, nestedFields };
+}
 
 interface ViewOptions {
   comments?: boolean | undefined;
@@ -68,6 +108,62 @@ export function createViewCommand(output: Output, prApi: PrApi): Command {
 
         const pr = await prApi.getPr({ owner, repo, pullNumber });
         const useColor = process.stdout.isTTY;
+        const jsonConfig = parseJsonFields(options.json);
+
+        // Fetch nested data if JSON output requested with those fields
+        let nestedData: PrNestedData | undefined;
+        if (jsonConfig && jsonConfig.nestedFields.size > 0) {
+          const { nestedFields } = jsonConfig;
+          nestedData = {};
+
+          // Build array of fetch operations for requested fields
+          const fetchOps: Promise<void>[] = [];
+
+          if (nestedFields.has('files')) {
+            fetchOps.push(
+              prApi.listPrFiles({ owner, repo, pullNumber }).then((result) => {
+                nestedData = { ...nestedData, files: result };
+              })
+            );
+          }
+
+          if (nestedFields.has('comments')) {
+            fetchOps.push(
+              prApi.listPrComments({ owner, repo, issueNumber: pullNumber }).then((result) => {
+                nestedData = { ...nestedData, comments: result };
+              })
+            );
+          }
+
+          if (nestedFields.has('reviews')) {
+            fetchOps.push(
+              prApi.listPrReviews({ owner, repo, pullNumber }).then((result) => {
+                nestedData = { ...nestedData, reviews: result };
+              })
+            );
+          }
+
+          if (nestedFields.has('statusCheckRollup')) {
+            fetchOps.push(
+              prApi
+                .listPrChecks({ owner, repo, pullNumber })
+                .then((result) => {
+                  nestedData = { ...nestedData, statusCheckRollup: result };
+                })
+                .catch((error: unknown) => {
+                  // Only suppress permission errors (403) - return null like gh CLI
+                  // Re-throw other errors (network, server errors) to surface failures
+                  if (isPermissionError(error)) {
+                    nestedData = { ...nestedData, statusCheckRollup: null };
+                  } else {
+                    throw error;
+                  }
+                })
+            );
+          }
+
+          await Promise.all(fetchOps);
+        }
 
         if (options.jq) {
           if (options.json === undefined) {
@@ -78,7 +174,7 @@ export function createViewCommand(output: Output, prApi: PrApi): Command {
           }
 
           try {
-            const jsonData = prToJson(pr);
+            const jsonData = prToJson(pr, nestedData);
             const filtered = await filterWithJq(jsonData, options.jq);
             output.print(filtered);
           } catch (error) {
@@ -95,15 +191,14 @@ export function createViewCommand(output: Output, prApi: PrApi): Command {
         if (options.json === undefined) {
           output.print(formatPrViewText(pr, useColor));
         } else {
-          const fields =
-            typeof options.json === 'string'
-              ? options.json.split(',').map((f) => f.trim())
-              : undefined;
-          output.print(formatPrViewJson(pr, fields));
+          output.print(formatPrViewJson(pr, jsonConfig?.fields, nestedData));
         }
 
         if (options.comments) {
-          const comments = await prApi.listPrComments({ owner, repo, issueNumber: pullNumber });
+          // Use already-fetched comments if available, otherwise fetch
+          const comments =
+            nestedData?.comments ??
+            (await prApi.listPrComments({ owner, repo, issueNumber: pullNumber }));
           output.print('');
 
           if (options.json === undefined) {

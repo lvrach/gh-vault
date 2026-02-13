@@ -223,6 +223,20 @@ describe('pr edit command', () => {
       );
     });
 
+    it('adds comma-separated reviewers', async () => {
+      const result = createMockEditResult({ updatedFields: ['reviewers (added)'] });
+      mockPrApi.editPr.mockResolvedValue(result);
+
+      const cmd = createEditCommand(mockOutput as unknown as Output, mockPrApi as unknown as PrApi);
+      await cmd.parseAsync(['node', 'test', '42', '--add-reviewer', 'reviewer1,reviewer2']);
+
+      expect(mockPrApi.editPr).toHaveBeenCalledWith(
+        expect.objectContaining({
+          addReviewers: ['reviewer1', 'reviewer2'],
+        })
+      );
+    });
+
     it('removes reviewers', async () => {
       const result = createMockEditResult({ updatedFields: ['reviewers (removed)'] });
       mockPrApi.editPr.mockResolvedValue(result);

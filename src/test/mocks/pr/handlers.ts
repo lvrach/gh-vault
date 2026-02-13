@@ -348,15 +348,32 @@ index 1234567..abcdefg 100644
   // POST /repos/:owner/:repo/pulls/:pull_number/requested_reviewers - Request reviewers
   http.post<{ owner: string; repo: string; pull_number: string }>(
     'https://api.github.com/repos/:owner/:repo/pulls/:pull_number/requested_reviewers',
-    ({ params }) => {
+    async ({ params, request }) => {
       const pullNumber = Number(params.pull_number);
 
       const error = handleMagicNumber(pullNumber);
       if (error) return error;
 
-      return HttpResponse.json(createMockPullRequest(pullNumber), {
-        headers: ratelimitHeaders(),
-      });
+      // Parse the request body to get the reviewers being added
+      const body = (await request.json()) as { reviewers?: string[] };
+      const requestedReviewers = (body.reviewers ?? []).map((login, index) => ({
+        login,
+        id: 10_000 + index, // Deterministic ID for tests
+        type: 'User',
+        avatar_url: `https://avatars.githubusercontent.com/u/${String(10_000 + index)}?v=4`,
+        html_url: `https://github.com/${login}`,
+      }));
+
+      // Return PR with requested_reviewers populated
+      return HttpResponse.json(
+        {
+          ...createMockPullRequest(pullNumber),
+          requested_reviewers: requestedReviewers,
+        },
+        {
+          headers: ratelimitHeaders(),
+        }
+      );
     }
   ),
 

@@ -68,6 +68,7 @@ src/
 - **Functional core, imperative shell** - Pure business logic in domains/, I/O at boundaries
 - **Guard clauses over nesting** - Early returns for error conditions
 - **Explicit return types** - All functions have declared return types
+- **Never fail silently** - Always show an error when an operation fails. If an API returns success but the action didn't actually happen, verify the result and report the failure. Silent failures are bugs.
 
 ## gh CLI Parity Requirements
 

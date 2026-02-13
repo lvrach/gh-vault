@@ -3,6 +3,7 @@ import { setTimeout } from 'node:timers/promises';
 import { Command } from 'commander';
 import open from 'open';
 
+import { formatPermissionError, isPermissionError } from '../../../shared/errors.js';
 import { filterWithJq, JqError } from '../../../shared/jq.js';
 import type { Output } from '../../../shared/output.js';
 import { resolvePrNumber, resolveRepository } from '../../../shared/repo.js';
@@ -128,6 +129,11 @@ export function createChecksCommand(output: Output, prApi: PrApi): Command {
         }
       } catch (error) {
         if (error instanceof Error && error.message === 'Exit') {
+          return;
+        }
+        if (isPermissionError(error)) {
+          output.printError(formatPermissionError('pr:checks'));
+          process.exitCode = 1;
           return;
         }
         const message = error instanceof Error ? error.message : 'Unknown error';

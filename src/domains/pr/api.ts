@@ -518,13 +518,35 @@ export class PrApi {
     }
 
     if (input.addReviewers && input.addReviewers.length > 0) {
-      await this.client.rest.pulls.requestReviewers({
+      const { data: reviewerResponse } = await this.client.rest.pulls.requestReviewers({
         owner: input.owner,
         repo: input.repo,
         pull_number: input.pullNumber,
         reviewers: input.addReviewers,
       });
-      updatedFields.push('reviewers (added)');
+
+      // Verify reviewers were actually added
+      const addedReviewerLogins =
+        reviewerResponse.requested_reviewers?.map((r) => r.login.toLowerCase()) ?? [];
+      const addedReviewers = new Set(addedReviewerLogins);
+      const requestedReviewers = input.addReviewers.map((r) => r.toLowerCase());
+      const failedReviewers = requestedReviewers.filter((r) => !addedReviewers.has(r));
+
+      if (failedReviewers.length === requestedReviewers.length) {
+        // All reviewers failed - this is an error
+        throw new Error(
+          `Could not add reviewers: ${input.addReviewers.join(', ')}. ` +
+            `They may not have access to this repository.`
+        );
+      } else if (failedReviewers.length > 0) {
+        // Some reviewers failed - warn but continue
+        const addedCount = String(requestedReviewers.length - failedReviewers.length);
+        updatedFields.push(
+          `reviewers (added: ${addedCount}, failed: ${failedReviewers.join(', ')})`
+        );
+      } else {
+        updatedFields.push('reviewers (added)');
+      }
     }
 
     if (input.removeReviewers && input.removeReviewers.length > 0) {
